@@ -74,9 +74,9 @@ public class CyanoTemplates {
                 
                 ComponentDefinition plasmid = createTemplatePlasmid(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
                 
-                ComponentDefinition sll00199Plasmid = createSll00199Plasmid(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
+                //ComponentDefinition sll00199Plasmid = createSll00199Plasmid(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
                 
-                ComponentDefinition sll00199PlasmidFlat = createSll00199PlasmidFlat(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
+                //ComponentDefinition sll00199PlasmidFlat = createSll00199PlasmidFlat(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
                 
                 String fName = "cyano_full_template";
                 SBOLValidate.validateSBOL(doc, true, true, true);
@@ -139,10 +139,19 @@ public class CyanoTemplates {
         an.createAnnotation(new QName("http://sbols.org/genBankConversion#", "note","gbconv"), 
                 "pC0.031  \nhttps://doi.org/10.1104/pp.18.01401");
         
-        an = region.createSequenceAnnotation("codA", "codA", 2783-SS, 4066-SS);
-        an.addRole(SequenceOntology.CDS);
-        an.createAnnotation(new QName("http://sbols.org/genBankConversion#", "product","gbconv"), 
+        
+        ComponentDefinition codA = doc.createComponentDefinition("codA", version, ComponentDefinition.DNA_REGION);
+        codA.addRole(SequenceOntology.CDS);
+        codA.createAnnotation(new QName("http://sbols.org/genBankConversion#", "product","gbconv"), 
                 "Codon optimised (V153A, F317C)  \ndoi:10.1111/tpj.12675");
+        
+        Component codAI = region.createComponent("codA_inst", AccessType.PUBLIC, codA.getIdentity());
+        
+        an = region.createSequenceAnnotation("codA", "codA", 2783-SS, 4066-SS);
+        an.setComponent(codAI.getIdentity());
+        //an.addRole(SequenceOntology.CDS);
+        //an.createAnnotation(new QName("http://sbols.org/genBankConversion#", "product","gbconv"), 
+        //        "Codon optimised (V153A, F317C)  \ndoi:10.1111/tpj.12675");
         
         an = region.createSequenceAnnotation("rrnBT1_T7_term", "rrnBT1_T7_term", 4071-SS, 4185-SS);
         an.addRole(SequenceOntology.TERMINATOR);
@@ -223,10 +232,10 @@ public class CyanoTemplates {
         originD.createAnnotation(new QName("http://sbols.org/genBankConversion#", "note","gbconv"), 
                 "high-copy-number ColE1/pMB1/pBR322/pUC origin of replication");        
         
-        //Component origin = region.createComponent("ori_instance", AccessType.PUBLIC, originD.getIdentity());
+        Component origin = region.createComponent("ori_instance", AccessType.PUBLIC, originD.getIdentity());
         
         an = region.createSequenceAnnotation("ori", "ori", 1228, 1816);
-        //an.setComponent(origin.getIdentity());
+        an.setComponent(origin.getIdentity());
         return region;
     }
 
