@@ -62,9 +62,9 @@ public class CyanoTemplates {
 		
 		String version = "1.0.0";
                 
-                ComponentDefinition insert = createCodAInsert(doc, version);
+                ComponentDefinition insert = createCassete(doc, version);
 		
-                ComponentDefinition ampROrg = createAmpROrg(doc, version);
+                ComponentDefinition ampROrg = createBackbone(doc, version);
 
                 ComponentDefinition endGap = createEndGap(doc, version);
                 
@@ -96,11 +96,13 @@ public class CyanoTemplates {
 		
 	}
 
-    static ComponentDefinition createCodAInsert(SBOLDocument doc, String version) throws SBOLValidationException, URISyntaxException {
+    static ComponentDefinition createCassete(SBOLDocument doc, String version) throws SBOLValidationException, URISyntaxException {
         
-        String name = "codA_Km";
+        String name = "cassete";
         ComponentDefinition region = doc.createComponentDefinition(name, version, ComponentDefinition.DNA_REGION);
-        region.setName("codA Km");
+        region.setName("cassete");
+        region.setDescription("transgene cassete with codA and Km");
+        
         //region.addRole(SequenceOntology.ENGINEERED_REGION);
         // engineered insert
         region.addRole(new URI(SeqenceOntoPref+"SO:0000915"));
@@ -111,26 +113,33 @@ public class CyanoTemplates {
 
         final int SS = 2573;
         SequenceAnnotation an = region.createSequenceAnnotation("SapI_ATG_over", "SapI_ATG_over", 2574-SS, 2584-SS);
-        //an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
-        an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
         an.setName("SapI-ATG overhang");
     
         
         an = region.createSequenceAnnotation("barcode", "barcode", 2596-SS, 2613-SS);
         an.addRole(new URI(SeqenceOntoPref+"SO:0000730"));
+
+        an = region.createSequenceAnnotation("BpiI", "BpiI", 2613-SS, 2613-SS);
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
         
         an = region.createSequenceAnnotation("BpiI_TGCC_over", "BpiI_TGCC_over", 2614-SS, 2625-SS);
-        //an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
-        an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
         an.setName("BpiI-TGCC overhang");
+
+        an = region.createSequenceAnnotation("AarI", "AarI", 2625-SS, 2625-SS);
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
         
         an = region.createSequenceAnnotation("AarI_TGCC_over", "AarI_TGCC_over", 2626-SS, 2640-SS);
-        //an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
-        an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
         an.setName("AarI-TGCC overhang");
         
         an = region.createSequenceAnnotation("attB_CC", "attB_CC", 2641-SS, 2693-SS);
-        an.addRole(new URI(SeqenceOntoPref+"SO:0000001"));
+        //recombination_signal_sequence
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001532"));
         an.setName("attB CC");
         
         an = region.createSequenceAnnotation("J23101MH_prom", "J23101MH_prom", 2694-SS, 2782-SS);
@@ -142,6 +151,7 @@ public class CyanoTemplates {
         
         ComponentDefinition codA = doc.createComponentDefinition("codA", version, ComponentDefinition.DNA_REGION);
         codA.addRole(SequenceOntology.CDS);
+        codA.setDescription("Codon optimised (V153A, F317C)  \ndoi:10.1111/tpj.12675");
         codA.createAnnotation(new QName("http://sbols.org/genBankConversion#", "product","gbconv"), 
                 "Codon optimised (V153A, F317C)  \ndoi:10.1111/tpj.12675");
         
@@ -179,33 +189,47 @@ public class CyanoTemplates {
         an.setName("KanR prom");
         
         an = region.createSequenceAnnotation("attB_TT", "attB_TT", 5400-SS, 5452-SS);
-        an.addRole(new URI(SeqenceOntoPref+"SO:0000001"));
+        //recombination_signal_sequence
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001532"));
         an.setName("attB TT");
         an.createAnnotation(new QName("http://sbols.org/genBankConversion#", "note","gbconv"), 
                 "https://doi.org/10.1002/bit.26854");
 
+        
+        an = region.createSequenceAnnotation("AarI_2", "AarI_2", 5463-SS, 5463-SS);
+        an.setName("AarI");
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
+        
         an = region.createSequenceAnnotation("AarI_GGGA_over", "AarI_GGGA_over", 5453-SS, 5467-SS);
-        //an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
-        an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
         an.setName("AarI-GGGA overhang");
 
+        an = region.createSequenceAnnotation("BpiI_2", "BpiI_2", 5475-SS, 5475-SS);
+        an.setName("BpiI");
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
+        
         an = region.createSequenceAnnotation("BpiI_GGGA_over", "BpiI_GGGA_over", 5468-SS, 5479-SS);
-        //an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
-        an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
         an.setName("BpiI-GGGA overhang");
 
+        an = region.createSequenceAnnotation("SapI_2", "SapI_2", 5487-SS, 5487-SS);
+        an.setName("SapI");
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
+        
         an = region.createSequenceAnnotation("SapI_TAA_over", "SapI_TAA_over", 5480-SS, 5490-SS);
-        //an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
-        an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
         an.setName("SapI-TAA overhang");
         
         
         return region;
     }
 
-    static ComponentDefinition createAmpROrg(SBOLDocument doc, String version) throws SBOLValidationException, URISyntaxException {
+    static ComponentDefinition createBackbone(SBOLDocument doc, String version) throws SBOLValidationException, URISyntaxException {
 
-        String name = "ampr_origin";
+        String name = "backbone";
         ComponentDefinition region = doc.createComponentDefinition(name, version, ComponentDefinition.DNA_REGION);
         region.addRole(SequenceOntology.ENGINEERED_REGION);
         
@@ -230,7 +254,8 @@ public class CyanoTemplates {
         ComponentDefinition originD = doc.createComponentDefinition("ori", version, ComponentDefinition.DNA_REGION);
         originD.addRole(SequenceOntology.ORIGIN_OF_REPLICATION);
         originD.createAnnotation(new QName("http://sbols.org/genBankConversion#", "note","gbconv"), 
-                "high-copy-number ColE1/pMB1/pBR322/pUC origin of replication");        
+                "high-copy-number ColE1/pMB1/pBR322/pUC origin of replication");   
+        originD.setDescription("high-copy-number ColE1/pMB1/pBR322/pUC origin of replication");
         
         Component origin = region.createComponent("ori_instance", AccessType.PUBLIC, originD.getIdentity());
         
@@ -241,14 +266,23 @@ public class CyanoTemplates {
 
     static ComponentDefinition createEndGap(SBOLDocument doc, String version) throws SBOLValidationException, URISyntaxException {
 
-        String name = "gap";
+        String name = "end_of_backbone";
         ComponentDefinition region = doc.createComponentDefinition(name, version, ComponentDefinition.DNA_REGION);
+        region.setName("backbone end");
         region.addRole(SequenceOntology.ENGINEERED_REGION);
         
         String seqStr = "CGCTGCTTACAGACAAGCTGTGACCGTCTCCGGGAGCTGCATGTGTCAGAGGTTTTCACCGTCATCACCGAAACGCGCGAGACG";
         Sequence seq = doc.createSequence(name+"_seq", version, seqStr, Sequence.IUPAC_DNA);
         region.addSequence(seq);
 
+        int SS = 6058;
+        SequenceAnnotation an = region.createSequenceAnnotation("BsmBI", "BsmBI", 6089-SS, 6089-SS);
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
+        
+        an = region.createSequenceAnnotation("BsmBI_2", "BsmBI_2", 6131-SS, 6131-SS);
+        an.setName("BsmBI");
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));        
+        
         return region;
     }
 
@@ -258,8 +292,9 @@ public class CyanoTemplates {
         ComponentDefinition region = doc.createComponentDefinition(name, version, ComponentDefinition.DNA_REGION);
         //region.addRole(SequenceOntology.ENGINEERED_REGION);
         // recombination feature
-        region.addRole(new URI(SeqenceOntoPref+"SO:0000298"));
-        
+        //region.addRole(new URI(SeqenceOntoPref+"SO:0000298"));
+        //site_specific_recombination_target_region‘
+        region.addRole(new URI(SeqenceOntoPref+"SO:0000342"));
         return region;
     }
 
@@ -269,8 +304,10 @@ public class CyanoTemplates {
         ComponentDefinition region = doc.createComponentDefinition(name, version, ComponentDefinition.DNA_REGION);
         //region.addRole(SequenceOntology.ENGINEERED_REGION);
         // recombination feature
-        region.addRole(new URI(SeqenceOntoPref+"SO:0000298"));
+        //region.addRole(new URI(SeqenceOntoPref+"SO:0000298"));
         //region.addRole(OrientationType.REVERSECOMPLEMENT);
+        //site_specific_recombination_target_region‘
+        region.addRole(new URI(SeqenceOntoPref+"SO:0000342"));
         return region;
     }
 
