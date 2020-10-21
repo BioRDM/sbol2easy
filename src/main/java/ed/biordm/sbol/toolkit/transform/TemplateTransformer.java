@@ -125,10 +125,10 @@ public class TemplateTransformer {
 
                     if (subject.getIdentity().equals(c.getIdentity())) {
                         parent.removeSequenceConstraint(sc);
-                        parent.createSequenceConstraint(sc.getDisplayId(), RestrictionType.PRECEDES, object.getIdentity(), link.getIdentity());
+                        parent.createSequenceConstraint(sc.getDisplayId(), RestrictionType.PRECEDES, link.getIdentity(), object.getIdentity());
                     } else if (object.getIdentity().equals(c.getIdentity())) {
                         parent.removeSequenceConstraint(sc);
-                        parent.createSequenceConstraint(sc.getDisplayId(), RestrictionType.PRECEDES, link.getIdentity(), object.getIdentity());
+                        parent.createSequenceConstraint(sc.getDisplayId(), RestrictionType.PRECEDES, object.getIdentity(), link.getIdentity());
                     }
                 }
             }
