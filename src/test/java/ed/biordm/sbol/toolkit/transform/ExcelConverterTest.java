@@ -164,7 +164,7 @@ public class ExcelConverterTest {
             }
 
             try {
-                SBOLWriter.write(newDoc, "D:/Temp/sbol/"+fName+".xml");
+                SBOLWriter.write(newDoc, "E:/Temp/sbol/"+fName+".xml");
             } catch (IOException ex) {
                 ex.printStackTrace();
             } catch (SBOLConversionException ex) {
