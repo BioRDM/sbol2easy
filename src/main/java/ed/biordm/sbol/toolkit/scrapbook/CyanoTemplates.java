@@ -74,9 +74,9 @@ public class CyanoTemplates {
                 
                 ComponentDefinition plasmid = createTemplatePlasmid(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
                 
-                //ComponentDefinition sll00199Plasmid = createSll00199Plasmid(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
+                ComponentDefinition sll00199Plasmid = createSll00199Plasmid(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
                 
-                //ComponentDefinition sll00199PlasmidFlat = createSll00199PlasmidFlat(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
+                ComponentDefinition sll00199PlasmidFlat = createSll00199PlasmidFlat(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
                 
                 String fName = "cyano_full_template";
                 SBOLValidate.validateSBOL(doc, true, true, true);
@@ -98,9 +98,9 @@ public class CyanoTemplates {
 
     static ComponentDefinition createCassete(SBOLDocument doc, String version) throws SBOLValidationException, URISyntaxException {
         
-        String name = "cassete";
+        String name = "cassette";
         ComponentDefinition region = doc.createComponentDefinition(name, version, ComponentDefinition.DNA_REGION);
-        region.setName("cassete");
+        region.setName("cassette");
         region.setDescription("transgene cassete with codA and Km");
         
         //region.addRole(SequenceOntology.ENGINEERED_REGION);
@@ -113,8 +113,8 @@ public class CyanoTemplates {
 
         final int SS = 2573;
         SequenceAnnotation an = region.createSequenceAnnotation("SapI_ATG_over", "SapI_ATG_over", 2574-SS, 2584-SS);
-        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
-        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
         an.setName("SapI-ATG overhang");
     
         
@@ -363,7 +363,7 @@ public class CyanoTemplates {
         //engineered plasmid
         plasmid.addRole(new URI(SeqenceOntoPref+"SO:0000637"));
         
-        Component aC = plasmid.createComponent("ampR", AccessType.PUBLIC, ampROrg.getIdentity());
+        Component aC = plasmid.createComponent("backbone", AccessType.PUBLIC, ampROrg.getIdentity());
         
         leftFlank = (ComponentDefinition)doc.createCopy(leftFlank, "sll00199_left", version);
         String seqStr = "caaggcaaaaccaccgttatcagcagaacgacggcgggaaaaaatgattaaacgaaaaaatttgcaaggattcatagcggttgcccaatctaactcagggagcgacttcagcccacaaaaaacaccactgggcctactgggctattcccattatcatctacattgaagggatagcaagctaatttttatgacggcgatcgccaaaaacaaagaaaattcagcaattaccgtgggtagcaaaaaatccccatctaaagttcagtaaatatagctagaacaaccaagcattttcggcaaagtactattcagatagaacgagaaatgagcttgttctatccgcccggggctgaggctgtataatctacgacgggctgtcaaacattgtgataccatgggcagaagaaaggaaaaacgtccctgatcgcctttttgggcacggagtagggcgttaccccggcccgttcaaccacaagtccctatAGATACAATCGCCAAGAAGT";
@@ -371,7 +371,7 @@ public class CyanoTemplates {
         leftFlank.addSequence(seq);
         
         Component lC = plasmid.createComponent("left", AccessType.PUBLIC, leftFlank.getIdentity());
-        Component iC = plasmid.createComponent("insert", AccessType.PUBLIC, insert.getIdentity());
+        Component iC = plasmid.createComponent("cassette", AccessType.PUBLIC, insert.getIdentity());
         
         rightFlank = (ComponentDefinition)doc.createCopy(rightFlank, "sll00199_right", version);
         seqStr = "tcagccagctcaatctgtgtgtcgttgatttaagcttaatgctacggggtctgtctccaactccctcagcttctcgcaatggcaaggcaaataatgtttctcttgctgagtagatgttcaggaggacggatcgaaagtctacaaaacagattcttgaccaagccatctacttagaaaaacttctgcgttttggcgatcgcatcttttaagcgagatgcgatttttttgtccattagtttgtattttaatactcttttgttgtttgatttcgtccaagcttttcttggtatgtgggatcttccgtgcccaaaattttatcccagaaagtgaaatatagtcatttcaattaacgatgagagaatttaatgtaaaattatggagtgtacaaaatgaacaggtttaaacaatggcttacagtttagatttaaggcaaagggtagtagcttatatagaagctggaggaaaaataactgaggcttccaagatatataaaataggaaaagcctcgatatacagatggttaaatagagtagatttaagcccaacaaaagtagagcgtcgccatagg";
@@ -379,7 +379,7 @@ public class CyanoTemplates {
         rightFlank.addSequence(seq);
         
         Component rC = plasmid.createComponent("right", AccessType.PUBLIC, rightFlank.getIdentity());
-        Component gC = plasmid.createComponent("gap", AccessType.PUBLIC, endGap.getIdentity());
+        Component gC = plasmid.createComponent("backbone_end", AccessType.PUBLIC, endGap.getIdentity());
 
         plasmid.createSequenceConstraint("cs1", RestrictionType.PRECEDES, aC.getIdentity(), lC.getIdentity());
         plasmid.createSequenceConstraint("cs2", RestrictionType.PRECEDES, lC.getIdentity(), iC.getIdentity());
@@ -402,7 +402,7 @@ public class CyanoTemplates {
         //engineered plasmid
         plasmid.addRole(new URI(SeqenceOntoPref+"SO:0000637"));
         
-        Component aC = plasmid.createComponent("ampR", AccessType.PUBLIC, ampROrg.getIdentity());
+        Component aC = plasmid.createComponent("backbone", AccessType.PUBLIC, ampROrg.getIdentity());
         
         
         if (doc.getComponentDefinition("sll00199_left", version) == null) {
@@ -415,7 +415,7 @@ public class CyanoTemplates {
         }
         
         Component lC = plasmid.createComponent("left", AccessType.PUBLIC, leftFlank.getIdentity());
-        Component iC = plasmid.createComponent("insert", AccessType.PUBLIC, insert.getIdentity());
+        Component iC = plasmid.createComponent("cassette", AccessType.PUBLIC, insert.getIdentity());
         
         if (doc.getComponentDefinition("sll00199_right", version) == null) {
             rightFlank = (ComponentDefinition)doc.createCopy(rightFlank, "sll00199_right", version);
@@ -427,7 +427,7 @@ public class CyanoTemplates {
         }
         
         Component rC = plasmid.createComponent("right", AccessType.PUBLIC, rightFlank.getIdentity());
-        Component gC = plasmid.createComponent("gap", AccessType.PUBLIC, endGap.getIdentity());
+        Component gC = plasmid.createComponent("backbone_end", AccessType.PUBLIC, endGap.getIdentity());
 
         plasmid.createSequenceConstraint("cs1", RestrictionType.PRECEDES, aC.getIdentity(), lC.getIdentity());
         plasmid.createSequenceConstraint("cs2", RestrictionType.PRECEDES, lC.getIdentity(), iC.getIdentity());
@@ -455,13 +455,44 @@ public class CyanoTemplates {
         an = plasmid.createSequenceAnnotation("ori", "ori", 1228, 1816);
         an.setComponent(origin.getIdentity());        
         
-        /*ComponentDefinition originD = doc.createComponentDefinition("ori", version, ComponentDefinition.DNA_REGION);
-        originD.addRole(SequenceOntology.ORIGIN_OF_REPLICATION);
+        final int SS = 0;
+        an = plasmid.createSequenceAnnotation("SapI_ATG_over", "SapI_ATG_over", 2574-SS, 2584-SS);
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+        an.setName("SapI-ATG overhang");
+    
         
-        Component origin = region.createComponent("ori_instance", AccessType.PUBLIC, originD.getIdentity());
+        an = plasmid.createSequenceAnnotation("barcode", "barcode", 2596-SS, 2613-SS);
+        an.addRole(new URI(SeqenceOntoPref+"SO:0000730"));
+
+        an = plasmid.createSequenceAnnotation("BpiI", "BpiI", 2613-SS, 2613-SS);
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
         
-        an = region.createSequenceAnnotation("ori", "ori", 1228, 1816);
-        an.setComponent(origin.getIdentity());*/        
+        an = plasmid.createSequenceAnnotation("BpiI_TGCC_over", "BpiI_TGCC_over", 2614-SS, 2625-SS);
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+        an.setName("BpiI-TGCC overhang");
+
+        an = plasmid.createSequenceAnnotation("AarI", "AarI", 2625-SS, 2625-SS);
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
+        
+        an = plasmid.createSequenceAnnotation("AarI_TGCC_over", "AarI_TGCC_over", 2626-SS, 2640-SS);
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+        an.setName("AarI-TGCC overhang");
+        
+        an = plasmid.createSequenceAnnotation("attB_CC", "attB_CC", 2641-SS, 2693-SS);
+        //recombination_signal_sequence
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001532"));
+        an.setName("attB CC");
+        
+        an = plasmid.createSequenceAnnotation("J23101MH_prom", "J23101MH_prom", 2694-SS, 2782-SS);
+        an.addRole(SequenceOntology.PROMOTER); 
+        an.setName("J23101MH prom");
+        an.createAnnotation(new QName("http://sbols.org/genBankConversion#", "note","gbconv"), 
+                "pC0.031  \nhttps://doi.org/10.1104/pp.18.01401");
+
+        
         return plasmid;        
     }    
 
