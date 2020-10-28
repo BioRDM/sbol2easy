@@ -72,11 +72,11 @@ public class CyanoTemplates {
 
                 ComponentDefinition rightFlank = createRightFlank(doc, version);
                 
-                ComponentDefinition plasmid = createTemplatePlasmid(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
+                ComponentDefinition plasmid = createTemplatePlasmid(doc, version, ampROrg, leftFlank, insert, rightFlank);
                 
-                ComponentDefinition sll00199Plasmid = createSll00199Plasmid(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
+                //ComponentDefinition sll00199Plasmid = createSll00199Plasmid(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
                 
-                ComponentDefinition sll00199PlasmidFlat = createSll00199PlasmidFlat(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
+                //ComponentDefinition sll00199PlasmidFlat = createSll00199PlasmidFlat(doc, version, ampROrg, leftFlank, insert, rightFlank, endGap);
                 
                 String fName = "cyano_full_template";
                 SBOLValidate.validateSBOL(doc, true, true, true);
@@ -98,10 +98,10 @@ public class CyanoTemplates {
 
     static ComponentDefinition createCassete(SBOLDocument doc, String version) throws SBOLValidationException, URISyntaxException {
         
-        String name = "cassette";
+        String name = "insert";
         ComponentDefinition region = doc.createComponentDefinition(name, version, ComponentDefinition.DNA_REGION);
-        region.setName("cassette");
-        region.setDescription("transgene cassete with codA and Km");
+        region.setName("insert");
+        region.setDescription("transgene insert with codA and Km");
         
         //region.addRole(SequenceOntology.ENGINEERED_REGION);
         // engineered insert
@@ -111,38 +111,50 @@ public class CyanoTemplates {
         Sequence seq = doc.createSequence(name+"_seq", version, seqStr, Sequence.IUPAC_DNA);
         region.addSequence(seq);
 
-        final int SS = 2573;
-        SequenceAnnotation an = region.createSequenceAnnotation("SapI_ATG_over", "SapI_ATG_over", 2574-SS, 2584-SS);
+        final int SS = 2657;
+        SequenceAnnotation an = region.createSequenceAnnotation("SapI_ATG_over", "SapI_ATG_over", 2658-SS, 2660-SS);
         //an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
         an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
         an.setName("SapI-ATG overhang");
     
-        
-        an = region.createSequenceAnnotation("barcode", "barcode", 2596-SS, 2613-SS);
-        an.addRole(new URI(SeqenceOntoPref+"SO:0000730"));
-
-        an = region.createSequenceAnnotation("BpiI", "BpiI", 2613-SS, 2613-SS);
+        an = region.createSequenceAnnotation("SapI_BspQI", "SapI_BspQI", 2662-SS, 2668-SS);
         an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
+        an.setName("SapI/BspQI");
         
-        an = region.createSequenceAnnotation("BpiI_TGCC_over", "BpiI_TGCC_over", 2614-SS, 2625-SS);
-        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
-        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+        ComponentDefinition barcode = doc.createComponentDefinition("barcode", version, ComponentDefinition.DNA_REGION);
+        barcode.addRole(new URI(SeqenceOntoPref+"SO:0000730"));
+
+        Component barcodeI = region.createComponent("barcode_inst", AccessType.PUBLIC, barcode.getIdentity());
+        
+        an = region.createSequenceAnnotation("barcode", "barcode", 2680-SS, 2697-SS);
+        an.setComponent(barcodeI.getIdentity());
+        //an = region.createSequenceAnnotation("barcode", "barcode", 2680-SS, 2697-SS);
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0000730"));
+
+        an = region.createSequenceAnnotation("BpiI_TGCC_over", "BpiI_TGCC_over", 2698-SS, 2701-SS);
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
         an.setName("BpiI-TGCC overhang");
 
-        an = region.createSequenceAnnotation("AarI", "AarI", 2625-SS, 2625-SS);
+        an = region.createSequenceAnnotation("BpiI", "BpiI", 2704-SS, 2709-SS);
         an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
         
-        an = region.createSequenceAnnotation("AarI_TGCC_over", "AarI_TGCC_over", 2626-SS, 2640-SS);
-        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
-        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+
+        an = region.createSequenceAnnotation("AarI_TGCC_over", "AarI_TGCC_over", 2710-SS, 2713-SS);
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
         an.setName("AarI-TGCC overhang");
+
+        an = region.createSequenceAnnotation("AarI", "AarI", 2718-SS, 2724-SS);
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
         
-        an = region.createSequenceAnnotation("attB_CC", "attB_CC", 2641-SS, 2693-SS);
+        
+        an = region.createSequenceAnnotation("attB_CC", "attB_CC", 2725-SS, 2777-SS);
         //recombination_signal_sequence
         an.addRole(new URI(SeqenceOntoPref+"SO:0001532"));
         an.setName("attB CC");
         
-        an = region.createSequenceAnnotation("J23101MH_prom", "J23101MH_prom", 2694-SS, 2782-SS);
+        an = region.createSequenceAnnotation("J23101MH_prom", "J23101MH_prom", 2778-SS, 2866-SS);
         an.addRole(SequenceOntology.PROMOTER); 
         an.setName("J23101MH prom");
         an.createAnnotation(new QName("http://sbols.org/genBankConversion#", "note","gbconv"), 
@@ -155,25 +167,30 @@ public class CyanoTemplates {
         codA.createAnnotation(new QName("http://sbols.org/genBankConversion#", "product","gbconv"), 
                 "Codon optimised (V153A, F317C)  \ndoi:10.1111/tpj.12675");
         
+        seqStr = "ATGTCTAACAACGCGCTGCAAACCATCATCAATGCACGCCTGCCTGGAGAGGAAGGGTTGTGGCAGATTCACTTACAGGACGGCAAAATCTCCGCGATCGACGCACAATCTGGGGTTATGCCGATCACCGAAAACTCTTTGGATGCCGAACAAGGGTTAGTCATTCCCCCATTCGTTGAACCACATATTCACCTGGATACTACTCAGACAGCCGGTCAGCCCAATTGGAACCAGTCCGGTACGCTGTTCGAAGGTATCGAACGATGGGCGGAGCGAAAAGCTCTACTCACGCATGACGATGTCAAGCAACGGGCCTGGCAGACCCTGAAGTGGCAGATCGCCAACGGAATACAGCACGTACGCACTCACGTGGATGTTTCCGATGCCACTTTGACGGCATTGAAGGCAATGCTCGAAGTTAAGCAGGAAGTAGCCCCGTGGATTGACTTGCAAATCGCTGCCTTCCCTCAGGAAGGCATCCTAAGTTATCCGAATGGAGAAGCGCTCCTGGAGGAGGCATTGCGGTTAGGAGCAGACGTGGTGGGAGCGATTCCCCATTTCGAGTTTACCCGCGAGTACGGTGTTGAATCTCTGCATAAAACATTTGCTTTAGCTCAGAAGTATGACCGTCTGATCGACGTACACTGCGACGAGATCGATGACGAACAGAGTCGCTTCGTGGAGACGGTGGCTGCGCTGGCGCATCACGAAGGCATGGGTGCACGTGTAACTGCAAGCCATACGACGGCTATGCACAGCTATAATGGGGCATATACATCTCGTTTGTTCCGATTACTAAAAATGAGCGGAATCAACTTTGTTGCCAATCCATTGGTCAACATTCATCTACAAGGACGCTTCGACACCTACCCGAAACGGCGAGGAATCACACGAGTTAAGGAAATGCTAGAGTCTGGTATCAATGTGTGTTTCGGGCATGATGACGTGTGTGGTCCCTGGTACCCTCTAGGAACAGCCAACATGCTGCAAGTTCTCCACATGGGTCTACACGTGTGTCAACTCATGGGGTATGGACAAATTAACGATGGACTCAATCTAATTACACACCATTCCGCCCGAACACTGAACCTCCAGGATTACGGGATCGCGGCGGGAAATTCTGCCAACCTCATCATTCTGCCCGCGGAAAACGGGTTCGACGCTCTACGCCGTCAAGTGCCAGTTCGGTATTCTGTTCGTGGGGGTAAGGTAATTGCAAGTACCCAACCGGCTCAGACCACGGTCTATTTAGAGCAACCGGAAGCTATCGACTACAAACGATGA";
+        seq = doc.createSequence("codA_seq", version, seqStr, Sequence.IUPAC_DNA);
+        codA.addSequence(seq);
+
+
         Component codAI = region.createComponent("codA_inst", AccessType.PUBLIC, codA.getIdentity());
         
-        an = region.createSequenceAnnotation("codA", "codA", 2783-SS, 4066-SS);
+        an = region.createSequenceAnnotation("codA", "codA", 2867-SS, 4150-SS);
         an.setComponent(codAI.getIdentity());
         //an.addRole(SequenceOntology.CDS);
         //an.createAnnotation(new QName("http://sbols.org/genBankConversion#", "product","gbconv"), 
         //        "Codon optimised (V153A, F317C)  \ndoi:10.1111/tpj.12675");
         
-        an = region.createSequenceAnnotation("rrnBT1_T7_term", "rrnBT1_T7_term", 4071-SS, 4185-SS);
+        an = region.createSequenceAnnotation("rrnBT1_T7_term", "rrnBT1_T7_term", 4155-SS, 4269-SS);
         an.addRole(SequenceOntology.TERMINATOR);
         an.setName("rrnBT1/T7 term");
         an.createAnnotation(new QName("http://sbols.org/genBankConversion#", "note","gbconv"), 
                 "BBa_B0015 double terminator (B0010-B0012)  \npC0.082  \nhttps://doi.org/10.1104/pp.18.01401");
         
-        an = region.createSequenceAnnotation("KanR_term", "KanR_term", 4190-SS, 4473-SS, OrientationType.REVERSECOMPLEMENT);
+        an = region.createSequenceAnnotation("KanR_term", "KanR_term", 4274-SS, 4557-SS, OrientationType.REVERSECOMPLEMENT);
         an.addRole(SequenceOntology.TERMINATOR);
         an.setName("KanR term");
         
-        an = region.createSequenceAnnotation("KanR", "KanR", 4474-SS, 5289-SS, OrientationType.REVERSECOMPLEMENT);
+        an = region.createSequenceAnnotation("KanR", "KanR", 4558-SS, 5373-SS, OrientationType.REVERSECOMPLEMENT);
         an.addRole(SequenceOntology.CDS); 
         an.setDescription("Gene: aph(3')-Ia\n aminoglycoside phosphotransferase confers resistance to kanamycin in bacteria or G418 (Geneticin(R)) in eukaryotes");
         
@@ -184,11 +201,11 @@ public class CyanoTemplates {
         an.createAnnotation(new QName("http://sbols.org/genBankConversion#", "product","gbconv"), 
                 "aminoglycoside phosphotransferase");
 
-        an = region.createSequenceAnnotation("KanR_prom", "KanR_prom", 5290-SS, 5399-SS, OrientationType.REVERSECOMPLEMENT);
+        an = region.createSequenceAnnotation("KanR_prom", "KanR_prom", 5374-SS, 5483-SS, OrientationType.REVERSECOMPLEMENT);
         an.addRole(SequenceOntology.PROMOTER);
         an.setName("KanR prom");
         
-        an = region.createSequenceAnnotation("attB_TT", "attB_TT", 5400-SS, 5452-SS);
+        an = region.createSequenceAnnotation("attB_TT", "attB_TT", 5484-SS, 5536-SS);
         //recombination_signal_sequence
         an.addRole(new URI(SeqenceOntoPref+"SO:0001532"));
         an.setName("attB TT");
@@ -196,31 +213,31 @@ public class CyanoTemplates {
                 "https://doi.org/10.1002/bit.26854");
 
         
-        an = region.createSequenceAnnotation("AarI_2", "AarI_2", 5463-SS, 5463-SS);
+        an = region.createSequenceAnnotation("AarI_2", "AarI_2", 5537-SS, 5543-SS);
         an.setName("AarI");
         an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
         
-        an = region.createSequenceAnnotation("AarI_GGGA_over", "AarI_GGGA_over", 5453-SS, 5467-SS);
-        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
-        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+        an = region.createSequenceAnnotation("AarI_GGGA_over", "AarI_GGGA_over", 5548-SS, 5551-SS);
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
         an.setName("AarI-GGGA overhang");
 
-        an = region.createSequenceAnnotation("BpiI_2", "BpiI_2", 5475-SS, 5475-SS);
+        an = region.createSequenceAnnotation("BpiI_2", "BpiI_2", 5552-SS, 5557-SS);
         an.setName("BpiI");
         an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
         
-        an = region.createSequenceAnnotation("BpiI_GGGA_over", "BpiI_GGGA_over", 5468-SS, 5479-SS);
-        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
-        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+        an = region.createSequenceAnnotation("BpiI_GGGA_over", "BpiI_GGGA_over", 5560-SS, 5563-SS);
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
         an.setName("BpiI-GGGA overhang");
 
-        an = region.createSequenceAnnotation("SapI_2", "SapI_2", 5487-SS, 5487-SS);
+        an = region.createSequenceAnnotation("SapI_2", "SapI_2", 5564-SS, 5570-SS);
         an.setName("SapI");
         an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
         
-        an = region.createSequenceAnnotation("SapI_TAA_over", "SapI_TAA_over", 5480-SS, 5490-SS);
-        an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
-        //an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
+        an = region.createSequenceAnnotation("SapI_TAA_over", "SapI_TAA_over", 5572-SS, 5574-SS);
+        //an.addRole(new URI(SeqenceOntoPref+"SO:0001695"));
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001933"));
         an.setName("SapI-TAA overhang");
         
         
@@ -233,16 +250,24 @@ public class CyanoTemplates {
         ComponentDefinition region = doc.createComponentDefinition(name, version, ComponentDefinition.DNA_REGION);
         region.addRole(SequenceOntology.ENGINEERED_REGION);
         
-        String seqStr = "AAAGGGCCTCGTGATACGCCTATTTTTATAGGTTAATGTCATGATAATAATGGTTTCTTAGACGTCAGGTGGCACTTTTCGGGGAAATGTGCGCGGAACCCCTATTTGTTTATTTTTCTAAATACATTCAAATATGTATCCGCTCATGAGACAATAACCCTGATAAATGCTTCAATAATATTGAAAAAGGAAGAGTATGAGTATTCAACATTTCCGTGTCGCCCTTATTCCCTTTTTTGCGGCATTTTGCCTTCCTGTTTTTGCTCACCCAGAAACGCTGGTGAAAGTAAAAGATGCTGAAGATCAGTTGGGTGCACGAGTGGGTTACATCGAACTGGATCTCAACAGCGGTAAGATCCTTGAGAGTTTTCGCCCCGAAGAACGTTTTCCAATGATGAGCACTTTTAAAGTTCTGCTATGTGGCGCGGTATTATCCCGTATTGACGCCGGGCAAGAGCAACTCGGTCGCCGCATACACTATTCTCAGAATGACTTGGTTGAGTACTCACCAGTCACAGAAAAGCATCTTACGGATGGCATGACAGTAAGAGAATTATGCAGTGCTGCCATAACCATGAGTGATAACACTGCGGCCAACTTACTTCTGACAACGATCGGAGGACCGAAGGAGCTAACCGCTTTTTTGCACAACATGGGGGATCATGTAACTCGCCTTGATCGTTGGGAACCGGAGCTGAATGAAGCCATACCAAACGACGAGCGTGACACCACGATGCCTGTAGCAATGGCAACAACGTTGCGCAAACTATTAACTGGCGAACTACTTACTCTAGCTTCCCGGCAACAATTAATAGACTGGATGGAGGCGGATAAAGTTGCAGGACCACTTCTGCGCTCGGCCCTTCCGGCTGGCTGGTTTATTGCTGATAAATCTGGAGCCGGTGAGCGTGGTTCTCGCGGTATCATTGCAGCACTGGGGCCAGATGGTAAGCCCTCCCGTATCGTAGTTATCTACACGACGGGGAGTCAGGCAACTATGGATGAACGAAATAGACAGATCGCTGAGATAGGTGCCTCACTGATTAAGCATTGGTAACTGTCAGACCAAGTTTACTCATATATACTTTAGATTGATTTAAAACTTCATTTTTAATTTAAAAGGATCTAGGTGAAGATCCTTTTTGATAATCTCATGACCAAAATCCCTTAACGTGAGTTTTCGTTCCACTGAGCGTCAGACCCCGTAGAAAAGATCAAAGGATCTTCTTGAGATCCTTTTTTTCTGCGCGTAATCTGCTGCTTGCAAACAAAAAAACCACCGCTACCAGCGGTGGTTTGTTTGCCGGATCAAGAGCTACCAACTCTTTTTCCGAAGGTAACTGGCTTCAGCAGAGCGCAGATACCAAATACTGTTCTTCTAGTGTAGCCGTAGTTAGGCCACCACTTCAAGAACTCTGTAGCACCGCCTACATACCTCGCTCTGCTAATCCTGTTACCAGTGGCTGCTGCCAGTGGCGATAAGTCGTGTCTTACCGGGTTGGACTCAAGACGATAGTTACCGGATAAGGCGCAGCGGTCGGGCTGAACGGGGGGTTCGTGCACACAGCCCAGCTTGGAGCGAACGACCTACACCGAACTGAGATACCTACAGCGTGAGCTATGAGAAAGCGCCACGCTTCCCGAAGGGAGAAAGGCGGACAGGTATCCGGTAAGCGGCAGGGTCGGAACAGGAGAGCGCACGAGGGAGCTTCCAGGGGGAAACGCCTGGTATCTTTATAGTCCTGTCGGGTTTCGCCACCTCTGACTTGAGCGTCGATTTTTGTGATGCTCGTCAGGGGGGCGGAGCCTATGGAAAAACGCCAGCAACGCGGCCTTTTTACGGTTCCTGGCCTTTTGCTGGCCTTTTGCTCACATGTTCTTTCCTGCGTTATCCCCTGATTCTGTGGATAACCGTATTACCGCCTTTGAGTGAGCTGATACCGCTCGCCGCAGCCGAACGACCGAGCGCAGCGAGTCAGTGAGCGAGGAAGCGGATGAGCGCCCAATACGCAAACCGCCTCTCCCCGCGCGTTGGCCGATTCATTAATGCAGCTGGCACGACAGGTTTCggag";
+        String seqStr = "CGCTGCTTACAGACAAGCTGTGACCGTCTCCGGGAGCTGCATGTGTCAGAGGTTTTCACCGTCATCACCGAAACGCGCGAGACGAAAGGGCCTCGTGATACGCCTATTTTTATAGGTTAATGTCATGATAATAATGGTTTCTTAGACGTCAGGTGGCACTTTTCGGGGAAATGTGCGCGGAACCCCTATTTGTTTATTTTTCTAAATACATTCAAATATGTATCCGCTCATGAGACAATAACCCTGATAAATGCTTCAATAATATTGAAAAAGGAAGAGTATGAGTATTCAACATTTCCGTGTCGCCCTTATTCCCTTTTTTGCGGCATTTTGCCTTCCTGTTTTTGCTCACCCAGAAACGCTGGTGAAAGTAAAAGATGCTGAAGATCAGTTGGGTGCACGAGTGGGTTACATCGAACTGGATCTCAACAGCGGTAAGATCCTTGAGAGTTTTCGCCCCGAAGAACGTTTTCCAATGATGAGCACTTTTAAAGTTCTGCTATGTGGCGCGGTATTATCCCGTATTGACGCCGGGCAAGAGCAACTCGGTCGCCGCATACACTATTCTCAGAATGACTTGGTTGAGTACTCACCAGTCACAGAAAAGCATCTTACGGATGGCATGACAGTAAGAGAATTATGCAGTGCTGCCATAACCATGAGTGATAACACTGCGGCCAACTTACTTCTGACAACGATCGGAGGACCGAAGGAGCTAACCGCTTTTTTGCACAACATGGGGGATCATGTAACTCGCCTTGATCGTTGGGAACCGGAGCTGAATGAAGCCATACCAAACGACGAGCGTGACACCACGATGCCTGTAGCAATGGCAACAACGTTGCGCAAACTATTAACTGGCGAACTACTTACTCTAGCTTCCCGGCAACAATTAATAGACTGGATGGAGGCGGATAAAGTTGCAGGACCACTTCTGCGCTCGGCCCTTCCGGCTGGCTGGTTTATTGCTGATAAATCTGGAGCCGGTGAGCGTGGTTCTCGCGGTATCATTGCAGCACTGGGGCCAGATGGTAAGCCCTCCCGTATCGTAGTTATCTACACGACGGGGAGTCAGGCAACTATGGATGAACGAAATAGACAGATCGCTGAGATAGGTGCCTCACTGATTAAGCATTGGTAACTGTCAGACCAAGTTTACTCATATATACTTTAGATTGATTTAAAACTTCATTTTTAATTTAAAAGGATCTAGGTGAAGATCCTTTTTGATAATCTCATGACCAAAATCCCTTAACGTGAGTTTTCGTTCCACTGAGCGTCAGACCCCGTAGAAAAGATCAAAGGATCTTCTTGAGATCCTTTTTTTCTGCGCGTAATCTGCTGCTTGCAAACAAAAAAACCACCGCTACCAGCGGTGGTTTGTTTGCCGGATCAAGAGCTACCAACTCTTTTTCCGAAGGTAACTGGCTTCAGCAGAGCGCAGATACCAAATACTGTTCTTCTAGTGTAGCCGTAGTTAGGCCACCACTTCAAGAACTCTGTAGCACCGCCTACATACCTCGCTCTGCTAATCCTGTTACCAGTGGCTGCTGCCAGTGGCGATAAGTCGTGTCTTACCGGGTTGGACTCAAGACGATAGTTACCGGATAAGGCGCAGCGGTCGGGCTGAACGGGGGGTTCGTGCACACAGCCCAGCTTGGAGCGAACGACCTACACCGAACTGAGATACCTACAGCGTGAGCTATGAGAAAGCGCCACGCTTCCCGAAGGGAGAAAGGCGGACAGGTATCCGGTAAGCGGCAGGGTCGGAACAGGAGAGCGCACGAGGGAGCTTCCAGGGGGAAACGCCTGGTATCTTTATAGTCCTGTCGGGTTTCGCCACCTCTGACTTGAGCGTCGATTTTTGTGATGCTCGTCAGGGGGGCGGAGCCTATGGAAAAACGCCAGCAACGCGGCCTTTTTACGGTTCCTGGCCTTTTGCTGGCCTTTTGCTCACATGTTCTTTCCTGCGTTATCCCCTGATTCTGTGGATAACCGTATTACCGCCTTTGAGTGAGCTGATACCGCTCGCCGCAGCCGAACGACCGAGCGCAGCGAGTCAGTGAGCGAGGAAGCGGATGAGCGCCCAATACGCAAACCGCCTCTCCCCGCGCGTTGGCCGATTCATTAATGCAGCTGGCACGACAGGTTTCggag";
         Sequence seq = doc.createSequence(name+"_seq", version, seqStr, Sequence.IUPAC_DNA);
         region.addSequence(seq);
         
-        SequenceAnnotation an = region.createSequenceAnnotation("AmpR_prom", "AmpR_prom", 92, 196);
+        
+        SequenceAnnotation an = region.createSequenceAnnotation("BsmBI", "BsmBI", 31, 31);
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
+        
+        an = region.createSequenceAnnotation("BsmBI_2", "BsmBI_2", 73, 73);
+        an.setName("BsmBI");
+        an.addRole(new URI(SeqenceOntoPref+"SO:0001687"));
+        
+        an = region.createSequenceAnnotation("AmpR_prom", "AmpR_prom", 176, 280);
         an.addRole(SequenceOntology.PROMOTER);
         an.createAnnotation(new QName("http://sbols.org/genBankConversion#", "gene","gbconv"), 
                 "bla");
         
-        an = region.createSequenceAnnotation("AmpR", "AmpR", 197, 1057);
+        an = region.createSequenceAnnotation("AmpR", "AmpR", 281, 1141);
         an.addRole(SequenceOntology.CDS);    
         an.createAnnotation(new QName("http://sbols.org/genBankConversion#", "note","gbconv"), 
                 "confers resistance to ampicillin, carbenicillin, and related antibiotics");
@@ -257,9 +282,13 @@ public class CyanoTemplates {
                 "high-copy-number ColE1/pMB1/pBR322/pUC origin of replication");   
         originD.setDescription("high-copy-number ColE1/pMB1/pBR322/pUC origin of replication");
         
+        seqStr = "TTGAGATCCTTTTTTTCTGCGCGTAATCTGCTGCTTGCAAACAAAAAAACCACCGCTACCAGCGGTGGTTTGTTTGCCGGATCAAGAGCTACCAACTCTTTTTCCGAAGGTAACTGGCTTCAGCAGAGCGCAGATACCAAATACTGTTCTTCTAGTGTAGCCGTAGTTAGGCCACCACTTCAAGAACTCTGTAGCACCGCCTACATACCTCGCTCTGCTAATCCTGTTACCAGTGGCTGCTGCCAGTGGCGATAAGTCGTGTCTTACCGGGTTGGACTCAAGACGATAGTTACCGGATAAGGCGCAGCGGTCGGGCTGAACGGGGGGTTCGTGCACACAGCCCAGCTTGGAGCGAACGACCTACACCGAACTGAGATACCTACAGCGTGAGCTATGAGAAAGCGCCACGCTTCCCGAAGGGAGAAAGGCGGACAGGTATCCGGTAAGCGGCAGGGTCGGAACAGGAGAGCGCACGAGGGAGCTTCCAGGGGGAAACGCCTGGTATCTTTATAGTCCTGTCGGGTTTCGCCACCTCTGACTTGAGCGTCGATTTTTGTGATGCTCGTCAGGGGGGCGGAGCCTATGGAAA";
+        seq = doc.createSequence("ori_seq", version, seqStr, Sequence.IUPAC_DNA);
+        originD.addSequence(seq);
+        
         Component origin = region.createComponent("ori_instance", AccessType.PUBLIC, originD.getIdentity());
         
-        an = region.createSequenceAnnotation("ori", "ori", 1228, 1816);
+        an = region.createSequenceAnnotation("ori", "ori", 1312, 1900);
         an.setComponent(origin.getIdentity());
         return region;
     }
@@ -312,23 +341,21 @@ public class CyanoTemplates {
     }
 
     static ComponentDefinition createTemplatePlasmid(SBOLDocument doc, String version, 
-            ComponentDefinition ampROrg, 
+            ComponentDefinition backbone, 
             ComponentDefinition leftFlank, 
             ComponentDefinition insert, 
-            ComponentDefinition rightFlank, 
-            ComponentDefinition endGap) throws SBOLValidationException, URISyntaxException {
+            ComponentDefinition rightFlank) throws SBOLValidationException, URISyntaxException {
 
-        return createTemplatePlasmid(doc, version, ampROrg.getIdentity(), leftFlank.getIdentity(), insert.getIdentity(), 
-                rightFlank.getIdentity(), endGap.getIdentity());
+        return createTemplatePlasmid(doc, version, backbone.getIdentity(), leftFlank.getIdentity(), insert.getIdentity(), 
+                rightFlank.getIdentity());
         
     }
 
     static ComponentDefinition createTemplatePlasmid(SBOLDocument doc, String version, 
-            URI ampROrg, 
+            URI backbone, 
             URI leftFlank, 
             URI insert, 
-            URI rightFlank, 
-            URI endGap) throws SBOLValidationException, URISyntaxException {
+            URI rightFlank) throws SBOLValidationException, URISyntaxException {
 
         String name = "cyano_codA_Km";
         ComponentDefinition plasmid = doc.createComponentDefinition(name, version, ComponentDefinition.DNA_REGION);
@@ -336,16 +363,16 @@ public class CyanoTemplates {
         //engineered plasmid
         plasmid.addRole(new URI(SeqenceOntoPref+"SO:0000637"));
         
-        Component aC = plasmid.createComponent("ampR", AccessType.PUBLIC, ampROrg);
+        Component aC = plasmid.createComponent("backbone", AccessType.PUBLIC, backbone);
         Component lC = plasmid.createComponent("left", AccessType.PUBLIC, leftFlank);
         Component iC = plasmid.createComponent("insert", AccessType.PUBLIC, insert);
         Component rC = plasmid.createComponent("right", AccessType.PUBLIC, rightFlank);
-        Component gC = plasmid.createComponent("gap", AccessType.PUBLIC, endGap);
+        //Component gC = plasmid.createComponent("gap", AccessType.PUBLIC, endGap);
 
         plasmid.createSequenceConstraint("cs1", RestrictionType.PRECEDES, aC.getIdentity(), lC.getIdentity());
         plasmid.createSequenceConstraint("cs2", RestrictionType.PRECEDES, lC.getIdentity(), iC.getIdentity());
         plasmid.createSequenceConstraint("cs3", RestrictionType.PRECEDES, iC.getIdentity(), rC.getIdentity());
-        plasmid.createSequenceConstraint("cs4", RestrictionType.PRECEDES, rC.getIdentity(), gC.getIdentity());
+        //plasmid.createSequenceConstraint("cs4", RestrictionType.PRECEDES, rC.getIdentity(), gC.getIdentity());
                 
         return plasmid;
     }
