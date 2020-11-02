@@ -57,12 +57,8 @@ public class FeaturesReader {
             rows.forEach((key, value) -> {
                 List<String> colVals = (List<String>) value;
                 String featureVal = new String();
-                if (colVals.size() > 1) {
-                    featureVal = String.join(",", colVals);
-                } else {
-                    if (colVals.size() > 0) {
-                        featureVal = colVals.get(0);
-                    }
+                if (colVals.size() > 0) {
+                    featureVal = colVals.get(0);
                 }
 
                 features.put(key, featureVal);

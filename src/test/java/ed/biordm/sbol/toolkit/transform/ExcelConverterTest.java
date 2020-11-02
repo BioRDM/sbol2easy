@@ -7,6 +7,7 @@ package ed.biordm.sbol.toolkit.transform;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.sbolstandard.core2.SBOLValidate;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.SBOLWriter;
 import org.sbolstandard.core2.Sequence;
+import org.sbolstandard.core2.SequenceOntology;
 
 /**
  *
@@ -36,6 +38,7 @@ public class ExcelConverterTest {
     SBOLDocument templateDoc;
     ComponentDefinition cyanoTemplate;
     String templateFilename = "cyano_template.xml";
+    static String SEQUENCE_ONTO_PREF = "http://identifiers.org/so/";
 
     @Before
     public void generateSBOLDocument() throws IOException, SBOLValidationException, SBOLConversionException {
@@ -129,6 +132,9 @@ public class ExcelConverterTest {
             try {
                 newCyanoCD = templateTransformer.
                         instantiateFromTemplate(cyanoTemplate, newPlasmidName, version, description, newDoc);
+                newCyanoCD.addType(SequenceOntology.CIRCULAR);
+                //engineered plasmid
+                newCyanoCD.addRole(new URI(SEQUENCE_ONTO_PREF+"SO:0000637"));
 
                 newLeftFlank = templateTransformer.concretizePart(newCyanoCD, lfGenericId, leftFlankName, leftFlankSequence, newDoc);
                 newRightFlank = templateTransformer.concretizePart(newCyanoCD, rfGenericId, rightFlankName, rightFlankSequence, newDoc);
