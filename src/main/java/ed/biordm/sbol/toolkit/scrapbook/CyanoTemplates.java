@@ -66,7 +66,7 @@ public class CyanoTemplates {
 		
                 ComponentDefinition ampROrg = createBackbone(doc, version);
 
-                ComponentDefinition endGap = createEndGap(doc, version);
+                //ComponentDefinition endGap = createEndGap(doc, version);
                 
                 ComponentDefinition leftFlank = createLeftFlank(doc, version);
 
