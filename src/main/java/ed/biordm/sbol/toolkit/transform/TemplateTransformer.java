@@ -14,6 +14,7 @@ import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.Location;
 import org.sbolstandard.core2.OrientationType;
+import org.sbolstandard.core2.Range;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.Sequence;
@@ -96,7 +97,24 @@ public class TemplateTransformer {
         newCmpDef.setName(cleanName);
         newCmpDef.addWasDerivedFrom(prevCmpDef.getIdentity());
 
-        // Assume we are adding a new sequence to the component
+        // Find the sequence annotation for the previous component definition
+        for (SequenceAnnotation seqAnn : parent.getSequenceAnnotations()) {
+            if (seqAnn.getComponent() == cmp) {
+
+                for (Location loc : seqAnn.getLocations()) {
+                    Range range = (Range) loc;
+                    int seqStart = range.getStart();
+                    int seqEnd = range.getEnd();
+
+                    // Update the barcode sequence in the parent sequence
+                    for (Sequence seq : parent.getSequences()) {
+                        String newParentSeq = this.updateBarcodeSequence(seq.getElements(), newSequence, seqStart, seqEnd);
+                        seq.setElements(newParentSeq);
+                    }
+                }
+            }
+        }
+        // Create a new sequence for the component
         String version = "1.0.0"; // should this be the version of the component definition?
         Sequence seq = doc.createSequence(cleanName + "_seq", version,
                 newSequence, Sequence.IUPAC_DNA);
@@ -107,10 +125,7 @@ public class TemplateTransformer {
         link.addWasDerivedFrom(cmp.getIdentity());
         link.setName(cleanName);
 
-        // Create SequenceAnnotation for new component definition and link to instance
-        // SequenceAnnotation seqAnn = newCmpDef.createSequenceAnnotation(cleanName + "_sa", cleanName + "_sa", 1, newSequence.length());
-        //seqAnn.setComponent(link.getDisplayId());
-
+        // Replace component and update sequence constraints
         replaceComponent(parent, cmp, link);
 
         return newCmpDef;
@@ -154,40 +169,7 @@ public class TemplateTransformer {
         newCmpDef.setName(cleanName);
         newCmpDef.addWasDerivedFrom(template.getIdentity());
 
-        Set<SequenceAnnotation> flatSAs = new HashSet<>();
-        //addChildSequenceAnnotations(newCmpDef, doc, flatSAs);
-
-        for (SequenceAnnotation sa : flatSAs) {
-            if(!newCmpDef.getSequenceAnnotations().contains(sa)) {
-                if (sa.getComponent() == null) {
-                    System.out.println("here1");
-
-                    if (sa.getComponentDefinition() == null) {
-                        System.out.println("No component or component definition?!");
-                    }
-                   //System.out.println(sa.getComponentDefinition().getIdentity());
-                } else {
-                    System.out.println(sa.getComponent().getDisplayId());
-                }
-                //System.out.println(sa.getDisplayId());
-
-                Set<Location> saLocs = sa.getLocations();
-
-                for (Location saLoc : saLocs) {
-                    System.out.println(saLoc.getSequence());
-                }
-                //newCmpDef.createSequenceAnnotation(sa.getDisplayId(), cleanName);
-            }
-            //System.out.println(((Location)sa.getLocations().toArray()[0]).getSequence().getElements());
-        }
-
-        rebuildSequences(newCmpDef, doc, flatSAs);
-        //rebuildSequencesOrig(newCmpDef, doc);
-
-        // this sort of works
-        addSequenceAnnotationsToParent(newCmpDef);
-
-        //addChildSequenceAnnotations(newCmpDef, doc, flatSAs);
+        rebuildSequences(newCmpDef, newCmpDef, doc);
 
         return newCmpDef;
     }
@@ -208,21 +190,23 @@ public class TemplateTransformer {
      * recursively adds SequenceAnnotation objects from child components into
      * Set parameter
      *
-     * @param comp The parent component definition to descend through children from
+     * @param comp The parent component definition to descend through children
+     * from
      * @param doc The top level SBOL document
-     * @param childSequenceAnns The set to populate with all child sequence annotations
+     * @param childSequenceAnns The set to populate with all child sequence
+     * annotations
      */
     protected void addChildSequenceAnnotations(ComponentDefinition comp, SBOLDocument doc, Set<SequenceAnnotation> childSequenceAnns) throws SBOLValidationException {
         Set<SequenceAnnotation> oldSequenceAnn = comp.getSequenceAnnotations();
         int saCount = 1;
 
-        for(Component child : comp.getComponents()) {
+        for (Component child : comp.getComponents()) {
             ComponentDefinition cmpDef = child.getDefinition();
 
             if (cmpDef.getSequenceAnnotations().size() > 0) {
-            for(SequenceAnnotation seqAn : cmpDef.getSequenceAnnotations()) {
-                childSequenceAnns.add(seqAn);
-            }
+                for (SequenceAnnotation seqAn : cmpDef.getSequenceAnnotations()) {
+                    childSequenceAnns.add(seqAn);
+                }
             } else {
                 for (Sequence seq : cmpDef.getSequences()) {
                     String newSAName = "ann".concat(String.valueOf(saCount));
@@ -241,11 +225,13 @@ public class TemplateTransformer {
     }
 
     /**
-     * remove old component and replace with new component in parent component definition
+     * remove old component and replace with new component in parent component
+     * definition
      *
      * @param parent The parent component definition to replace component in
      * @param oldComponent The child component to be replaced
-     * @param newComponent The new child component that will replace the existing
+     * @param newComponent The new child component that will replace the
+     * existing
      */
     protected void replaceComponent(ComponentDefinition parent, Component oldComponent, Component newComponent) throws SBOLValidationException {
         for (SequenceConstraint sc : parent.getSequenceConstraints()) {
@@ -267,190 +253,109 @@ public class TemplateTransformer {
      * all sub-components' sequence annotations to the parent
      *
      * @param parent The parent component definition to iterate over
+     * @param child
+     * @param startIdx
      */
-    protected void addSequenceAnnotationsToParent(ComponentDefinition parent) throws SBOLValidationException {
-        Set<SequenceConstraint> flatSCs = parent.getSequenceConstraints();
-        int length = 0;
-        int start = 1;
+    protected void addSequenceAnnotationsToParent(ComponentDefinition parent,
+            ComponentDefinition child, int startIdx) throws SBOLValidationException {
+        List<SequenceAnnotation> seqAnns = child.getSortedSequenceAnnotations();
+        for (SequenceAnnotation seqAnn : seqAnns) {
 
-        List<Component> flatCmps = parent.getSortedComponents();
+            Set<Location> seqAnnLocs = seqAnn.getLocations();
 
-        for (Component cmp : flatCmps) {
-            length = 0;
+            for (Location loc : seqAnnLocs) {
+                Range locRange = (Range) loc;
 
-            ComponentDefinition cmpDef = cmp.getDefinition();
-            Set<Sequence> cmpDefSeqs = cmpDef.getSequences();
+                int seqAnnStart = locRange.getStart();
+                int seqAnnEnd = locRange.getEnd();
 
-            for (Sequence seq : cmpDefSeqs) {
-                length += seq.getElements().length();
-            }
+                SequenceAnnotation newSA = parent
+                        .createSequenceAnnotation(seqAnn.getDisplayId(),
+                                seqAnn.getDisplayId(),
+                                startIdx + seqAnnStart - 1,
+                                startIdx + +seqAnnEnd - 1);
 
-            Set<SequenceAnnotation> seqAnns = cmpDef.getSequenceAnnotations();
-            for (SequenceAnnotation seqAnn : seqAnns) {
-
-                Set<Location> seqAnnLocs = seqAnn.getLocations();
-
-                SequenceAnnotation newSA = parent.createSequenceAnnotation(seqAnn.getDisplayId(), seqAnn.getDisplayId(), start, start+length);
+                newSA.setRoles(seqAnn.getRoles());
 
                 if (newSA.getComponent() == null) {
                     // Throws org.sbolstandard.core2.SBOLValidationException: sbol-10522:  Strong Validation Error: 
                     // The sequenceAnnotations property of a ComponentDefinition MUST NOT contain two or more SequenceAnnotation objects that refer to the same Component.
-                    //newSA.setComponent(cmp.getIdentity());
+                    // A SequenceAnnotation MUST NOT include both a component property and a roles property. 
+                    //newSA.setComponent(c.getIdentity());
                 }
             }
-            start += length;
         }
     }
 
     /**
      * Copied from
      * edu.utah.ece.async.sboldesigner.sbol.editor.SBOLDesign.rebuildSequences.
-     * Modified to create new Sequence Annotations for each sequence in all 
+     * Modified to create new Sequence Annotations for each sequence in all
      * sub-components.
      *
-     * @param comp
+     * @param parent
+     * @param subCmp
      * @param doc
-     * @param newSequenceAnns The set of SequenceAnnotation objects to recursively collect from sub-components
+     * @param newSequenceAnns The set of SequenceAnnotation objects to
+     * recursively collect from sub-components
      * @throws SBOLValidationException
      */
-    protected void rebuildSequences(ComponentDefinition comp, SBOLDocument doc, Set<SequenceAnnotation> newSequenceAnns) throws SBOLValidationException {
-        Set<SequenceAnnotation> oldSequenceAnns = comp.getSequenceAnnotations();
-
-        //comp.clearSequenceAnnotations();
-        Set<Sequence> currSequences = new HashSet<Sequence>();
-
+    protected void rebuildSequences(ComponentDefinition parent,
+            ComponentDefinition subCmp, SBOLDocument doc) throws SBOLValidationException {
         int start = 1;
         int length;
         int count = 0;
         String newSeq = "";
         ComponentDefinition curr;
-        for (org.sbolstandard.core2.Component c : comp.getSortedComponents()) {
+        for (org.sbolstandard.core2.Component c : subCmp.getSortedComponents()) {
             curr = c.getDefinition();
             if (!curr.getComponents().isEmpty()) {
-                rebuildSequences(curr, doc, newSequenceAnns);
+                rebuildSequences(parent, curr, doc);
             }
             length = 0;
+
+            addSequenceAnnotationsToParent(parent, curr, start);
+
             //Append sequences to build newly constructed sequence
             for (Sequence s : curr.getSequences()) {
-                currSequences.add(s);
                 newSeq = newSeq.concat(s.getElements());
                 length += s.getElements().length();
             }
-            /*String currSeq = curr.getImpliedNucleicAcidSequence();
-            newSeq = newSeq.concat(currSeq);
-            length += currSeq.length();*/
 
-            OrientationType o = OrientationType.INLINE;
-            for(SequenceAnnotation seqAnn : curr.getSequenceAnnotations()) {
-                if(seqAnn == null) {
-                    if (length == 0) {
-                        seqAnn = comp.createSequenceAnnotation(seqAnn.getDisplayId(), "GenericLocation", o);
-                    } else {
-                        seqAnn = comp.createSequenceAnnotation(seqAnn.getDisplayId(), "Range", start, start + length - 1, o);
-                        start += length;
-                    }
-                    seqAnn.setComponent(c.getIdentity());
-                }
-
-                newSequenceAnns.add(seqAnn);
-            }
-
-            for (SequenceAnnotation sa : oldSequenceAnns) {
-                ComponentDefinition saCmpDef = sa.getComponentDefinition();
-                if (saCmpDef != null) {
-                    if (saCmpDef.getDisplayId().equals(c.getDisplayId())) {
-                        o = sa.getLocations().iterator().next().getOrientation();
-                        SequenceAnnotation seqAnn = comp.getSequenceAnnotation(sa.getDisplayId());
-
-                        if(seqAnn == null) {
-                            if (length == 0) {
-                                seqAnn = comp.createSequenceAnnotation(sa.getDisplayId(), "GenericLocation", o);
-                            } else {
-                                seqAnn = comp.createSequenceAnnotation(sa.getDisplayId(), "Range", start, start + length - 1, o);
-                                start += length;
-                            }
-                            seqAnn.setComponent(c.getIdentity());
-                        }
-
-                        newSequenceAnns.add(seqAnn);
-                    }
-                }
-            }
+            start += length;
 
             count++;
         }
         if (!newSeq.isBlank()) {
-            if (comp.getSequences().isEmpty()) {
-                String uniqueId = comp.getDisplayId().concat("_seq");
-                comp.addSequence(doc.createSequence(uniqueId, comp.getVersion(), newSeq, Sequence.IUPAC_DNA));
+            if (parent.getSequences().isEmpty()) {
+                String uniqueId = parent.getDisplayId().concat("_seq");
+                parent.addSequence(doc.createSequence(uniqueId, parent.getVersion(), newSeq, Sequence.IUPAC_DNA));
             } else {
-                comp.getSequences().iterator().next().setElements(newSeq);
+                parent.getSequences().iterator().next().setElements(newSeq);
             }
         }
     }
 
     /**
-     * Copied from
-     * edu.utah.ece.async.sboldesigner.sbol.editor.SBOLDesign.rebuildSequences.
-     * Unused at present (23/10/20).
+     * Replace the sub-string between the startIdx and endIdx positions in the
+     * provided oldSeq String parameter, with the content of the barcodeSeq
+     * String value. If the length of the barcodeSeq String parameter is shorter
+     * or longer than the section of the oldSeq defined by the index values, the
+     * resulting sub-string is truncated or padded accordingly.
      *
-     * @param comp
-     * @param doc
-     * @throws SBOLValidationException
+     * @param oldSeq
+     * @param barcodeSeq
+     * @param startIdx
+     * @param endIdx
+     * @return
      */
-    private void rebuildSequencesOrig(ComponentDefinition comp, SBOLDocument doc) throws SBOLValidationException {
-        Set<SequenceAnnotation> oldSequenceAnn = comp.getSequenceAnnotations();
-        comp.clearSequenceAnnotations();
-        Set<Sequence> currSequences = new HashSet<Sequence>();
+    public String updateBarcodeSequence(String oldSeq, String barcodeSeq, int startIdx, int endIdx) {
 
-        int start = 1;
-        int length;
-        int count = 0;
-        String newSeq = "";
-        ComponentDefinition curr;
-        for (org.sbolstandard.core2.Component c : comp.getSortedComponents()) {
-            curr = c.getDefinition();
-            if (!curr.getComponents().isEmpty()) {
-                rebuildSequencesOrig(curr, doc);
-            }
-            length = 0;
-            //Append sequences to build newly constructed sequence
-            for (Sequence s : curr.getSequences()) {
-                currSequences.add(s);
-                newSeq = newSeq.concat(s.getElements());
-                length += s.getElements().length();
-            }
+        String startSubStr = oldSeq.substring(0, startIdx);
+        String endSubStr = oldSeq.substring(endIdx, oldSeq.length());
 
-            OrientationType o = OrientationType.INLINE;
-            for (SequenceAnnotation sa : oldSequenceAnn) {
-                Component saCmp = sa.getComponent();
-                if (saCmp != null) {
-                    if (saCmp.getIdentity() == c.getIdentity()) {
-                        o = sa.getLocations().iterator().next().getOrientation();
-                    }
-                }
-            }
+        String newSeq = startSubStr.concat(barcodeSeq).concat(endSubStr);
 
-            SequenceAnnotation seqAnn;
-            if (length == 0) {
-                seqAnn = comp.createSequenceAnnotation("SequenceAnnotation_" + count, "GenericLocation", o);
-            } else {
-                seqAnn = comp.createSequenceAnnotation("SequenceAnnotation_" + count, "Range", start, start + length - 1, o);
-                start += length;
-            }
-            seqAnn.setComponent(c.getIdentity());
-
-            count++;
-        }
-        if (newSeq != "") {
-            if (comp.getSequences().isEmpty()) {
-                /*String uniqueId = SBOLUtils.getUniqueDisplayId(null, null,
-                                comp.getDisplayId() + "Sequence", comp.getVersion(), "Sequence", doc);*/
-                String uniqueId = comp.getDisplayId().concat("_seq");
-                comp.addSequence(doc.createSequence(uniqueId, comp.getVersion(), newSeq, Sequence.IUPAC_DNA));
-            } else {
-                comp.getSequences().iterator().next().setElements(newSeq);
-            }
-        }
+        return newSeq;
     }
 }

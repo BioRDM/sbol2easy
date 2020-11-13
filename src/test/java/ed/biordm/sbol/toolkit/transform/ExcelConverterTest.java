@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
+import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.SBOLConversionException;
 import org.sbolstandard.core2.SBOLDocument;
@@ -25,6 +26,7 @@ import org.sbolstandard.core2.SBOLValidate;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.SBOLWriter;
 import org.sbolstandard.core2.Sequence;
+import org.sbolstandard.core2.SequenceAnnotation;
 import org.sbolstandard.core2.SequenceOntology;
 
 /**
@@ -150,6 +152,20 @@ public class ExcelConverterTest {
 
                 // Finally, flatten the new sequences into the parent plasmid definition
                 newCyanoCDFlat = templateTransformer.flattenSequences(newCyanoCD, newPlasmidName.concat("_flat"), newDoc);
+
+                // Add arbitrary(?) SequenceAnnotations. What are the rules for these annotations?
+                Component seqCmp = newCyanoCDFlat.getComponent("ampR");
+                SequenceAnnotation an = newCyanoCDFlat.createSequenceAnnotation("ann1", "ann1", 1, 2073);
+                an.setComponent(seqCmp.getIdentity());
+
+                seqCmp = newCyanoCDFlat.getComponent(leftFlankName);
+                an = newCyanoCDFlat.createSequenceAnnotation("ann2", "ann2", 2074, 2074+leftFlankSequence.length());
+
+                if (seqCmp != null) {
+                    if (seqCmp.getIdentity() != null) {
+                        an.setComponent(seqCmp.getIdentity());
+                    }
+                }
             } catch (SBOLValidationException ex) {
                 ex.printStackTrace();
             } catch (URISyntaxException ex) {
