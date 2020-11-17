@@ -13,6 +13,7 @@ import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.Location;
+import org.sbolstandard.core2.OrientationType;
 import org.sbolstandard.core2.Range;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLValidationException;
@@ -345,6 +346,48 @@ public class TemplateTransformer {
         }
 
         return newSeqAnn;
+    }
+
+    protected void addCustomSequenceAnnotations(ComponentDefinition parent,
+            String leftFlankSeqId, String leftFlankCmpId) throws SBOLValidationException {
+        /*
+        // Finally the original child components (backbone, left, insert) after
+        // flattening should get sequence annotations which locates them in
+        // correct regions (1-length_bacbone) (lenght-backbone+1, lengh_left)
+        // as after flattening we assume they follow each other and we know
+        // their exact locations
+        */
+        String backboneCmpId = "backbone";
+        String insertCmpId = "insert";
+
+        String backboneSeqId = "backbone_seq";
+        String insertSeqId = "insert_seq";
+
+        int backboneSeqLen = 0;
+        int leftSeqLen = 0;
+        int insertSeqLen = 0;
+
+        for (Sequence seq : parent.getSequences()) {
+            String seqDispId = seq.getDisplayId();
+            if (seqDispId.equals(backboneSeqId)) {
+                backboneSeqLen = seq.getElements().length();
+            } else if(seqDispId.equals(leftFlankSeqId)) {
+                leftSeqLen = seq.getElements().length();
+            } else if(seqDispId.equals(insertSeqId)) {
+                insertSeqLen = seq.getElements().length();
+            }
+        }
+
+        // Get the relevant components for association with sequence annotations
+        Component bbCmp = parent.getComponent(backboneCmpId);
+        Component leftCmp = parent.getComponent(leftFlankCmpId);
+        Component insertCmp = parent.getComponent(insertCmpId);
+
+        SequenceAnnotation bbSA = parent.createSequenceAnnotation("ann1", "ann1", 1, backboneSeqLen);
+        bbSA.setComponent(bbCmp.getDisplayId());
+
+        SequenceAnnotation leftSA = parent.createSequenceAnnotation("ann2", "ann2", backboneSeqLen+1, backboneSeqLen+1+leftSeqLen);
+        leftSA.setComponent(leftCmp.getDisplayId());
     }
 
     /**
