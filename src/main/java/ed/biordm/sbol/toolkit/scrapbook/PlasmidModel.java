@@ -45,75 +45,68 @@ import org.sbolstandard.core2.SystemsBiologyOntology;
  * @author tzielins
  * 
  */
-
 public class PlasmidModel {
 
-	public static void main(String[] args) throws SBOLValidationException, SBOLConversionException, IOException, URISyntaxException {
-		
-		SBOLDocument doc = new SBOLDocument();
+    // private static final String TMP_PATH = "E:/Temp/";
+    private static final String TMP_PATH = "D:/Temp/sbol/";
 
-		doc.setDefaultURIprefix("http://bio.ed.ac.uk/a_mccormick/");
-		doc.setComplete(false);
-		doc.setCreateDefaults(true);
-                
-		
-		String version = "1.0.0";
-		
-                String targetGene = "sll0199A";
-                String plasmidName = targetGene+"_codA";
-                
-		ComponentDefinition plasmid = doc.createComponentDefinition(plasmidName, version, ComponentDefinition.DNA_REGION);
-                
-                String SeqO = "http://identifiers.org/so/";
-                //engineered plasmid
-                plasmid.addRole(new URI(SeqO+"SO:0000637"));
-                
-		String fullSeqStr = "aaagggcctcgtgatacgcctatttttataggttaatgtcatgataataatggtttcttagacgtcaggtggcacttttcggggaaatgtgcgcggaacccctatttgtttatttttctaaatacattcaaatatgtatccgctcatgagacaataaccctgataaatgcttcaataatattgaaaaaggaagagtatgagtattcaacatttccgtgtcgcccttattcccttttttgcggcattttgccttcctgtttttgctcacccagaaacgctggtgaaagtaaaagatgctgaagatcagttgggtgcacgagtgggttacatcgaactggatctcaacagcggtaagatccttgagagttttcgccccgaagaacgttttccaatgatgagcacttttaaagttctgctatgtggcgcggtattatcccgtattgacgccgggcaagagcaactcggtcgccgcatacactattctcagaatgacttggttgagtactcaccagtcacagaaaagcatcttacggatggcatgacagtaagagaattatgcagtgctgccataaccatgagtgataacactgcggccaacttacttctgacaacgatcggaggaccgaaggagctaaccgcttttttgcacaacatgggggatcatgtaactcgccttgatcgttgggaaccggagctgaatgaagccataccaaacgacgagcgtgacaccacgatgcctgtagcaatggcaacaacgttgcgcaaactattaactggcgaactacttactctagcttcccggcaacaattaatagactggatggaggcggataaagttgcaggaccacttctgcgctcggcccttccggctggctggtttattgctgataaatctggagccggtgagcgtggttctcgcggtatcattgcagcactggggccagatggtaagccctcccgtatcgtagttatctacacgacggggagtcaggcaactatggatgaacgaaatagacagatcgctgagataggtgcctcactgattaagcattggtaactgtcagaccaagtttactcatatatactttagattgatttaaaacttcatttttaatttaaaaggatctaggtgaagatcctttttgataatctcatgaccaaaatcccttaacgtgagttttcgttccactgagcgtcagaccccgtagaaaagatcaaaggatcttcttgagatcctttttttctgcgcgtaatctgctgcttgcaaacaaaaaaaccaccgctaccagcggtggtttgtttgccggatcaagagctaccaactctttttccgaaggtaactggcttcagcagagcgcagataccaaatactgttcttctagtgtagccgtagttaggccaccacttcaagaactctgtagcaccgcctacatacctcgctctgctaatcctgttaccagtggctgctgccagtggcgataagtcgtgtcttaccgggttggactcaagacgatagttaccggataaggcgcagcggtcgggctgaacggggggttcgtgcacacagcccagcttggagcgaacgacctacaccgaactgagatacctacagcgtgagctatgagaaagcgccacgcttcccgaagggagaaaggcggacaggtatccggtaagcggcagggtcggaacaggagagcgcacgagggagcttccagggggaaacgcctggtatctttatagtcctgtcgggtttcgccacctctgacttgagcgtcgatttttgtgatgctcgtcaggggggcggagcctatggaaaaacgccagcaacgcggcctttttacggttcctggccttttgctggccttttgctcacatgttctttcctgcgttatcccctgattctgtggataaccgtattaccgcctttgagtgagctgataccgctcgccgcagccgaacgaccgagcgcagcgagtcagtgagcgaggaagcggatgagcgcccaatacgcaaaccgcctctccccgcgcgttggccgattcattaatgcagctggcacgacaggtttcggagcaaggcaaaaccaccgttatcagcagaacgacggcgggaaaaaatgattaaacgaaaaaatttgcaaggattcatagcggttgcccaatctaactcagggagcgacttcagcccacaaaaaacaccactgggcctactgggctattcccattatcatctacattgaagggatagcaagctaatttttatgacggcgatcgccaaaaacaaagaaaattcagcaattaccgtgggtagcaaaaaatccccatctaaagttcagtaaatatagctagaacaaccaagcattttcggcaaagtactattcagatagaacgagaaatgagcttgttctatccgcccggggctgaggctgtataatctacgacgggctgtcaaacattgtgataccatgggcagaagaaaggaaaaacgtccctgatcgcctttttgggcacggagtagggcgttaccccggcccgttcaaccacaagtccctatagatacaatcgccaagaagtatgagaagagcacggtagccttnnnnnnnnnnnnnnnnnntgcccagtcttctgcctaaggcaggtgccgcggtgcgggtgccagggcgtgcccccgggctccccgggcgcgtactccactttacagctagctcagtcctaggtattatgctagctattgtgagcggataacaatttcacacatactagagaaagaggagaaatactaaatgtctaacaacgcgctgcaaaccatcatcaatgcacgcctgcctggagaggaagggttgtggcagattcacttacaggacggcaaaatctccgcgatcgacgcacaatctggggttatgccgatcaccgaaaactctttggatgccgaacaagggttagtcattcccccattcgttgaaccacatattcacctggatactactcagacagccggtcagcccaattggaaccagtccggtacgctgttcgaaggtatcgaacgatgggcggagcgaaaagctctactcacgcatgacgatgtcaagcaacgggcctggcagaccctgaagtggcagatcgccaacggaatacagcacgtacgcactcacgtggatgtttccgatgccactttgacggcattgaaggcaatgctcgaagttaagcaggaagtagccccgtggattgacttgcaaatcgctgccttccctcaggaaggcatcctaagttatccgaatggagaagcgctcctggaggaggcattgcggttaggagcagacgtggtgggagcgattccccatttcgagtttacccgcgagtacggtgttgaatctctgcataaaacatttgctttagctcagaagtatgaccgtctgatcgacgtacactgcgacgagatcgatgacgaacagagtcgcttcgtggagacggtggctgcgctggcgcatcacgaaggcatgggtgcacgtgtaactgcaagccatacgacggctatgcacagctataatggggcatatacatctcgtttgttccgattactaaaaatgagcggaatcaactttgttgccaatccattggtcaacattcatctacaaggacgcttcgacacctacccgaaacggcgaggaatcacacgagttaaggaaatgctagagtctggtatcaatgtgtgtttcgggcatgatgacgtgtgtggtccctggtaccctctaggaacagccaacatgctgcaagttctccacatgggtctacacgtgtgtcaactcatggggtatggacaaattaacgatggactcaatctaattacacaccattccgcccgaacactgaacctccaggattacgggatcgcggcgggaaattctgccaacctcatcattctgcccgcggaaaacgggttcgacgctctacgccgtcaagtgccagttcggtattctgttcgtgggggtaaggtaattgcaagtacccaaccggctcagaccacggtctatttagagcaaccggaagctatcgactacaaacgatgagcttcaaataaaacgaaaggctcagtcgaaagactgggcctttcgttttatctgttgtttgtcggtgaacgctctctactagagtcacactggctcaccttcgggtgggcctttctgcgcgctctgaggtctgcctcgtgaagaaggtgttgctgactcataccaggcctgaatcgccccatcatccagccagaaagtgagggagccacggttgatgagagctttgttgtaggtggaccagttggtgattttgaacttttgctttgccacggaacggtctgcgttgtcgggaagatgcgtgatctgatccttcaactcagcaaaagttcgatttattcaacaaagccgccgtcccgtcaagtcagcgtaatgctctgccagtgttacaaccaattaaccaattctgattagaaaaactcatcgagcatcaaatgaaactgcaatttattcatatcaggattatcaataccatatttttgaaaaagccgtttctgtaatgaaggagaaaactcaccgaggcagttccataggatggcaagatcctggtatcggtctgcgattccgactcgtccaacatcaatacaacctattaatttcccctcgtcaaaaataaggttatcaagtgagaaatcaccatgagtgacgactgaatccggtgagaatggcaaaagcttatgcatttctttccagacttgttcaacaggccagccattacgctcgtcatcaaaatcactcgcatcaaccaaaccgttattcattcgtgattgcgcctgagcgagacgaaatacgcgatcgctgttaaaaggacaattacaaacaggaatcgaatgcaaccggcgcaggaacactgccagcgcatcaacaatattttcacctgaatcaggatattcttctaatacctggaatgctgttttcccggggatcgcagtggtgagtaaccatgcatcatcaggagtacggataaaatgcttgatggtcggaagaggcataaattccgtcagccagtttagtctgaccatctcatctgtaacatcattggcaacgctacctttgccatgtttcagaaacaactctggcgcatcgggcttcccatacaatcgatagattgtcgcacctgattgcccgacattatcgcgagcccatttatacccatataaatcagcatccatgttggaatttaatcgcggcctcgagcaagacgtttcccgttgaatatggctcataacaccccttgtattactgtttatgtaagcagacagttttattgttcatgatgatatatttttatcttgtgcaatgtaacatcagagattttgagacacaacgtggctttccgcggtgcgggtgccagggcgtgcccttgggctccccgggcgcgtactccaccacctgccattgggagaagacttgggagctcttcataatcagccagctcaatctgtgtgtcgttgatttaagcttaatgctacggggtctgtctccaactccctcagcttctcgcaatggcaaggcaaataatgtttctcttgctgagtagatgttcaggaggacggatcgaaagtctacaaaacagattcttgaccaagccatctacttagaaaaacttctgcgttttggcgatcgcatcttttaagcgagatgcgatttttttgtccattagtttgtattttaatactcttttgttgtttgatttcgtccaagcttttcttggtatgtgggatcttccgtgcccaaaattttatcccagaaagtgaaatatagtcatttcaattaacgatgagagaatttaatgtaaaattatggagtgtacaaaatgaacaggtttaaacaatggcttacagtttagatttaaggcaaagggtagtagcttatatagaagctggaggaaaaataactgaggcttccaagatatataaaataggaaaagcctcgatatacagatggttaaatagagtagatttaagcccaacaaaagtagagcgtcgccataggcgctgcttacagacaagctgtgaccgtctccgggagctgcatgtgtcagaggttttcaccgtcatcaccgaaacgcgcgagacg";
-                Sequence fullSeq = doc.createSequence(plasmidName+"_seq", version, fullSeqStr, Sequence.IUPAC_DNA);
+    public static void main(String[] args) throws SBOLValidationException, SBOLConversionException, IOException, URISyntaxException {
 
-                plasmid.addSequence(fullSeq);
-                
-                
-		ComponentDefinition leftF = doc.createComponentDefinition("left_flank_d", version, ComponentDefinition.DNA_REGION);
-                leftF.addRole(SequenceOntology.SEQUENCE_FEATURE);
-                
-                
-                Component leftFC = plasmid.createComponent(targetGene+"_left_flank_c", AccessType.PUBLIC, leftF.getIdentity());
-                
-                SequenceAnnotation sa = plasmid.createSequenceAnnotation("left_flank_a", "left_flank_l", 2074, 2573);
-                sa.setComponent(leftFC.getIdentity());
-                sa.setName("lf_a_name");
-                
-                sa = plasmid.createSequenceAnnotation("ampr_a", "ampr_l", 92, 196);
-                sa.addRole(SequenceOntology.PROMOTER);
-                sa.setName("AmpR prom");
+        SBOLDocument doc = new SBOLDocument();
 
+        doc.setDefaultURIprefix("http://bio.ed.ac.uk/a_mccormick/");
+        doc.setComplete(false);
+        doc.setCreateDefaults(true);
 
-                //ComponentDefinition cass = doc.createComponentDefinition("cassete", version, ComponentDefinition.DNA_REGION);
-                //cass.addRole(SequenceOntology.ENGINEERED_REGION);
-                
-		//ComponentDefinition rightF = doc.createComponentDefinition("rigth_flank_d", version, ComponentDefinition.DNA_REGION);
-                //rightF.addRole(SequenceOntology.SEQUENCE_FEATURE);
-                
-                String rightSeqStr = "tcagccagctcaatctgtgtgtcgttgatttaagcttaatgctacggggtctgtctccaactccctcagcttctcgcaatggcaaggcaaataatgtttctcttgctgagtagatgttcaggaggacggatcgaaagtctacaaaacagattcttgaccaagccatctacttagaaaaacttctgcgttttggcgatcgcatcttttaagcgagatgcgatttttttgtccattagtttgtattttaatactcttttgttgtttgatttcgtccaagcttttcttggtatgtgggatcttccgtgcccaaaattttatcccagaaagtgaaatatagtcatttcaattaacgatgagagaatttaatgtaaaattatggagtgtacaaaatgaacaggtttaaacaatggcttacagtttagatttaaggcaaagggtagtagcttatatagaagctggaggaaaaataactgaggcttccaagatatataaaataggaaaagcctcgatatacagatggttaaatagagtagatttaagcccaacaaaagtagagcgtcgccatagg";
-                //String rightSeqStr = "cccaaatttcaatctgtgtgtcgttgatttaagcttaatgctacggggtctgtctccaactccctcagcttctcgcaatggcaaggcaaataatgtttctcttgctgagtagatgttcaggaggacggatcgaaagtctacaaaacagattcttgaccaagccatctacttagaaaaacttctgcgttttggcgatcgcatcttttaagcgagatgcgatttttttgtccattagtttgtattttaatactcttttgttgtttgatttcgtccaagcttttcttggtatgtgggatcttccgtgcccaaaattttatcccagaaagtgaaatatagtcatttcaattaacgatgagagaatttaatgtaaaattatggagtgtacaaaatgaacaggtttaaacaatggcttacagtttagatttaaggcaaagggtagtagcttatatagaagctggaggaaaaataactgaggcttccaagatatataaaataggaaaagcctcgatatacagatggttaaatagagtagatttaagcccaacaaaagtagagcgtcgccatagg";
-                //rightF.addSequence(doc.createSequence("right_seq", version, rightSeqStr, Sequence.IUPAC_DNA));
-                
-                                
-                //Component rightFC = plasmid.createComponent(targetGene+"_right_flank_c", AccessType.PUBLIC, rightF.getIdentity());
-                //Component rightFC = cass.createComponent(targetGene+"_right_flank_c", AccessType.PUBLIC, rightF.getIdentity());
-                
-                //plasmid.createComponent("cassete", AccessType.PUBLIC, cass.getIdentity());
-                plasmid.createComponent("cassete", AccessType.PUBLIC, new URI("https://synbiohub.org/user/tzielins/a_sbol_testing/cassete/1.0.0"));
-                plasmid.setName("remote_"+plasmidName);
-                plasmid.setDescription("WIth remote cassete");
-                
-                //sa = plasmid.createSequenceAnnotation("right_flank_a", "right_flank_l", 5491,6058);
-                //sa = cass.createSequenceAnnotation("right_flank_a", "right_flank_l", 5491,6058);
-                //sa.setComponent(rightFC.getIdentity());
-                //sa.setName("rf_a_name");
-                
-                /*
+        String version = "1.0.0";
+
+        String targetGene = "sll0199A";
+        String plasmidName = targetGene + "_codA";
+
+        ComponentDefinition plasmid = doc.createComponentDefinition(plasmidName, version, ComponentDefinition.DNA_REGION);
+
+        String SeqO = "http://identifiers.org/so/";
+        //engineered plasmid
+        plasmid.addRole(new URI(SeqO + "SO:0000637"));
+
+        String fullSeqStr = "aaagggcctcgtgatacgcctatttttataggttaatgtcatgataataatggtttcttagacgtcaggtggcacttttcggggaaatgtgcgcggaacccctatttgtttatttttctaaatacattcaaatatgtatccgctcatgagacaataaccctgataaatgcttcaataatattgaaaaaggaagagtatgagtattcaacatttccgtgtcgcccttattcccttttttgcggcattttgccttcctgtttttgctcacccagaaacgctggtgaaagtaaaagatgctgaagatcagttgggtgcacgagtgggttacatcgaactggatctcaacagcggtaagatccttgagagttttcgccccgaagaacgttttccaatgatgagcacttttaaagttctgctatgtggcgcggtattatcccgtattgacgccgggcaagagcaactcggtcgccgcatacactattctcagaatgacttggttgagtactcaccagtcacagaaaagcatcttacggatggcatgacagtaagagaattatgcagtgctgccataaccatgagtgataacactgcggccaacttacttctgacaacgatcggaggaccgaaggagctaaccgcttttttgcacaacatgggggatcatgtaactcgccttgatcgttgggaaccggagctgaatgaagccataccaaacgacgagcgtgacaccacgatgcctgtagcaatggcaacaacgttgcgcaaactattaactggcgaactacttactctagcttcccggcaacaattaatagactggatggaggcggataaagttgcaggaccacttctgcgctcggcccttccggctggctggtttattgctgataaatctggagccggtgagcgtggttctcgcggtatcattgcagcactggggccagatggtaagccctcccgtatcgtagttatctacacgacggggagtcaggcaactatggatgaacgaaatagacagatcgctgagataggtgcctcactgattaagcattggtaactgtcagaccaagtttactcatatatactttagattgatttaaaacttcatttttaatttaaaaggatctaggtgaagatcctttttgataatctcatgaccaaaatcccttaacgtgagttttcgttccactgagcgtcagaccccgtagaaaagatcaaaggatcttcttgagatcctttttttctgcgcgtaatctgctgcttgcaaacaaaaaaaccaccgctaccagcggtggtttgtttgccggatcaagagctaccaactctttttccgaaggtaactggcttcagcagagcgcagataccaaatactgttcttctagtgtagccgtagttaggccaccacttcaagaactctgtagcaccgcctacatacctcgctctgctaatcctgttaccagtggctgctgccagtggcgataagtcgtgtcttaccgggttggactcaagacgatagttaccggataaggcgcagcggtcgggctgaacggggggttcgtgcacacagcccagcttggagcgaacgacctacaccgaactgagatacctacagcgtgagctatgagaaagcgccacgcttcccgaagggagaaaggcggacaggtatccggtaagcggcagggtcggaacaggagagcgcacgagggagcttccagggggaaacgcctggtatctttatagtcctgtcgggtttcgccacctctgacttgagcgtcgatttttgtgatgctcgtcaggggggcggagcctatggaaaaacgccagcaacgcggcctttttacggttcctggccttttgctggccttttgctcacatgttctttcctgcgttatcccctgattctgtggataaccgtattaccgcctttgagtgagctgataccgctcgccgcagccgaacgaccgagcgcagcgagtcagtgagcgaggaagcggatgagcgcccaatacgcaaaccgcctctccccgcgcgttggccgattcattaatgcagctggcacgacaggtttcggagcaaggcaaaaccaccgttatcagcagaacgacggcgggaaaaaatgattaaacgaaaaaatttgcaaggattcatagcggttgcccaatctaactcagggagcgacttcagcccacaaaaaacaccactgggcctactgggctattcccattatcatctacattgaagggatagcaagctaatttttatgacggcgatcgccaaaaacaaagaaaattcagcaattaccgtgggtagcaaaaaatccccatctaaagttcagtaaatatagctagaacaaccaagcattttcggcaaagtactattcagatagaacgagaaatgagcttgttctatccgcccggggctgaggctgtataatctacgacgggctgtcaaacattgtgataccatgggcagaagaaaggaaaaacgtccctgatcgcctttttgggcacggagtagggcgttaccccggcccgttcaaccacaagtccctatagatacaatcgccaagaagtatgagaagagcacggtagccttnnnnnnnnnnnnnnnnnntgcccagtcttctgcctaaggcaggtgccgcggtgcgggtgccagggcgtgcccccgggctccccgggcgcgtactccactttacagctagctcagtcctaggtattatgctagctattgtgagcggataacaatttcacacatactagagaaagaggagaaatactaaatgtctaacaacgcgctgcaaaccatcatcaatgcacgcctgcctggagaggaagggttgtggcagattcacttacaggacggcaaaatctccgcgatcgacgcacaatctggggttatgccgatcaccgaaaactctttggatgccgaacaagggttagtcattcccccattcgttgaaccacatattcacctggatactactcagacagccggtcagcccaattggaaccagtccggtacgctgttcgaaggtatcgaacgatgggcggagcgaaaagctctactcacgcatgacgatgtcaagcaacgggcctggcagaccctgaagtggcagatcgccaacggaatacagcacgtacgcactcacgtggatgtttccgatgccactttgacggcattgaaggcaatgctcgaagttaagcaggaagtagccccgtggattgacttgcaaatcgctgccttccctcaggaaggcatcctaagttatccgaatggagaagcgctcctggaggaggcattgcggttaggagcagacgtggtgggagcgattccccatttcgagtttacccgcgagtacggtgttgaatctctgcataaaacatttgctttagctcagaagtatgaccgtctgatcgacgtacactgcgacgagatcgatgacgaacagagtcgcttcgtggagacggtggctgcgctggcgcatcacgaaggcatgggtgcacgtgtaactgcaagccatacgacggctatgcacagctataatggggcatatacatctcgtttgttccgattactaaaaatgagcggaatcaactttgttgccaatccattggtcaacattcatctacaaggacgcttcgacacctacccgaaacggcgaggaatcacacgagttaaggaaatgctagagtctggtatcaatgtgtgtttcgggcatgatgacgtgtgtggtccctggtaccctctaggaacagccaacatgctgcaagttctccacatgggtctacacgtgtgtcaactcatggggtatggacaaattaacgatggactcaatctaattacacaccattccgcccgaacactgaacctccaggattacgggatcgcggcgggaaattctgccaacctcatcattctgcccgcggaaaacgggttcgacgctctacgccgtcaagtgccagttcggtattctgttcgtgggggtaaggtaattgcaagtacccaaccggctcagaccacggtctatttagagcaaccggaagctatcgactacaaacgatgagcttcaaataaaacgaaaggctcagtcgaaagactgggcctttcgttttatctgttgtttgtcggtgaacgctctctactagagtcacactggctcaccttcgggtgggcctttctgcgcgctctgaggtctgcctcgtgaagaaggtgttgctgactcataccaggcctgaatcgccccatcatccagccagaaagtgagggagccacggttgatgagagctttgttgtaggtggaccagttggtgattttgaacttttgctttgccacggaacggtctgcgttgtcgggaagatgcgtgatctgatccttcaactcagcaaaagttcgatttattcaacaaagccgccgtcccgtcaagtcagcgtaatgctctgccagtgttacaaccaattaaccaattctgattagaaaaactcatcgagcatcaaatgaaactgcaatttattcatatcaggattatcaataccatatttttgaaaaagccgtttctgtaatgaaggagaaaactcaccgaggcagttccataggatggcaagatcctggtatcggtctgcgattccgactcgtccaacatcaatacaacctattaatttcccctcgtcaaaaataaggttatcaagtgagaaatcaccatgagtgacgactgaatccggtgagaatggcaaaagcttatgcatttctttccagacttgttcaacaggccagccattacgctcgtcatcaaaatcactcgcatcaaccaaaccgttattcattcgtgattgcgcctgagcgagacgaaatacgcgatcgctgttaaaaggacaattacaaacaggaatcgaatgcaaccggcgcaggaacactgccagcgcatcaacaatattttcacctgaatcaggatattcttctaatacctggaatgctgttttcccggggatcgcagtggtgagtaaccatgcatcatcaggagtacggataaaatgcttgatggtcggaagaggcataaattccgtcagccagtttagtctgaccatctcatctgtaacatcattggcaacgctacctttgccatgtttcagaaacaactctggcgcatcgggcttcccatacaatcgatagattgtcgcacctgattgcccgacattatcgcgagcccatttatacccatataaatcagcatccatgttggaatttaatcgcggcctcgagcaagacgtttcccgttgaatatggctcataacaccccttgtattactgtttatgtaagcagacagttttattgttcatgatgatatatttttatcttgtgcaatgtaacatcagagattttgagacacaacgtggctttccgcggtgcgggtgccagggcgtgcccttgggctccccgggcgcgtactccaccacctgccattgggagaagacttgggagctcttcataatcagccagctcaatctgtgtgtcgttgatttaagcttaatgctacggggtctgtctccaactccctcagcttctcgcaatggcaaggcaaataatgtttctcttgctgagtagatgttcaggaggacggatcgaaagtctacaaaacagattcttgaccaagccatctacttagaaaaacttctgcgttttggcgatcgcatcttttaagcgagatgcgatttttttgtccattagtttgtattttaatactcttttgttgtttgatttcgtccaagcttttcttggtatgtgggatcttccgtgcccaaaattttatcccagaaagtgaaatatagtcatttcaattaacgatgagagaatttaatgtaaaattatggagtgtacaaaatgaacaggtttaaacaatggcttacagtttagatttaaggcaaagggtagtagcttatatagaagctggaggaaaaataactgaggcttccaagatatataaaataggaaaagcctcgatatacagatggttaaatagagtagatttaagcccaacaaaagtagagcgtcgccataggcgctgcttacagacaagctgtgaccgtctccgggagctgcatgtgtcagaggttttcaccgtcatcaccgaaacgcgcgagacg";
+        Sequence fullSeq = doc.createSequence(plasmidName + "_seq", version, fullSeqStr, Sequence.IUPAC_DNA);
+
+        plasmid.addSequence(fullSeq);
+
+        ComponentDefinition leftF = doc.createComponentDefinition("left_flank_d", version, ComponentDefinition.DNA_REGION);
+        leftF.addRole(SequenceOntology.SEQUENCE_FEATURE);
+
+        Component leftFC = plasmid.createComponent(targetGene + "_left_flank_c", AccessType.PUBLIC, leftF.getIdentity());
+
+        SequenceAnnotation sa = plasmid.createSequenceAnnotation("left_flank_a", "left_flank_l", 2074, 2573);
+        sa.setComponent(leftFC.getIdentity());
+        sa.setName("lf_a_name");
+
+        sa = plasmid.createSequenceAnnotation("ampr_a", "ampr_l", 92, 196);
+        sa.addRole(SequenceOntology.PROMOTER);
+        sa.setName("AmpR prom");
+
+        //ComponentDefinition cass = doc.createComponentDefinition("cassete", version, ComponentDefinition.DNA_REGION);
+        //cass.addRole(SequenceOntology.ENGINEERED_REGION);
+        //ComponentDefinition rightF = doc.createComponentDefinition("rigth_flank_d", version, ComponentDefinition.DNA_REGION);
+        //rightF.addRole(SequenceOntology.SEQUENCE_FEATURE);
+        String rightSeqStr = "tcagccagctcaatctgtgtgtcgttgatttaagcttaatgctacggggtctgtctccaactccctcagcttctcgcaatggcaaggcaaataatgtttctcttgctgagtagatgttcaggaggacggatcgaaagtctacaaaacagattcttgaccaagccatctacttagaaaaacttctgcgttttggcgatcgcatcttttaagcgagatgcgatttttttgtccattagtttgtattttaatactcttttgttgtttgatttcgtccaagcttttcttggtatgtgggatcttccgtgcccaaaattttatcccagaaagtgaaatatagtcatttcaattaacgatgagagaatttaatgtaaaattatggagtgtacaaaatgaacaggtttaaacaatggcttacagtttagatttaaggcaaagggtagtagcttatatagaagctggaggaaaaataactgaggcttccaagatatataaaataggaaaagcctcgatatacagatggttaaatagagtagatttaagcccaacaaaagtagagcgtcgccatagg";
+        //String rightSeqStr = "cccaaatttcaatctgtgtgtcgttgatttaagcttaatgctacggggtctgtctccaactccctcagcttctcgcaatggcaaggcaaataatgtttctcttgctgagtagatgttcaggaggacggatcgaaagtctacaaaacagattcttgaccaagccatctacttagaaaaacttctgcgttttggcgatcgcatcttttaagcgagatgcgatttttttgtccattagtttgtattttaatactcttttgttgtttgatttcgtccaagcttttcttggtatgtgggatcttccgtgcccaaaattttatcccagaaagtgaaatatagtcatttcaattaacgatgagagaatttaatgtaaaattatggagtgtacaaaatgaacaggtttaaacaatggcttacagtttagatttaaggcaaagggtagtagcttatatagaagctggaggaaaaataactgaggcttccaagatatataaaataggaaaagcctcgatatacagatggttaaatagagtagatttaagcccaacaaaagtagagcgtcgccatagg";
+        //rightF.addSequence(doc.createSequence("right_seq", version, rightSeqStr, Sequence.IUPAC_DNA));
+
+        //Component rightFC = plasmid.createComponent(targetGene+"_right_flank_c", AccessType.PUBLIC, rightF.getIdentity());
+        //Component rightFC = cass.createComponent(targetGene+"_right_flank_c", AccessType.PUBLIC, rightF.getIdentity());
+        //plasmid.createComponent("cassete", AccessType.PUBLIC, cass.getIdentity());
+        plasmid.createComponent("cassete", AccessType.PUBLIC, new URI("https://synbiohub.org/user/tzielins/a_sbol_testing/cassete/1.0.0"));
+        plasmid.setName("remote_" + plasmidName);
+        plasmid.setDescription("WIth remote cassete");
+
+        //sa = plasmid.createSequenceAnnotation("right_flank_a", "right_flank_l", 5491,6058);
+        //sa = cass.createSequenceAnnotation("right_flank_a", "right_flank_l", 5491,6058);
+        //sa.setComponent(rightFC.getIdentity());
+        //sa.setName("rf_a_name");
+        /*
 		// Create ComponentDefinition for cas9_generic protein
 		doc.createComponentDefinition("cas9_generic", version, ComponentDefinition.PROTEIN);
 		
@@ -370,24 +363,23 @@ public class PlasmidModel {
 		Template_Module.createMapsTo("EYFP_map", RefinementType.USELOCAL, "EYFP", "target");
 		Template_Module.createMapsTo("EYFP_gene_map", RefinementType.USELOCAL, "EYFP_gene", "target_gene");
 		
-                */
-                
-                SBOLValidate.validateSBOL(doc, true, true, true);
-		if (SBOLValidate.getNumErrors() > 0) {
-			for (String error : SBOLValidate.getErrors()) {
-				System.out.println(error);
-			}
-			//return;
-		}
-                
-		try {
-			SBOLWriter.write(doc, "E:/Temp/"+plasmidName+".xml");
-                } catch (IOException e) {
-			e.printStackTrace();
-                        throw e;
-		}
-		
-                /*
+         */
+        SBOLValidate.validateSBOL(doc, true, true, true);
+        if (SBOLValidate.getNumErrors() > 0) {
+            for (String error : SBOLValidate.getErrors()) {
+                System.out.println(error);
+            }
+            //return;
+        }
+
+        try {
+            SBOLWriter.write(doc, TMP_PATH + plasmidName + ".xml");
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+        /*
 		// END of Repression Model construction. Code below uses trivial manipulations to show other major methods in the library.
 		
 		ComponentDefinition cas9_generic1 = doc.getComponentDefinition("cas9_generic", version);
@@ -467,11 +459,8 @@ public class PlasmidModel {
 		}
 		
 		SBOLWriter.write(doc,(System.out));
-		SBOLWriter.write(doc, "E:/Temp/RepressionModel2.rdf");
-		*/		
-	}
-	
-
-
+		SBOLWriter.write(doc, TMP_PATH+"RepressionModel2.rdf");
+         */
+    }
 
 }
