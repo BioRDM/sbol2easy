@@ -6,14 +6,13 @@
 package ed.biordm.sbol.toolkit.transform;
 
 import java.net.URISyntaxException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.sbolstandard.core2.AccessType;
+import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.Location;
-import org.sbolstandard.core2.OrientationType;
 import org.sbolstandard.core2.Range;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLValidationException;
@@ -275,7 +274,8 @@ public class TemplateTransformer {
                                 startIdx + seqAnnStart - 1,
                                 startIdx + +seqAnnEnd - 1);
 
-                newSA.setRoles(seqAnn.getRoles());
+                // Copy attributes from old SA to new SA
+                copySequenceAnnotationAttributes(parent, seqAnn, newSA);
 
                 if (newSA.getComponent() == null) {
                     // Throws org.sbolstandard.core2.SBOLValidationException: sbol-10522:  Strong Validation Error: 
@@ -285,6 +285,66 @@ public class TemplateTransformer {
                 }
             }
         }
+    }
+
+    /**
+     * Does not appear to be a 'copy' or 'deepCopy' method in SequenceAnnotation
+     * class, so doing this manually.
+     *
+     * See https://www.javadoc.io/static/org.sbolstandard/libSBOLj/2.4.0/org/sbolstandard/core2/SequenceAnnotation.html
+     *
+     * @param parent
+     * @param origSeqAnn
+     * @param newSeqAnn
+     * @return
+     * @throws SBOLValidationException
+     */
+    protected SequenceAnnotation copySequenceAnnotationAttributes(ComponentDefinition parent,
+            SequenceAnnotation origSeqAnn, SequenceAnnotation newSeqAnn) throws SBOLValidationException {
+        newSeqAnn.setRoles(origSeqAnn.getRoles());
+
+        newSeqAnn.setDescription(origSeqAnn.getDescription());
+
+        Component origCmp = origSeqAnn.getComponent();
+
+        if (origCmp != null) {
+            if (origCmp.getIdentity() == null) {
+                if (origCmp.getDisplayId() == null) {
+                    System.out.println("Original Component Display ID is null!");
+                } else {
+                    newSeqAnn.setComponent(origCmp.getDisplayId());
+                }
+            } else {
+                /*
+                "The Component referenced by the component property of a
+                SequenceAnnotation MUST be contained by the ComponentDefinition that contains the SequenceAnnotation."
+                Therefore, need to add this component to the parent component definition.
+                */
+                Component parentChild = parent.getComponent(origCmp.getIdentity());
+
+                if (parentChild == null) {
+                    parentChild = parent.createComponent(origCmp.getDisplayId(), AccessType.PUBLIC, origCmp.getDefinitionURI());
+                }
+                // newSeqAnn.setComponent(origSeqAnn.getComponent().getIdentity());
+                newSeqAnn.setComponent(parentChild.getIdentity());
+            }
+        }
+
+        newSeqAnn.setName(origSeqAnn.getName());
+
+        newSeqAnn.setWasDerivedFroms(origSeqAnn.getWasDerivedFroms());
+
+        // TODO: should do this recursively for nested annotations?
+        for (Annotation origAnno : origSeqAnn.getAnnotations()) {
+            // TODO: should retrieve type of literal value, not assume it's string?
+            newSeqAnn.createAnnotation(origAnno.getQName(), origAnno.getStringValue());
+        }
+
+        for (Location origLoc : origSeqAnn.getSortedLocations()) {
+            //newSeqAnn.addGenericLocation(origLoc.getDisplayId());
+        }
+
+        return newSeqAnn;
     }
 
     /**
