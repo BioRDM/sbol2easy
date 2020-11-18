@@ -384,7 +384,13 @@ public class TemplateTransformer {
                 start += seqLength+1;
                 saCount += 1;
 
-                newSA.setComponent(cmp.getDisplayId());
+                if (newSA.getComponent() == null) {
+                    newSA.setComponent(cmp.getDisplayId());
+                } else {
+                    if (!newSA.getComponent().equals(cmp)) {
+                       newSA.setComponent(cmp.getDisplayId());
+                    }
+                }
             }
         }
     }
