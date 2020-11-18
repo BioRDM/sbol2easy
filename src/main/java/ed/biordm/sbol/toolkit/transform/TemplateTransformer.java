@@ -375,20 +375,33 @@ public class TemplateTransformer {
 
         for (Component cmp : cmpSeqMap.keySet()) {
             List<Sequence> seqs = cmpSeqMap.get(cmp);
+            boolean seqAnnCmpExists = false;
 
             for (Sequence seq : seqs) {
-                int seqLength = seq.getElements().length();
-                String newSADispId = "ann".concat(String.valueOf(saCount));
-                SequenceAnnotation newSA = parent.createSequenceAnnotation(newSADispId, newSADispId, start, start+seqLength);
+                // Cycle through sequence annotations to check there isn't one already for this component
+                for (SequenceAnnotation seqAnn : parent.getSequenceAnnotations()) {
+                    Component existingCmp = seqAnn.getComponent();
 
-                start += seqLength+1;
-                saCount += 1;
+                    if (existingCmp != null && existingCmp.getIdentity().equals(cmp.getIdentity())) {
+                        seqAnnCmpExists = true;
+                        break;
+                    }
+                }
 
-                if (newSA.getComponent() == null) {
-                    newSA.setComponent(cmp.getDisplayId());
-                } else {
-                    if (!newSA.getComponent().equals(cmp)) {
-                       newSA.setComponent(cmp.getDisplayId());
+                if (seqAnnCmpExists == false) {
+                    int seqLength = seq.getElements().length();
+                    String newSADispId = "ann".concat(String.valueOf(saCount));
+                    SequenceAnnotation newSA = parent.createSequenceAnnotation(newSADispId, newSADispId, start, start+seqLength);
+
+                    start += seqLength+1;
+                    saCount += 1;
+
+                    if (newSA.getComponent() == null) {
+                        newSA.setComponent(cmp.getIdentity());
+                    } else {
+                        if (!newSA.getComponent().equals(cmp)) {
+                           newSA.setComponent(cmp.getIdentity());
+                        }
                     }
                 }
             }

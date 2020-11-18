@@ -5,17 +5,18 @@
  */
 package ed.biordm.sbol.toolkit.transform;
 
-import static ed.biordm.sbol.toolkit.transform.TemplateTransformerTest.SEQUENCE_ONTO_PREF;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
-import org.sbolstandard.core2.AccessType;
 import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.SBOLConversionException;
@@ -223,8 +224,35 @@ public class TemplateTransformerTestFull {
         // Get original sll00199 component definition for comparison
         assertNotNull(doc);
 
+        // Copy Template
+        ComponentDefinition sll00199Plasmid = doc.getComponentDefinition("sll00199_codA_Km", "1.0.0");
+        assertNotNull(sll00199Plasmid);
+
         ComponentDefinition sll00199PlasmidFlat = doc.getComponentDefinition("sll00199_codA_Km_flat", "1.0.0");
         assertNotNull(sll00199PlasmidFlat);
+
+        Map<Component, List<Sequence>> cmpSeqMap = new HashMap<>();
+        //cmpSeqMap = templateTransformer.rebuildSequences(sll00199Plasmid, sll00199Plasmid, doc, cmpSeqMap);
+        templateTransformer.addCustomSequenceAnnotations(sll00199Plasmid, cmpSeqMap);
+        
+        Set<SequenceAnnotation> sll00199PlasmidFlatSAs = sll00199PlasmidFlat.getSequenceAnnotations();
+        Set<SequenceAnnotation> npFlatSAs = sll00199Plasmid.getSequenceAnnotations();
+
+        // will be empty because no sub-components have been added to parent yet
+        assertEquals(0, npFlatSAs.size());
+
+        cmpSeqMap = templateTransformer.rebuildSequences(sll00199Plasmid, sll00199Plasmid, doc, cmpSeqMap);
+        templateTransformer.addCustomSequenceAnnotations(sll00199Plasmid, cmpSeqMap);
+        npFlatSAs = sll00199Plasmid.getSequenceAnnotations();
+
+        assertEquals(33, npFlatSAs.size());
+
+        // Get sequence annos and verify they match in new component
+        for (SequenceAnnotation seqAnn : npFlatSAs) {
+            // How to verify these objets are equivalent in each plasmid?
+            System.out.println(seqAnn.getIdentity());
+            System.out.println(seqAnn.getComponentIdentity());
+        }
     }
 
     /*@Test
