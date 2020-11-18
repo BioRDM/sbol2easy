@@ -42,6 +42,9 @@ public class ExcelConverterTest {
     String templateFilename = "cyano_template.xml";
     static String SEQUENCE_ONTO_PREF = "http://identifiers.org/so/";
 
+    // private static final String TMP_PATH = "E:/Temp/";
+    private static final String TMP_PATH = "D:/Temp/sbol/";
+
     @Before
     public void generateSBOLDocument() throws IOException, SBOLValidationException, SBOLConversionException {
         File file = new File(getClass().getResource(templateFilename).getFile());
@@ -65,7 +68,7 @@ public class ExcelConverterTest {
         cyanoTemplate = templateDoc.getComponentDefinition("cyano_codA_Km", templateVersion);
     }
 
-    @Test
+    //@Test
     public void testReadMultiFeatures() throws SBOLValidationException, Exception, IOException {
         assertNotNull(cyanoTemplate);
 
@@ -83,7 +86,7 @@ public class ExcelConverterTest {
             String leftFlankSequence = "";
             String rightFlankSequence = "";
 
-            if(value.size() > 0) {
+            if (value.size() > 0) {
                 leftFlankSequence = value.get(0);
             }
 
@@ -96,10 +99,10 @@ public class ExcelConverterTest {
 
             List<String> rightFlankVal = rightSheet.get(rightFlankName);
 
-            if(value.size() > 0) {
+            if (value.size() > 0) {
                 rightFlankSequence = value.get(0);
             }
-            
+
             //String lfGenericId = "left_flank";
             //String rfGenericId = "right_flank";
             String lfGenericId = "left";
@@ -136,7 +139,7 @@ public class ExcelConverterTest {
                         instantiateFromTemplate(cyanoTemplate, newPlasmidName, version, description, newDoc);
                 newCyanoCD.addType(SequenceOntology.CIRCULAR);
                 //engineered plasmid
-                newCyanoCD.addRole(new URI(SEQUENCE_ONTO_PREF+"SO:0000637"));
+                newCyanoCD.addRole(new URI(SEQUENCE_ONTO_PREF + "SO:0000637"));
 
                 newLeftFlank = templateTransformer.concretizePart(newCyanoCD, lfGenericId, leftFlankName, leftFlankSequence, newDoc);
                 newRightFlank = templateTransformer.concretizePart(newCyanoCD, rfGenericId, rightFlankName, rightFlankSequence, newDoc);
@@ -149,23 +152,11 @@ public class ExcelConverterTest {
                 for (Sequence seq : newRightFlank.getSequences()) {
                     newDoc.createSequence(rightFlankName.concat("_seq"), seq.getElements(), Sequence.IUPAC_DNA);
                 }*/
-
                 // Finally, flatten the new sequences into the parent plasmid definition
                 newCyanoCDFlat = templateTransformer.flattenSequences(newCyanoCD, newPlasmidName.concat("_flat"), newDoc);
 
                 // Add arbitrary(?) SequenceAnnotations. What are the rules for these annotations?
                 Component seqCmp = newCyanoCDFlat.getComponent("ampR");
-                SequenceAnnotation an = newCyanoCDFlat.createSequenceAnnotation("ann1", "ann1", 1, 2073);
-                an.setComponent(seqCmp.getIdentity());
-
-                seqCmp = newCyanoCDFlat.getComponent(leftFlankName);
-                an = newCyanoCDFlat.createSequenceAnnotation("ann2", "ann2", 2074, 2074+leftFlankSequence.length());
-
-                if (seqCmp != null) {
-                    if (seqCmp.getIdentity() != null) {
-                        an.setComponent(seqCmp.getIdentity());
-                    }
-                }
             } catch (SBOLValidationException ex) {
                 ex.printStackTrace();
             } catch (URISyntaxException ex) {
@@ -186,7 +177,7 @@ public class ExcelConverterTest {
             }
 
             try {
-                SBOLWriter.write(newDoc, "E:/Temp/sbol/"+fName+".xml");
+                SBOLWriter.write(newDoc, TMP_PATH + fName + ".xml");
             } catch (IOException ex) {
                 ex.printStackTrace();
             } catch (SBOLConversionException ex) {
@@ -209,7 +200,7 @@ public class ExcelConverterTest {
         doc.setDefaultURIprefix("http://bio.ed.ac.uk/a_mccormick/cyano_source/");
         doc.setComplete(true);
         doc.setCreateDefaults(true);
-        
+
         return doc;
     }
 
@@ -218,7 +209,7 @@ public class ExcelConverterTest {
         String filePath = templateFile.getParentFile().getAbsolutePath();
         File outputFile = new File(filePath.concat("/").concat(newFileName).concat(".xml"));
 
-        if(!outputFile.exists()) {
+        if (!outputFile.exists()) {
             Files.copy(templateFile.toPath(), outputFile.toPath());
         }
 
@@ -249,8 +240,8 @@ public class ExcelConverterTest {
         } catch (SBOLValidationException ex) {
             Logger.getLogger(ExcelConverterTest.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         return doc;
     }
-    
+
 }

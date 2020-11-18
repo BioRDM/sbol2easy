@@ -6,14 +6,17 @@
 package ed.biordm.sbol.toolkit.transform;
 
 import java.net.URISyntaxException;
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.sbolstandard.core2.AccessType;
+import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.Location;
-import org.sbolstandard.core2.OrientationType;
 import org.sbolstandard.core2.Range;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLValidationException;
@@ -169,7 +172,9 @@ public class TemplateTransformer {
         newCmpDef.setName(cleanName);
         newCmpDef.addWasDerivedFrom(template.getIdentity());
 
-        rebuildSequences(newCmpDef, newCmpDef, doc);
+        Map<Component, List<Sequence>> cmpSeqMap = new HashMap<>();
+        cmpSeqMap = rebuildSequences(newCmpDef, newCmpDef, doc, cmpSeqMap);
+        addCustomSequenceAnnotations(newCmpDef, cmpSeqMap);
 
         return newCmpDef;
     }
@@ -275,13 +280,129 @@ public class TemplateTransformer {
                                 startIdx + seqAnnStart - 1,
                                 startIdx + +seqAnnEnd - 1);
 
-                newSA.setRoles(seqAnn.getRoles());
+                // Copy attributes from old SA to new SA
+                copySequenceAnnotationAttributes(parent, seqAnn, newSA);
 
                 if (newSA.getComponent() == null) {
                     // Throws org.sbolstandard.core2.SBOLValidationException: sbol-10522:  Strong Validation Error: 
                     // The sequenceAnnotations property of a ComponentDefinition MUST NOT contain two or more SequenceAnnotation objects that refer to the same Component.
                     // A SequenceAnnotation MUST NOT include both a component property and a roles property. 
                     //newSA.setComponent(c.getIdentity());
+                }
+            }
+        }
+    }
+
+    /**
+     * Does not appear to be a 'copy' or 'deepCopy' method in SequenceAnnotation
+     * class, so doing this manually.
+     *
+     * See https://www.javadoc.io/static/org.sbolstandard/libSBOLj/2.4.0/org/sbolstandard/core2/SequenceAnnotation.html
+     *
+     * @param parent
+     * @param origSeqAnn
+     * @param newSeqAnn
+     * @return
+     * @throws SBOLValidationException
+     */
+    protected SequenceAnnotation copySequenceAnnotationAttributes(ComponentDefinition parent,
+            SequenceAnnotation origSeqAnn, SequenceAnnotation newSeqAnn) throws SBOLValidationException {
+        newSeqAnn.setRoles(origSeqAnn.getRoles());
+
+        newSeqAnn.setDescription(origSeqAnn.getDescription());
+
+        Component origCmp = origSeqAnn.getComponent();
+
+        if (origCmp != null) {
+            if (origCmp.getIdentity() == null) {
+                if (origCmp.getDisplayId() == null) {
+                    System.out.println("Original Component Display ID is null!");
+                } else {
+                    newSeqAnn.setComponent(origCmp.getDisplayId());
+                }
+            } else {
+                /*
+                "The Component referenced by the component property of a
+                SequenceAnnotation MUST be contained by the ComponentDefinition that contains the SequenceAnnotation."
+                Therefore, need to add this component to the parent component definition.
+                */
+                Component parentChild = parent.getComponent(origCmp.getDisplayId());
+
+                if (parentChild == null) {
+                    parentChild = parent.createComponent(origCmp.getDisplayId(), AccessType.PUBLIC, origCmp.getDefinitionURI());
+                }
+                // newSeqAnn.setComponent(origSeqAnn.getComponent().getIdentity());
+                newSeqAnn.setComponent(parentChild.getIdentity());
+            }
+        }
+
+        newSeqAnn.setName(origSeqAnn.getName());
+
+        newSeqAnn.setWasDerivedFroms(origSeqAnn.getWasDerivedFroms());
+
+        // TODO: should do this recursively for nested annotations?
+        for (Annotation origAnno : origSeqAnn.getAnnotations()) {
+            // TODO: should retrieve type of literal value, not assume it's string?
+            newSeqAnn.createAnnotation(origAnno.getQName(), origAnno.getStringValue());
+        }
+
+        for (Location origLoc : origSeqAnn.getSortedLocations()) {
+            //newSeqAnn.addGenericLocation(origLoc.getDisplayId());
+        }
+
+        return newSeqAnn;
+    }
+
+    /**
+     * For the flattened plasmid, this method creates the sequence annotations
+     * that reflect the sequences attached to the original child sub-components
+     * 
+     * @param cmpSeqMap
+     * @throws SBOLValidationException 
+     */
+    protected void addCustomSequenceAnnotations(ComponentDefinition parent,
+            Map<Component, List<Sequence>> cmpSeqMap) throws SBOLValidationException {
+        /*
+        // Finally the original child components (backbone, left, insert) after
+        // flattening should get sequence annotations which locates them in
+        // correct regions (1-length_bacbone) (lenght-backbone+1, lengh_left)
+        // as after flattening we assume they follow each other and we know
+        // their exact locations
+        */
+
+        int saCount = 1;
+        int start = 1;
+
+        for (Component cmp : cmpSeqMap.keySet()) {
+            List<Sequence> seqs = cmpSeqMap.get(cmp);
+            boolean seqAnnCmpExists = false;
+
+            for (Sequence seq : seqs) {
+                // Cycle through sequence annotations to check there isn't one already for this component
+                for (SequenceAnnotation seqAnn : parent.getSequenceAnnotations()) {
+                    Component existingCmp = seqAnn.getComponent();
+
+                    if (existingCmp != null && existingCmp.getIdentity().equals(cmp.getIdentity())) {
+                        seqAnnCmpExists = true;
+                        break;
+                    }
+                }
+
+                if (seqAnnCmpExists == false) {
+                    int seqLength = seq.getElements().length();
+                    String newSADispId = "ann".concat(String.valueOf(saCount));
+                    SequenceAnnotation newSA = parent.createSequenceAnnotation(newSADispId, newSADispId, start, start+seqLength);
+
+                    start += seqLength+1;
+                    saCount += 1;
+
+                    if (newSA.getComponent() == null) {
+                        newSA.setComponent(cmp.getIdentity());
+                    } else {
+                        if (!newSA.getComponent().equals(cmp)) {
+                           newSA.setComponent(cmp.getIdentity());
+                        }
+                    }
                 }
             }
         }
@@ -300,17 +421,21 @@ public class TemplateTransformer {
      * recursively collect from sub-components
      * @throws SBOLValidationException
      */
-    protected void rebuildSequences(ComponentDefinition parent,
-            ComponentDefinition subCmp, SBOLDocument doc) throws SBOLValidationException {
+    protected Map<Component, List<Sequence>> rebuildSequences(ComponentDefinition parent,
+            ComponentDefinition subCmp, SBOLDocument doc,
+            Map<Component, List<Sequence>> cmpSeqMap) throws SBOLValidationException {
         int start = 1;
         int length;
         int count = 0;
         String newSeq = "";
         ComponentDefinition curr;
+
+        List<String> customSAIds = Arrays.asList("left", "backbone", "insert", "right");
+
         for (org.sbolstandard.core2.Component c : subCmp.getSortedComponents()) {
             curr = c.getDefinition();
             if (!curr.getComponents().isEmpty()) {
-                rebuildSequences(parent, curr, doc);
+                cmpSeqMap = rebuildSequences(parent, curr, doc, cmpSeqMap);
             }
             length = 0;
 
@@ -320,6 +445,12 @@ public class TemplateTransformer {
             for (Sequence s : curr.getSequences()) {
                 newSeq = newSeq.concat(s.getElements());
                 length += s.getElements().length();
+
+                for(String customSAId : customSAIds) {
+                    if(curr.getDisplayId().contains(customSAId)) {
+                        cmpSeqMap.computeIfAbsent(c, k -> new LinkedList<>()).add(s);
+                    }
+                }
             }
 
             start += length;
@@ -334,6 +465,8 @@ public class TemplateTransformer {
                 parent.getSequences().iterator().next().setElements(newSeq);
             }
         }
+
+        return cmpSeqMap;
     }
 
     /**

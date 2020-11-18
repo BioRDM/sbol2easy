@@ -20,53 +20,67 @@ import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLReader;
+import org.sbolstandard.core2.SBOLValidate;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.SBOLWriter;
 import org.sbolstandard.core2.Sequence;
 import org.sbolstandard.core2.SequenceAnnotation;
 import org.sbolstandard.core2.SequenceOntology;
+
 /**
  *
  * @author Tomasz Zielinski
  */
 public class CyanoRecipeTest {
-    
-    Path templateFile = Paths.get("E:\\Temp\\cyano_full_template.xml");
+
+    //Path templateFile = Paths.get("E:\\Temp\\cyano_full_template.xml");
+    Path templateFile = Paths.get("D:\\Temp\\sbol\\cyano_full_template.xml");
+
+    //private static final String TMP_PATH = "E:/Temp/";
+    private static final String TMP_PATH = "D:/Temp/sbol/";
 
     @Test
     public void makeSll0199() throws Exception {
-        
+
         SBOLDocument templateDoc = SBOLReader.read(templateFile.toFile());
         templateDoc.setDefaultURIprefix("http://bio.ed.ac.uk/a_mccormick/cyano_source/");
         templateDoc.setComplete(true);
         templateDoc.setCreateDefaults(true);
 
         TemplateTransformer transformer = new TemplateTransformer();
-        
+
         String version = "1.0.0";
         ComponentDefinition template = templateDoc.getComponentDefinition("cyano_codA_Km", version);
         assertNotNull(template);
-        
+
         String description = template.getDescription();
-        ComponentDefinition sll0199 = transformer.instantiateFromTemplate(template, "sll0199", version, 
+        ComponentDefinition sll0199 = transformer.instantiateFromTemplate(template, "sll0199", version,
                 description, templateDoc);
-        
+
         String lFlankSeq = "caaggcaaaaccaccgttatcagcagaacgacggcgggaaaaaatgattaaacgaaaaaatttgcaaggattcatagcggttgcccaatctaactcagggagcgacttcagcccacaaaaaacaccactgggcctactgggctattcccattatcatctacattgaagggatagcaagctaatttttatgacggcgatcgccaaaaacaaagaaaattcagcaattaccgtgggtagcaaaaaatccccatctaaagttcagtaaatatagctagaacaaccaagcattttcggcaaagtactattcagatagaacgagaaatgagcttgttctatccgcccggggctgaggctgtataatctacgacgggctgtcaaacattgtgataccatgggcagaagaaaggaaaaacgtccctgatcgcctttttgggcacggagtagggcgttaccccggcccgttcaaccacaagtccctatAGATACAATCGCCAAGAAGT";
         transformer.concretizePart(sll0199, "left", "sll0199_left", lFlankSeq, templateDoc);
-        
+
         String rFlankSeq = "tcagccagctcaatctgtgtgtcgttgatttaagcttaatgctacggggtctgtctccaactccctcagcttctcgcaatggcaaggcaaataatgtttctcttgctgagtagatgttcaggaggacggatcgaaagtctacaaaacagattcttgaccaagccatctacttagaaaaacttctgcgttttggcgatcgcatcttttaagcgagatgcgatttttttgtccattagtttgtattttaatactcttttgttgtttgatttcgtccaagcttttcttggtatgtgggatcttccgtgcccaaaattttatcccagaaagtgaaatatagtcatttcaattaacgatgagagaatttaatgtaaaattatggagtgtacaaaatgaacaggtttaaacaatggcttacagtttagatttaaggcaaagggtagtagcttatatagaagctggaggaaaaataactgaggcttccaagatatataaaataggaaaagcctcgatatacagatggttaaatagagtagatttaagcccaacaaaagtagagcgtcgccatagg";
         transformer.concretizePart(sll0199, "right", "sll0199_right", rFlankSeq, templateDoc);
-        
+
         ComponentDefinition sll0199Flat = transformer.flattenSequences(sll0199, "sl0199_flatten", templateDoc);
+
+        SBOLValidate.validateSBOL(templateDoc, true, true, true);
+        if (SBOLValidate.getNumErrors() > 0) {
+            for (String error : SBOLValidate.getErrors()) {
+                System.out.println(error);
+            }
+            throw new IllegalStateException("Stoping cause of validation errors");
+        }        
         
         try {
-            SBOLWriter.write(templateDoc, "E:/Temp/cyano_sl1099.xml");
+            SBOLWriter.write(templateDoc, TMP_PATH + "cyano_sl1099.xml");
         } catch (IOException e) {
             e.printStackTrace();
             throw e;
-        }        
+        }
     }
-    
+
     @Test
     public void testNaming() throws Exception {
 
@@ -75,7 +89,7 @@ public class CyanoRecipeTest {
         doc.setDefaultURIprefix("http://bio.ed.ac.uk/a_mccormick/cyano_source/");
         doc.setComplete(true);
         doc.setCreateDefaults(true);
-        
+
         String name = "backbone";
         ComponentDefinition region = doc.createComponentDefinition(name, version, ComponentDefinition.DNA_REGION);
         region.addRole(SequenceOntology.ENGINEERED_REGION);
@@ -87,8 +101,6 @@ public class CyanoRecipeTest {
         region.addSequence(seq);
 
         SequenceAnnotation an;
-        
-        
 
         an = region.createSequenceAnnotation("AmpR_prom", "AmpR_prom", 176, 280);
         an.addRole(SequenceOntology.PROMOTER);
@@ -119,13 +131,13 @@ public class CyanoRecipeTest {
 
         an = region.createSequenceAnnotation("ori_ann", "ori_loc", 1312, 1900);
         an.setComponent(origin.getIdentity());
-        
+
         try {
-            SBOLWriter.write(doc, "E:/Temp/naming.xml");
+            SBOLWriter.write(doc, TMP_PATH + "naming.xml");
         } catch (IOException e) {
             e.printStackTrace();
             throw e;
-        }        
+        }
     }
-    
+
 }

@@ -573,14 +573,14 @@ https://doi.org/10.1104/pp.18.01401</gbconv:note>
     <sbol:sequenceAnnotation>
       <sbol:SequenceAnnotation rdf:about="http://bio.ed.ac.uk/a_mccormick/cyano_source/end_of_backbone/BsmBI_2/1.0.0">
         <sbol:persistentIdentity rdf:resource="http://bio.ed.ac.uk/a_mccormick/cyano_source/end_of_backbone/BsmBI_2"/>
-        <sbol:displayId>BsmBI_2</sbol:displayId>
+        <sbol:displayId>BsmBI_2_end</sbol:displayId>
         <sbol:version>1.0.0</sbol:version>
         <dcterms:title>BsmBI</dcterms:title>
         <sbol:role rdf:resource="http://identifiers.org/so/SO:0001687"/>
         <sbol:location>
           <sbol:Range rdf:about="http://bio.ed.ac.uk/a_mccormick/cyano_source/end_of_backbone/BsmBI_2/BsmBI_2/1.0.0">
             <sbol:persistentIdentity rdf:resource="http://bio.ed.ac.uk/a_mccormick/cyano_source/end_of_backbone/BsmBI_2/BsmBI_2"/>
-            <sbol:displayId>BsmBI_2</sbol:displayId>
+            <sbol:displayId>BsmBI_2_end</sbol:displayId>
             <sbol:version>1.0.0</sbol:version>
             <sbol:start>73</sbol:start>
             <sbol:end>73</sbol:end>
@@ -591,13 +591,13 @@ https://doi.org/10.1104/pp.18.01401</gbconv:note>
     <sbol:sequenceAnnotation>
       <sbol:SequenceAnnotation rdf:about="http://bio.ed.ac.uk/a_mccormick/cyano_source/end_of_backbone/BsmBI/1.0.0">
         <sbol:persistentIdentity rdf:resource="http://bio.ed.ac.uk/a_mccormick/cyano_source/end_of_backbone/BsmBI"/>
-        <sbol:displayId>BsmBI</sbol:displayId>
+        <sbol:displayId>BsmBI_end</sbol:displayId>
         <sbol:version>1.0.0</sbol:version>
         <sbol:role rdf:resource="http://identifiers.org/so/SO:0001687"/>
         <sbol:location>
           <sbol:Range rdf:about="http://bio.ed.ac.uk/a_mccormick/cyano_source/end_of_backbone/BsmBI/BsmBI/1.0.0">
             <sbol:persistentIdentity rdf:resource="http://bio.ed.ac.uk/a_mccormick/cyano_source/end_of_backbone/BsmBI/BsmBI"/>
-            <sbol:displayId>BsmBI</sbol:displayId>
+            <sbol:displayId>BsmBI_end</sbol:displayId>
             <sbol:version>1.0.0</sbol:version>
             <sbol:start>31</sbol:start>
             <sbol:end>31</sbol:end>
