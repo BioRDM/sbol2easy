@@ -6,14 +6,16 @@
 package ed.biordm.sbol.toolkit.transform;
 
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.sbolstandard.core2.AccessType;
 import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.Location;
-import org.sbolstandard.core2.OrientationType;
 import org.sbolstandard.core2.Range;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLValidationException;
@@ -169,7 +171,9 @@ public class TemplateTransformer {
         newCmpDef.setName(cleanName);
         newCmpDef.addWasDerivedFrom(template.getIdentity());
 
-        rebuildSequences(newCmpDef, newCmpDef, doc);
+        Map<Component, List<Sequence>> cmpSeqMap = new HashMap<>();
+        cmpSeqMap = rebuildSequences(newCmpDef, newCmpDef, doc, cmpSeqMap);
+        addCustomSequenceAnnotations(newCmpDef, cmpSeqMap);
 
         return newCmpDef;
     }
@@ -455,6 +459,40 @@ public class TemplateTransformer {
     }
 
     /**
+     * 
+     * @param cmpSeqMap
+     * @throws SBOLValidationException 
+     */
+    protected void addCustomSequenceAnnotations(ComponentDefinition parent,
+            Map<Component, List<Sequence>> cmpSeqMap) throws SBOLValidationException {
+        /*
+        // Finally the original child components (backbone, left, insert) after
+        // flattening should get sequence annotations which locates them in
+        // correct regions (1-length_bacbone) (lenght-backbone+1, lengh_left)
+        // as after flattening we assume they follow each other and we know
+        // their exact locations
+        */
+
+        int saCount = 1;
+        int start = 1;
+
+        for (Component cmp : cmpSeqMap.keySet()) {
+            List<Sequence> seqs = cmpSeqMap.get(cmp);
+
+            for (Sequence seq : seqs) {
+                int seqLength = seq.getElements().length();
+                String newSADispId = "ann".concat(String.valueOf(saCount));
+                SequenceAnnotation newSA = parent.createSequenceAnnotation(newSADispId, newSADispId, start, start+seqLength);
+
+                start += seqLength+1;
+                saCount += 1;
+
+                newSA.setComponent(cmp.getDisplayId());
+            }
+        }
+    }
+
+    /**
      * Copied from
      * edu.utah.ece.async.sboldesigner.sbol.editor.SBOLDesign.rebuildSequences.
      * Modified to create new Sequence Annotations for each sequence in all
@@ -467,8 +505,9 @@ public class TemplateTransformer {
      * recursively collect from sub-components
      * @throws SBOLValidationException
      */
-    protected void rebuildSequences(ComponentDefinition parent,
-            ComponentDefinition subCmp, SBOLDocument doc) throws SBOLValidationException {
+    protected Map<Component, List<Sequence>> rebuildSequences(ComponentDefinition parent,
+            ComponentDefinition subCmp, SBOLDocument doc,
+            Map<Component, List<Sequence>> cmpSeqMap) throws SBOLValidationException {
         int start = 1;
         int length;
         int count = 0;
@@ -481,7 +520,7 @@ public class TemplateTransformer {
         for (org.sbolstandard.core2.Component c : subCmp.getSortedComponents()) {
             curr = c.getDefinition();
             if (!curr.getComponents().isEmpty()) {
-                rebuildSequences(parent, curr, doc);
+                cmpSeqMap = rebuildSequences(parent, curr, doc, cmpSeqMap);
             }
             length = 0;
 
@@ -496,14 +535,17 @@ public class TemplateTransformer {
                     leftSeq = s;
                     System.out.println("Left sequence:");
                     System.out.println(leftSeq.getElements());
+                    cmpSeqMap.computeIfAbsent(c, k -> new LinkedList<>()).add(s);
                 } else if(curr.getDisplayId().contains("backbone")) {
                     backboneSeq = s;
                     System.out.println("Backbone sequence:");
                     System.out.println(backboneSeq.getElements());
+                    cmpSeqMap.computeIfAbsent(c, k -> new LinkedList<>()).add(s);
                 } else if(curr.getDisplayId().contains("insert")) {
                     insertSeq = s;
                     System.out.println("Insert sequence:");
                     System.out.println(insertSeq.getElements());
+                    cmpSeqMap.computeIfAbsent(c, k -> new LinkedList<>()).add(s);
                 } 
             }
 
@@ -512,9 +554,6 @@ public class TemplateTransformer {
             count++;
         }
         if (!newSeq.isBlank()) {
-            if (newSeq.equals("CGCTGCTTACAGACAAGCTGTGACCGTCTCCGGGAGCTGCATGTGTCAGAGGTTTTCACCGTCATCACCGAAACGCGCGAGACGAAAGGGCCTCGTGATACGCCTATTTTTATAGGTTAATGTCATGATAATAATGGTTTCTTAGACGTCAGGTGGCACTTTTCGGGGAAATGTGCGCGGAACCCCTATTTGTTTATTTTTCTAAATACATTCAAATATGTATCCGCTCATGAGACAATAACCCTGATAAATGCTTCAATAATATTGAAAAAGGAAGAGTATGAGTATTCAACATTTCCGTGTCGCCCTTATTCCCTTTTTTGCGGCATTTTGCCTTCCTGTTTTTGCTCACCCAGAAACGCTGGTGAAAGTAAAAGATGCTGAAGATCAGTTGGGTGCACGAGTGGGTTACATCGAACTGGATCTCAACAGCGGTAAGATCCTTGAGAGTTTTCGCCCCGAAGAACGTTTTCCAATGATGAGCACTTTTAAAGTTCTGCTATGTGGCGCGGTATTATCCCGTATTGACGCCGGGCAAGAGCAACTCGGTCGCCGCATACACTATTCTCAGAATGACTTGGTTGAGTACTCACCAGTCACAGAAAAGCATCTTACGGATGGCATGACAGTAAGAGAATTATGCAGTGCTGCCATAACCATGAGTGATAACACTGCGGCCAACTTACTTCTGACAACGATCGGAGGACCGAAGGAGCTAACCGCTTTTTTGCACAACATGGGGGATCATGTAACTCGCCTTGATCGTTGGGAACCGGAGCTGAATGAAGCCATACCAAACGACGAGCGTGACACCACGATGCCTGTAGCAATGGCAACAACGTTGCGCAAACTATTAACTGGCGAACTACTTACTCTAGCTTCCCGGCAACAATTAATAGACTGGATGGAGGCGGATAAAGTTGCAGGACCACTTCTGCGCTCGGCCCTTCCGGCTGGCTGGTTTATTGCTGATAAATCTGGAGCCGGTGAGCGTGGTTCTCGCGGTATCATTGCAGCACTGGGGCCAGATGGTAAGCCCTCCCGTATCGTAGTTATCTACACGACGGGGAGTCAGGCAACTATGGATGAACGAAATAGACAGATCGCTGAGATAGGTGCCTCACTGATTAAGCATTGGTAACTGTCAGACCAAGTTTACTCATATATACTTTAGATTGATTTAAAACTTCATTTTTAATTTAAAAGGATCTAGGTGAAGATCCTTTTTGATAATCTCATGACCAAAATCCCTTAACGTGAGTTTTCGTTCCACTGAGCGTCAGACCCCGTAGAAAAGATCAAAGGATCTTCTTGAGATCCTTTTTTTCTGCGCGTAATCTGCTGCTTGCAAACAAAAAAACCACCGCTACCAGCGGTGGTTTGTTTGCCGGATCAAGAGCTACCAACTCTTTTTCCGAAGGTAACTGGCTTCAGCAGAGCGCAGATACCAAATACTGTTCTTCTAGTGTAGCCGTAGTTAGGCCACCACTTCAAGAACTCTGTAGCACCGCCTACATACCTCGCTCTGCTAATCCTGTTACCAGTGGCTGCTGCCAGTGGCGATAAGTCGTGTCTTACCGGGTTGGACTCAAGACGATAGTTACCGGATAAGGCGCAGCGGTCGGGCTGAACGGGGGGTTCGTGCACACAGCCCAGCTTGGAGCGAACGACCTACACCGAACTGAGATACCTACAGCGTGAGCTATGAGAAAGCGCCACGCTTCCCGAAGGGAGAAAGGCGGACAGGTATCCGGTAAGCGGCAGGGTCGGAACAGGAGAGCGCACGAGGGAGCTTCCAGGGGGAAACGCCTGGTATCTTTATAGTCCTGTCGGGTTTCGCCACCTCTGACTTGAGCGTCGATTTTTGTGATGCTCGTCAGGGGGGCGGAGCCTATGGAAAAACGCCAGCAACGCGGCCTTTTTACGGTTCCTGGCCTTTTGCTGGCCTTTTGCTCACATGTTCTTTCCTGCGTTATCCCCTGATTCTGTGGATAACCGTATTACCGCCTTTGAGTGAGCTGATACCGCTCGCCGCAGCCGAACGAC")) {
-                System.out.println("MMMMMMMMMMMMMMMMAAAAAAAAAAAAAAAAAATTTTTTTTTTTTTTTTTTTTCCCCCCCCCCCHHHHHHHHHHHHHH!");
-            }
             if (parent.getSequences().isEmpty()) {
                 String uniqueId = parent.getDisplayId().concat("_seq");
                 parent.addSequence(doc.createSequence(uniqueId, parent.getVersion(), newSeq, Sequence.IUPAC_DNA));
@@ -523,11 +562,7 @@ public class TemplateTransformer {
             }
         }
 
-        if (backboneSeq == null || leftSeq == null || insertSeq == null) {
-            return;
-        } else {
-            addCustomSequenceAnnotations(parent, backboneSeq, leftSeq, insertSeq);
-        }
+        return cmpSeqMap;
     }
 
     /**
