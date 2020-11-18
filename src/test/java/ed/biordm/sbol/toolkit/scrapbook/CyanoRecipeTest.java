@@ -87,6 +87,8 @@ public class CyanoRecipeTest {
         region.addSequence(seq);
 
         SequenceAnnotation an;
+        
+        
 
         an = region.createSequenceAnnotation("AmpR_prom", "AmpR_prom", 176, 280);
         an.addRole(SequenceOntology.PROMOTER);
