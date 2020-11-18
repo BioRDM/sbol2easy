@@ -9,8 +9,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.xml.namespace.QName;
 import static org.junit.Assert.*;
@@ -425,6 +427,7 @@ public class TemplateTransformerTest {
         }
 
         newName = "sll00199_codA_Km!/new_2";
+        parent = (ComponentDefinition) doc.createCopy(template, "copy2", "1.0.0");
         templateTransformer.flattenSequences(parent, newName, doc);
 
         assertNotNull(parent);
@@ -493,7 +496,9 @@ public class TemplateTransformerTest {
         //ComponentDefinition template = doc.getComponentDefinition("cyano_codA_Km", "1.0.0");
         assertNotNull(template);
 
-        templateTransformer.rebuildSequences(template, template, doc);
+        Map<Component, List<Sequence>> cmpSeqMap = new HashMap<>();
+        cmpSeqMap = templateTransformer.rebuildSequences(template, template, doc, cmpSeqMap);
+        //templateTransformer.addCustomSequenceAnnotations(template, cmpSeqMap);
 
         String[] saDisplayIdsArr = new String[]{"ori", "ori_instance", "AmpR_prom", "null", "ann1", "gap", "AmpR", "ann2", "insert"};
         Set<String> saDisplayIds = new HashSet<>( Arrays.asList(saDisplayIdsArr) );
