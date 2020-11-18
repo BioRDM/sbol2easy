@@ -6,6 +6,7 @@
 package ed.biordm.sbol.toolkit.transform;
 
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -356,110 +357,6 @@ public class TemplateTransformer {
      * For the flattened plasmid, this method creates the sequence annotations
      * that reflect the sequences attached to the original child sub-components
      * 
-     * @param parent
-     * @param leftFlankSeqId
-     * @param leftFlankCmpId
-     * @throws SBOLValidationException 
-     */
-    protected void addCustomSequenceAnnotations(ComponentDefinition parent,
-            String leftFlankSeqId, ComponentDefinition leftFlankCmpDef) throws SBOLValidationException {
-        /*
-        // Finally the original child components (backbone, left, insert) after
-        // flattening should get sequence annotations which locates them in
-        // correct regions (1-length_bacbone) (lenght-backbone+1, lengh_left)
-        // as after flattening we assume they follow each other and we know
-        // their exact locations
-        */
-        String backboneCmpId = "backbone";
-        String insertCmpId = "insert";
-
-        String backboneSeqId = "backbone_seq";
-        String insertSeqId = "insert_seq";
-
-        int backboneSeqLen = 0;
-        int leftSeqLen = 0;
-        int insertSeqLen = 0;
-
-        for (Sequence seq : parent.getSequences()) {
-            String seqDispId = seq.getDisplayId();
-            if (seqDispId.equals(backboneSeqId)) {
-                backboneSeqLen = seq.getElements().length();
-            } else if(seqDispId.equals(leftFlankSeqId)) {
-                leftSeqLen = seq.getElements().length();
-            } else if(seqDispId.equals(insertSeqId)) {
-                insertSeqLen = seq.getElements().length();
-            }
-        }
-
-        Component leftCmp = null;
-
-        for (Component cmp : parent.getSortedComponents()) {
-            if (cmp.getDefinition() == leftFlankCmpDef) {
-                leftCmp = cmp;
-            }
-        }
-
-        // Get the relevant components for association with sequence annotations
-        Component bbCmp = parent.getComponent(backboneCmpId);
-        //Component leftCmp = parent.getComponent(leftFlankCmpId);
-        Component insertCmp = parent.getComponent(insertCmpId);
-
-        SequenceAnnotation bbSA = parent.createSequenceAnnotation("ann1", "ann1", 1, backboneSeqLen);
-        bbSA.setComponent(bbCmp.getDisplayId());
-
-        SequenceAnnotation leftSA = parent.createSequenceAnnotation("ann2", "ann2", backboneSeqLen+1, backboneSeqLen+1+leftSeqLen);
-        leftSA.setComponent(leftCmp.getDisplayId());
-    }
-
-    /**
-     * 
-     * @param parent
-     * @param backboneSeq
-     * @param leftSeq
-     * @param insertSeq
-     * @throws SBOLValidationException 
-     */
-    protected void addCustomSequenceAnnotations(ComponentDefinition parent,
-            Sequence backboneSeq, Sequence leftSeq, Sequence insertSeq) throws SBOLValidationException {
-        /*
-        // Finally the original child components (backbone, left, insert) after
-        // flattening should get sequence annotations which locates them in
-        // correct regions (1-length_bacbone) (lenght-backbone+1, lengh_left)
-        // as after flattening we assume they follow each other and we know
-        // their exact locations
-        */
-        String backboneCmpId = "backbone";
-        String insertCmpId = "insert";
-
-        String backboneSeqId = "backbone_seq";
-        String insertSeqId = "insert_seq";
-
-        // Get the relevant components for association with sequence annotations
-        Component bbCmp = parent.getComponent(backboneCmpId);
-        //Component leftCmp = parent.getComponent(leftFlankCmpId);
-        Component insertCmp = parent.getComponent(insertCmpId);
-
-        Component leftCmp = null;
-
-        for (Component cmp : parent.getSortedComponents()) {
-            if (cmp.getDefinition().getDisplayId().contains("left")) {
-                leftCmp = cmp;
-            }
-        }
-
-        int backboneSeqLen = backboneSeq.getElements().length();
-        int leftSeqLen = leftSeq.getElements().length();
-        int insertSeqLen = insertSeq.getElements().length();
-        
-        SequenceAnnotation bbSA = parent.createSequenceAnnotation("ann1", "ann1", 1, backboneSeqLen);
-        bbSA.setComponent(bbCmp.getDisplayId());
-
-        SequenceAnnotation leftSA = parent.createSequenceAnnotation("ann2", "ann2", backboneSeqLen+1, backboneSeqLen+1+leftSeqLen);
-        leftSA.setComponent(leftCmp.getDisplayId());
-    }
-
-    /**
-     * 
      * @param cmpSeqMap
      * @throws SBOLValidationException 
      */
@@ -513,9 +410,8 @@ public class TemplateTransformer {
         int count = 0;
         String newSeq = "";
         ComponentDefinition curr;
-        Sequence leftSeq = null;
-        Sequence backboneSeq = null;
-        Sequence insertSeq = null;
+
+        List<String> customSAIds = Arrays.asList("left", "backbone", "insert", "right");
 
         for (org.sbolstandard.core2.Component c : subCmp.getSortedComponents()) {
             curr = c.getDefinition();
@@ -531,22 +427,11 @@ public class TemplateTransformer {
                 newSeq = newSeq.concat(s.getElements());
                 length += s.getElements().length();
 
-                if(curr.getDisplayId().contains("left")) {
-                    leftSeq = s;
-                    System.out.println("Left sequence:");
-                    System.out.println(leftSeq.getElements());
-                    cmpSeqMap.computeIfAbsent(c, k -> new LinkedList<>()).add(s);
-                } else if(curr.getDisplayId().contains("backbone")) {
-                    backboneSeq = s;
-                    System.out.println("Backbone sequence:");
-                    System.out.println(backboneSeq.getElements());
-                    cmpSeqMap.computeIfAbsent(c, k -> new LinkedList<>()).add(s);
-                } else if(curr.getDisplayId().contains("insert")) {
-                    insertSeq = s;
-                    System.out.println("Insert sequence:");
-                    System.out.println(insertSeq.getElements());
-                    cmpSeqMap.computeIfAbsent(c, k -> new LinkedList<>()).add(s);
-                } 
+                for(String customSAId : customSAIds) {
+                    if(curr.getDisplayId().contains(customSAId)) {
+                        cmpSeqMap.computeIfAbsent(c, k -> new LinkedList<>()).add(s);
+                    }
+                }
             }
 
             start += length;
