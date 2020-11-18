@@ -68,7 +68,7 @@ public class ExcelConverterTest {
         cyanoTemplate = templateDoc.getComponentDefinition("cyano_codA_Km", templateVersion);
     }
 
-    @Test
+    //@Test
     public void testReadMultiFeatures() throws SBOLValidationException, Exception, IOException {
         assertNotNull(cyanoTemplate);
 
@@ -157,17 +157,6 @@ public class ExcelConverterTest {
 
                 // Add arbitrary(?) SequenceAnnotations. What are the rules for these annotations?
                 Component seqCmp = newCyanoCDFlat.getComponent("ampR");
-                SequenceAnnotation an = newCyanoCDFlat.createSequenceAnnotation("ann1", "ann1", 1, 2073);
-                an.setComponent(seqCmp.getIdentity());
-
-                seqCmp = newCyanoCDFlat.getComponent(leftFlankName);
-                an = newCyanoCDFlat.createSequenceAnnotation("ann2", "ann2", 2074, 2074 + leftFlankSequence.length());
-
-                if (seqCmp != null) {
-                    if (seqCmp.getIdentity() != null) {
-                        an.setComponent(seqCmp.getIdentity());
-                    }
-                }
             } catch (SBOLValidationException ex) {
                 ex.printStackTrace();
             } catch (URISyntaxException ex) {
