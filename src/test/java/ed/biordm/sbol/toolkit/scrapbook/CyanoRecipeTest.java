@@ -20,6 +20,7 @@ import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLReader;
+import org.sbolstandard.core2.SBOLValidate;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.SBOLWriter;
 import org.sbolstandard.core2.Sequence;
@@ -32,10 +33,10 @@ import org.sbolstandard.core2.SequenceOntology;
  */
 public class CyanoRecipeTest {
 
-    // Path templateFile = Paths.get("E:\\Temp\\cyano_full_template.xml");
+    //Path templateFile = Paths.get("E:\\Temp\\cyano_full_template.xml");
     Path templateFile = Paths.get("D:\\Temp\\sbol\\cyano_full_template.xml");
 
-    // private static final String TMP_PATH = "E:/Temp/";
+    //private static final String TMP_PATH = "E:/Temp/";
     private static final String TMP_PATH = "D:/Temp/sbol/";
 
     @Test
@@ -64,6 +65,14 @@ public class CyanoRecipeTest {
 
         ComponentDefinition sll0199Flat = transformer.flattenSequences(sll0199, "sl0199_flatten", templateDoc);
 
+        SBOLValidate.validateSBOL(templateDoc, true, true, true);
+        if (SBOLValidate.getNumErrors() > 0) {
+            for (String error : SBOLValidate.getErrors()) {
+                System.out.println(error);
+            }
+            throw new IllegalStateException("Stoping cause of validation errors");
+        }        
+        
         try {
             SBOLWriter.write(templateDoc, TMP_PATH + "cyano_sl1099.xml");
         } catch (IOException e) {
