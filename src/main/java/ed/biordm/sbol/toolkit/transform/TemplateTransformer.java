@@ -5,6 +5,7 @@
  */
 package ed.biordm.sbol.toolkit.transform;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.Sequence;
 import org.sbolstandard.core2.SequenceAnnotation;
 import org.sbolstandard.core2.SequenceConstraint;
+import static org.sbolstandard.examples.Sbol2Terms.component.start;
 
 /**
  *
@@ -353,6 +355,32 @@ public class TemplateTransformer {
         return newSeqAnn;
     }
 
+
+    protected boolean isComponentAnnotated(Set<SequenceAnnotation> seqAnns, URI componentIdentity) {
+        boolean seqAnnCmpExists = false;
+
+        // Cycle through sequence annotations to check there isn't one already for this component
+        for (SequenceAnnotation seqAnn : seqAnns) {
+            Component existingCmp = seqAnn.getComponent();
+
+            if (existingCmp != null) {
+                if (existingCmp.getIdentity().equals(componentIdentity)) {
+                    seqAnnCmpExists = true;
+                    break;
+                }
+            }
+        }
+
+        return seqAnnCmpExists;
+    }
+
+    protected void createNewSequenceAnnotation(ComponentDefinition parent, String seqAnnId,
+            URI componentIdentity, int start, int end) throws SBOLValidationException {
+        SequenceAnnotation newSA = parent.createSequenceAnnotation(seqAnnId, seqAnnId, start, end);
+
+        newSA.setComponent(componentIdentity);
+    }
+
     /**
      * For the flattened plasmid, this method creates the sequence annotations
      * that reflect the sequences attached to the original child sub-components
@@ -373,36 +401,22 @@ public class TemplateTransformer {
         int saCount = 1;
         int start = 1;
 
+        Set<SequenceAnnotation> parentSeqAnns = parent.getSequenceAnnotations();
+
         for (Component cmp : cmpSeqMap.keySet()) {
             List<Sequence> seqs = cmpSeqMap.get(cmp);
-            boolean seqAnnCmpExists = false;
+            URI cmpId = cmp.getIdentity();
 
             for (Sequence seq : seqs) {
-                // Cycle through sequence annotations to check there isn't one already for this component
-                for (SequenceAnnotation seqAnn : parent.getSequenceAnnotations()) {
-                    Component existingCmp = seqAnn.getComponent();
+                parentSeqAnns = parent.getSequenceAnnotations();
 
-                    if (existingCmp != null && existingCmp.getIdentity().equals(cmp.getIdentity())) {
-                        seqAnnCmpExists = true;
-                        break;
-                    }
-                }
-
-                if (seqAnnCmpExists == false) {
-                    int seqLength = seq.getElements().length();
+                if (! isComponentAnnotated(parentSeqAnns, cmpId)) {
                     String newSADispId = "ann".concat(String.valueOf(saCount));
-                    SequenceAnnotation newSA = parent.createSequenceAnnotation(newSADispId, newSADispId, start, start+seqLength);
-
-                    start += seqLength+1;
+                    int end = start + seq.getElements().length();
+                    createNewSequenceAnnotation(parent, newSADispId, cmpId,
+                            start, end);
+                    start += seq.getElements().length()+1;
                     saCount += 1;
-
-                    if (newSA.getComponent() == null) {
-                        newSA.setComponent(cmp.getIdentity());
-                    } else {
-                        if (!newSA.getComponent().equals(cmp)) {
-                           newSA.setComponent(cmp.getIdentity());
-                        }
-                    }
                 }
             }
         }
