@@ -412,10 +412,10 @@ public class TemplateTransformer {
 
                 if (! isComponentAnnotated(parentSeqAnns, cmpId)) {
                     String newSADispId = "ann".concat(String.valueOf(saCount));
-                    int end = start + seq.getElements().length();
+                    int end = start + seq.getElements().length()-1;
                     createNewSequenceAnnotation(parent, newSADispId, cmpId,
                             start, end);
-                    start += seq.getElements().length()+1;
+                    start += seq.getElements().length();
                     saCount += 1;
                 }
             }
