@@ -33,12 +33,13 @@ import org.sbolstandard.core2.SequenceOntology;
  */
 public class CyanoTemplates {
 
-    static String SeqenceOntoPref = "http://identifiers.org/so/";
+    public static String SeqenceOntoPref = "http://identifiers.org/so/";
 
     public static void main(String[] args) throws SBOLValidationException, SBOLConversionException, IOException, URISyntaxException {
 
         SBOLDocument doc = new SBOLDocument();
-
+        
+   
         doc.setDefaultURIprefix("http://bio.ed.ac.uk/a_mccormick/cyano_source/");
         doc.setComplete(true);
         doc.setCreateDefaults(true);
