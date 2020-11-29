@@ -221,7 +221,8 @@ public class SynBioTamerTest {
         doc.setCreateDefaults(true);
 
         ComponentDefinition def = doc.createComponentDefinition("comp", ComponentDefinition.DNA_REGION);
-        def.addRole(SequenceOntology.ENGINEERED_REGION);
+        //def.addRole(SequenceOntology.ENGINEERED_REGION);
+        def.addRole(SequenceOntology.SEQUENCE_FEATURE);
         def.createAnnotation(SynBioTamer.GB_FEATURE, "insulator");
         
         SequenceAnnotation an = def.createSequenceAnnotation("an", "an");
@@ -242,6 +243,31 @@ public class SynBioTamerTest {
         
        
         
+    }    
+
+    @Test
+    public void fixGenBankPreservesNonGenericRoles() throws Exception {
+        
+        SBOLDocument doc = new SBOLDocument();
+        
+   
+        doc.setDefaultURIprefix("http://bio.ed.ac.uk/sbol/test/");
+        doc.setComplete(true);
+        doc.setCreateDefaults(true);
+
+        ComponentDefinition def = doc.createComponentDefinition("comp", ComponentDefinition.DNA_REGION);
+        def.addRole(SequenceOntology.ENGINEERED_REGION);
+        def.createAnnotation(SynBioTamer.GB_FEATURE, "insulator");
+        
+        instance.fixGenBankRoles(doc);
+        
+        assertEquals(Set.of(SequenceOntology.ENGINEERED_REGION), def.getRoles());
+        
+        def.addRole(SequenceOntology.SEQUENCE_FEATURE);
+        
+        instance.fixGenBankRoles(doc);
+        
+        assertEquals(Set.of(SequenceOntology.INSULATOR, SequenceOntology.ENGINEERED_REGION), def.getRoles());
     }    
     
     SBOLDocument testDoc() throws Exception {

@@ -38,6 +38,8 @@ public class SynBioTamer {
     
     public static String DEFAULT_NAMESPACE = "https://bio.ed.ac.uk/forsynbio/";
     
+    GenBank2SO genBank2SO = new GenBank2SO();
+    
     public SBOLDocument tameForSynBio(SBOLDocument doc) throws SBOLValidationException {
         return tameForSynBio(doc, DEFAULT_NAMESPACE,true);
     }
@@ -73,22 +75,29 @@ public class SynBioTamer {
     
     protected void fixGenBankRoles(ComponentDefinition def) {
         
-        mapGenBankFeatureToRole(def)
-                .ifPresent( role -> def.setRoles(Set.of(role)));
-        
+        if (hasGenericRole(def.getRoles())) {
+            mapGenBankFeatureToRole(def)
+                .ifPresent( role -> {
+                    removeGenericRole(def);
+                    def.addRole(role);
+                        });
+        }
         def.getSequenceAnnotations().forEach( sa -> fixGenBankRoles(sa));
     }    
     
     protected void fixGenBankRoles(SequenceAnnotation def) {
         
-        mapGenBankFeatureToRole(def)
+        if (hasGenericRole(def.getRoles())) {
+            mapGenBankFeatureToRole(def)
                 .ifPresent( role -> {
                         try {
-                            def.setRoles(Set.of(role));
+                            removeGenericRole(def);
+                            def.addRole(role);
                         } catch (SBOLValidationException e) {
                             throw new RuntimeException(e);
                         }
-        });
+                });
+        }
     }
     
     
@@ -153,29 +162,31 @@ public class SynBioTamer {
     Optional<URI> mapGenBankFeatureToRole(Identified def) {
         
         return getGenBankFeature(def)
-                .flatMap(this::feature2Role);
+                .map(this::feature2Role);
     }
     Optional<String> getGenBankFeature(Identified def) {
         
         Annotation ann = def.getAnnotation(GB_FEATURE);
         if (ann == null) return Optional.empty();
         
-        return Optional.of(ann.getStringValue().toLowerCase());
+        return Optional.of(ann.getStringValue());
     }
     
-    Optional<URI> feature2Role(String feature) {
+    URI feature2Role(String feature) {
         
-        try {
-            switch (feature) {
-                case "insulator": return Optional.of(SequenceOntology.INSULATOR);
-                case "cds": return Optional.of(SequenceOntology.CDS);
-                case "promoter": return Optional.of(SequenceOntology.PROMOTER);
-                case "ltr": return Optional.of(new URI(SeqenceOntoPref+"SO:0000286"));
-                default: return Optional.empty();
-            }
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        return genBank2SO.featureToTerm(feature);
+    }
+
+    boolean hasGenericRole(Set<URI> roles) {
+        return roles.isEmpty() || roles.contains(SequenceOntology.SEQUENCE_FEATURE);
+    }
+
+    void removeGenericRole(ComponentDefinition def) {
+        def.removeRole(SequenceOntology.SEQUENCE_FEATURE);
+    }
+
+    void removeGenericRole(SequenceAnnotation def) {
+        def.removeRole(SequenceOntology.SEQUENCE_FEATURE);
     }
 
 
