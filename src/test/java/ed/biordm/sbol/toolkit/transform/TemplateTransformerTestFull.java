@@ -39,7 +39,7 @@ public class TemplateTransformerTestFull {
 
     @Before
     public void generateSBOLDocument() throws IOException, SBOLValidationException, SBOLConversionException {
-        String fName = "cyano_full_template.xml";
+        String fName = "cyano_full_template_2.xml";
         File file = new File(getClass().getResource(fName).getFile());
 
         try {

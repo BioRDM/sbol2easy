@@ -36,10 +36,8 @@ public class CyanoRecipeTest {
 
     //Path templateFile = Paths.get("E:\\Temp\\cyano_full_template.xml");
     //Path templateFile = Paths.get("D:\\Temp\\sbol\\cyano_full_template.xml");
-
     //String fName = "cyano_full_template.xml";
     //File sbolFile = new File(getClass().getResource(fName).getFile());
-
     String fName = "D:\\Temp\\sbol\\cyano_full_template.xml";
     File sbolFile = new File(fName);
 
@@ -80,8 +78,8 @@ public class CyanoRecipeTest {
                 System.out.println(error);
             }
             throw new IllegalStateException("Stoping cause of validation errors");
-        }        
-        
+        }
+
         try {
             SBOLWriter.write(templateDoc, TMP_PATH + "cyano_sl1099.xml");
         } catch (IOException e) {
