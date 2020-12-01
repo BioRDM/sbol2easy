@@ -7,6 +7,7 @@ package ed.biordm.sbol.toolkit.scrapbook;
 
 import static ed.biordm.sbol.toolkit.scrapbook.CyanoTemplates.SeqenceOntoPref;
 import ed.biordm.sbol.toolkit.transform.TemplateTransformer;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -34,7 +35,15 @@ import org.sbolstandard.core2.SequenceOntology;
 public class CyanoRecipeTest {
 
     //Path templateFile = Paths.get("E:\\Temp\\cyano_full_template.xml");
-    Path templateFile = Paths.get("D:\\Temp\\sbol\\cyano_full_template.xml");
+    //Path templateFile = Paths.get("D:\\Temp\\sbol\\cyano_full_template.xml");
+
+    //String fName = "cyano_full_template.xml";
+    //File sbolFile = new File(getClass().getResource(fName).getFile());
+
+    String fName = "D:\\Temp\\sbol\\cyano_full_template.xml";
+    File sbolFile = new File(fName);
+
+    Path templateFile = sbolFile.toPath();
 
     //private static final String TMP_PATH = "E:/Temp/";
     private static final String TMP_PATH = "D:/Temp/sbol/";
