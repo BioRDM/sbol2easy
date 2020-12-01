@@ -1019,6 +1019,7 @@ public class GenBankConverter {
             }
         }
 
+        // Add this in so that a label is generated from the display ID
         if (label == null) {
             writeNameLabel(w, sa);
         }
