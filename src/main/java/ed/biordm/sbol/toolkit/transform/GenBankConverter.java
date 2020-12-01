@@ -1002,8 +1002,9 @@ public class GenBankConverter {
                         + a.getIntegerValue(), 80, 21);
             }
         }
+
+        String label = null;
         if (!foundLabel) {
-            String label = null;
             if (sa.isSetName()) {
                 label = sa.getName();
             } else if (sa.isSetComponent() && sa.getComponent() != null
@@ -1017,6 +1018,38 @@ public class GenBankConverter {
                 writeGenBankLine(w, "                     /label=" + label, 80, 21);
             }
         }
+
+        if (label == null) {
+            writeNameLabel(w, sa);
+        }
+    }
+
+    public static void writeNameLabel(Writer w, SequenceAnnotation sa) throws IOException {
+        String label = null;
+        // In order of precedence: if Sequence Annotation's linked component
+        // has a component definition that has a Name, use that. If the component
+        // Definition doesn't have a Name, check if the component does and use
+        // that. If no name is present in either, check the definition for 
+        // display ID and use that. If there is no component definition, use 
+        // the component's display ID, and finally if there is no component, use
+        // the Sequence Annotation's display ID.
+        if (sa.isSetComponent() && sa.getComponent().getDefinition() != null
+                && sa.getComponent().getDefinition().isSetName()) {
+            label = sa.getComponent().getDefinition().getName();
+        } else if (sa.isSetComponent() && sa.getComponent().getDefinition() != null
+                && sa.getComponent().getDefinition().isSetDisplayId()) {
+            label = sa.getComponent().getDefinition().getDisplayId();
+        } else if (sa.isSetComponent() && sa.getComponent() != null
+                && sa.getComponent().isSetName()) {
+            label = sa.getComponent().getName();
+        } else if (sa.isSetComponent() && sa.getComponent() != null
+                && sa.getComponent().isSetDisplayId()) {
+            label = sa.getComponent().getDisplayId();
+        } else if (sa.isSetDisplayId()) {
+            label = sa.getDisplayId();
+        }
+
+        writeGenBankLine(w, "                     /label=" + label, 80, 21);
     }
 
     private static void writeSequence(Writer w, Sequence sequence, int size) throws IOException {
