@@ -89,6 +89,8 @@ public class GenBankConverter {
     // locus line
     protected static final Pattern lp = Pattern.compile("LOCUS\\s+([\\S+\\s]*)\\s+(\\d+)\\s+(bp|BP|aa|AA)\\s{0,4}(([dmsDMS][sS]-)?(\\S+))?\\s*(circular|CIRCULAR|linear|LINEAR)?\\s*(\\S+)?\\s*(\\S+)?$");
 
+    protected static final GenBank2SO genBank2SO = new GenBank2SO();
+
     private static void writeGenBankLine(Writer w, String line, int margin, int indent) throws IOException {
         if (line.length() < margin) {
             w.write(line + "\n");
@@ -422,13 +424,22 @@ public class GenBankConverter {
         if (soTerm.equals("SO:0000204")) {
             return String.format("%-15s", "5'UTR");
         }
+
+        String featureType = "misc_feature   ";
+
+        // Use the custom term converter to derive the feature type if it's misc_feature
+        String soFeatureType = genBank2SO.termToFeature(soTerm);
+
+        if (soFeatureType != null && !soFeatureType.isBlank()) {
+            featureType = String.format("%-15s", soFeatureType);
+        }
         /*
 		if (soTerm.equals("CDS") || soTerm.equals("promoter") || soTerm.equals("terminator"))
 			return String.format("%-15s", soTerm);
 		else if (soTerm.equals("ribosome_entry_site"))
 			return "RBS            ";
          */
-        return "misc_feature   ";
+        return featureType;
     }
 
     private static URI convertGenBanktoSO(String genBankTerm) {
@@ -1216,7 +1227,7 @@ public class GenBankConverter {
         }
 
         //definition = concatDescription(definition, componentDefinition);
-        
+
         for (SequenceAnnotation sa : cmpDefSeqAnns) {
             String role = "misc_feature   ";
             Component comp = sa.getComponent();

@@ -7,7 +7,9 @@
     <dcterms:description>new description: high-copy-number ColE1/pMB1/pBR322/pUC origin of replication</dcterms:description>
     <gbconv:note>high-copy-number ColE1/pMB1/pBR322/pUC origin of replication</gbconv:note>
     <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
-    <sbh:mutableDescription>test description</sbh:mutableDescription>
+    <sbh:mutableDescription>test description
+
+another line</sbh:mutableDescription>
     <sbol:role rdf:resource="http://identifiers.org/so/SO:0000296"/>
     <sbol:sequence rdf:resource="http://bio.ed.ac.uk/a_mccormick/cyano_source/ori_seq/1.0.0"/>
   </sbol:ComponentDefinition>
