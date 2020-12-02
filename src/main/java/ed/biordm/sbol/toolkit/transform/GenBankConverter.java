@@ -1034,7 +1034,9 @@ public class GenBankConverter {
         // display ID and use that. If there is no component definition, use 
         // the component's display ID, and finally if there is no component, use
         // the Sequence Annotation's display ID.
-        if (sa.isSetComponent() && sa.getComponent().getDefinition() != null
+        if (sa.isSetName()) {
+            label = sa.getName();
+        } else if (sa.isSetComponent() && sa.getComponent().getDefinition() != null
                 && sa.getComponent().getDefinition().isSetName()) {
             label = sa.getComponent().getDefinition().getName();
         } else if (sa.isSetComponent() && sa.getComponent().getDefinition() != null
@@ -1049,6 +1051,7 @@ public class GenBankConverter {
         } else if (sa.isSetDisplayId()) {
             label = sa.getDisplayId();
         }
+        System.out.println(String.format("Label for %s: %s", sa.getDisplayId(), label));
 
         writeGenBankLine(w, "                     /label=" + label, 80, 21);
     }

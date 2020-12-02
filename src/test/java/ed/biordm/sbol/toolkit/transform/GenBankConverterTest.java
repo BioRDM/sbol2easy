@@ -98,9 +98,9 @@ public class GenBankConverterTest {
 
         for (SequenceAnnotation seqAnn : newPlasmidFlat.getSequenceAnnotations()) {
             String label = getSequenceAnnoLabel(seqAnn);
-            if (seqAnn.isSetName()) {
+            /*if (seqAnn.isSetName()) {
                 label = seqAnn.getName();
-            } /*else if (seqAnn.isSetComponent() && seqAnn.getComponent() != null
+            } else if (seqAnn.isSetComponent() && seqAnn.getComponent() != null
                     && seqAnn.getComponent().isSetName()) {
                 label = seqAnn.getComponent().getName();
             } else if (seqAnn.isSetComponent() && seqAnn.getComponent().getDefinition() != null
@@ -143,7 +143,9 @@ public class GenBankConverterTest {
 
     private String getSequenceAnnoLabel(SequenceAnnotation seqAnn) {
         String label = null;
-        if (seqAnn.isSetComponent() && seqAnn.getComponent().getDefinition() != null
+        if (seqAnn.isSetName()) {
+            label = seqAnn.getName();
+        } else if (seqAnn.isSetComponent() && seqAnn.getComponent().getDefinition() != null
             && seqAnn.getComponent().getDefinition().isSetName()) {
             label = seqAnn.getComponent().getDefinition().getName();
         } else if (seqAnn.isSetComponent() && seqAnn.getComponent().getDefinition() != null
