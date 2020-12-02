@@ -5,6 +5,7 @@
  */
 package ed.biordm.sbol.toolkit.transform;
 
+import static ed.biordm.sbol.toolkit.transform.GenBankConverter.writeNotes;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,11 +15,16 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
+import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.ComponentDefinition;
+import org.sbolstandard.core2.Identified;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLReader;
 import org.sbolstandard.core2.SBOLValidationException;
@@ -101,18 +107,31 @@ public class GenBankConverterTest {
 
         for (SequenceAnnotation seqAnn : newPlasmidFlat.getSequenceAnnotations()) {
             String label = getSequenceAnnoLabel(seqAnn);
-            /*if (seqAnn.isSetName()) {
-                label = seqAnn.getName();
-            } else if (seqAnn.isSetComponent() && seqAnn.getComponent() != null
-                    && seqAnn.getComponent().isSetName()) {
-                label = seqAnn.getComponent().getName();
-            } else if (seqAnn.isSetComponent() && seqAnn.getComponent().getDefinition() != null
-                    && seqAnn.getComponent().getDefinition().isSetName()) {
-                label = seqAnn.getComponent().getDefinition().getName();
-            }*/
+
+            List<String> descs = new ArrayList<>();
+
+            // test the descriptions are present
+            String[] objDescs = getIdentifiedObjDescriptions(seqAnn);
+            descs.addAll(Arrays.asList(objDescs));
+
+            if (seqAnn.isSetComponent() && seqAnn.getComponent().getDefinition() != null) {
+                objDescs = getIdentifiedObjDescriptions(seqAnn.getComponent().getDefinition());
+                descs.addAll(Arrays.asList(objDescs));
+            } 
+
+            if (seqAnn.isSetComponent() && seqAnn.getComponent() != null) {
+                objDescs = getIdentifiedObjDescriptions(seqAnn.getComponent());
+                descs.addAll(Arrays.asList(objDescs));
+            }
+
+            for (String description : descs) {
+                System.out.println(description);
+                description = trimGenBankOutputString(description);
+                assertTrue(output.contains(description));
+            }
 
             // GenBank format limits the length of the line to 41 characters?
-            label = trimLabel(label);
+            label = trimGenBankOutputString(label);
 
             System.out.println(label);
             assertTrue(output.contains(label));
@@ -140,10 +159,35 @@ public class GenBankConverterTest {
             String label = getSequenceAnnoLabel(seqAnn);
 
             // GenBank format limits the length of the line to 41 characters?
-            label = trimLabel(label);
+            label = trimGenBankOutputString(label);
 
             System.out.println(label);
             assertTrue(output.contains(label));
+        }
+    }
+
+    @Test
+    public void testWriteNotes() throws Exception {
+        assertNotNull(doc);
+
+        ComponentDefinition oriDef = doc.getComponentDefinition("ori", "1.0.0");
+        assertNotNull(oriDef);
+
+        for (SequenceAnnotation seqAnn : oriDef.getSequenceAnnotations()) {
+            Writer strWriter = new StringWriter();
+            gbConverter.writeNotes(strWriter, seqAnn);
+            String output = strWriter.toString();
+            strWriter.flush();
+
+            System.out.println(output);
+            String[] descs = getIdentifiedObjDescriptions(seqAnn);
+
+            for (String description : descs) {
+                System.out.println(description);
+                // GenBank format limits the length of the line to 41 characters?
+                description = trimGenBankOutputString(description);
+                assertTrue(output.contains(description));
+            }
         }
     }
 
@@ -170,7 +214,7 @@ public class GenBankConverterTest {
         return label;
     }
 
-    private String trimLabel(String label) {
+    private String trimGenBankOutputString(String label) {
         String labelPrefix = "                     /label=";
         int labelPrefixLen = labelPrefix.length();
         int gbMaxLineLen = 41;
@@ -181,6 +225,33 @@ public class GenBankConverterTest {
         }
 
         return label;
+    }
+    
+    private String[] getIdentifiedObjDescriptions(Identified i) {
+        List<String> descriptions = new ArrayList<>();
+
+        if (i.isSetDescription() && i.getDescription() != null
+                && !i.getDescription().isBlank()) {
+            // Captures the <dcterms:description> tag
+            descriptions.add(i.getDescription());
+        }
+        
+        for (Annotation a : i.getAnnotations()) {
+            if (a.isStringValue()) {
+                if (a.getQName().getLocalPart().equals("mutableDescription")) {
+                    // <sbh:mutableDescription> user-edited description from SynBioHub ontology
+                    descriptions.add(a.getStringValue());
+                } else if (a.getQName().getLocalPart().equals("description")) {
+                    // This does not seem to detect elements with the <dcterms:description> tag?
+                    descriptions.add(a.getStringValue());
+                } else if (a.getQName().getLocalPart().equals("note")) {
+                    // <gbconv:note> from GenBank ontology
+                    descriptions.add(a.getStringValue());
+                }
+            }
+        }
+
+        return descriptions.toArray(new String[0]);
     }
 
     private boolean writeOutputToFile(String output, String outputFile) {

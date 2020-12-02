@@ -1,12 +1,13 @@
 <?xml version="1.0" ?>
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:sbol="http://sbols.org/v2#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:gbconv="http://sbols.org/genBankConversion#" xmlns:prov="http://www.w3.org/ns/prov#" xmlns:om="http://www.ontology-of-units-of-measure.org/resource/om-2/">
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:sbol="http://sbols.org/v2#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:gbconv="http://sbols.org/genBankConversion#" xmlns:prov="http://www.w3.org/ns/prov#" xmlns:om="http://www.ontology-of-units-of-measure.org/resource/om-2/" xmlns:synbiohub="http://synbiohub.org#" xmlns:sbh="http://wiki.synbiohub.org/wiki/Terms/synbiohub#" xmlns:sybio="http://www.sybio.ncl.ac.uk#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
   <sbol:ComponentDefinition rdf:about="http://bio.ed.ac.uk/a_mccormick/cyano_source/ori/1.0.0">
     <sbol:persistentIdentity rdf:resource="http://bio.ed.ac.uk/a_mccormick/cyano_source/ori"/>
     <sbol:displayId>ori</sbol:displayId>
     <sbol:version>1.0.0</sbol:version>
-    <dcterms:description>high-copy-number ColE1/pMB1/pBR322/pUC origin of replication</dcterms:description>
+    <dcterms:description>new description: high-copy-number ColE1/pMB1/pBR322/pUC origin of replication</dcterms:description>
     <gbconv:note>high-copy-number ColE1/pMB1/pBR322/pUC origin of replication</gbconv:note>
     <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbh:mutableDescription>test description</sbh:mutableDescription>
     <sbol:role rdf:resource="http://identifiers.org/so/SO:0000296"/>
     <sbol:sequence rdf:resource="http://bio.ed.ac.uk/a_mccormick/cyano_source/ori_seq/1.0.0"/>
   </sbol:ComponentDefinition>

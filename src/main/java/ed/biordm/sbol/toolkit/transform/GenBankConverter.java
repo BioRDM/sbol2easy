@@ -18,7 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -27,6 +26,7 @@ import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.Cut;
+import org.sbolstandard.core2.Identified;
 import org.sbolstandard.core2.Location;
 import org.sbolstandard.core2.OrientationType;
 import org.sbolstandard.core2.Range;
@@ -1023,9 +1023,12 @@ public class GenBankConverter {
         if (label == null) {
             writeNameLabel(w, sa);
         }
+
+        // Add multiple notes for sequence annotations and linked components/definitions
+        addNotes(w, sa);
     }
 
-    public static void writeNameLabel(Writer w, SequenceAnnotation sa) throws IOException {
+    protected static void writeNameLabel(Writer w, SequenceAnnotation sa) throws IOException {
         String label = null;
         // In order of precedence: if Sequence Annotation's linked component
         // has a component definition that has a Name, use that. If the component
@@ -1051,9 +1054,74 @@ public class GenBankConverter {
         } else if (sa.isSetDisplayId()) {
             label = sa.getDisplayId();
         }
-        System.out.println(String.format("Label for %s: %s", sa.getDisplayId(), label));
 
-        writeGenBankLine(w, "                     /label=" + label, 80, 21);
+        if (label != null) {
+            writeGenBankLine(w, "                     /label=" + label, 80, 21);
+        }
+    }
+
+    /**
+     * Add multiple notes for each description/note attached to the
+     * sequence annotation along with any linked component definitions and
+     * components
+     *
+     * @param w
+     * @param sa
+     * @throws IOException
+     */
+    protected static void addNotes(Writer w, SequenceAnnotation sa) throws IOException {
+        String note = null;
+
+        if (sa.isSetComponent() && sa.getComponent().getDefinition() != null) {
+            writeNotes(w, sa.getComponent().getDefinition());
+        }
+
+        if (sa.isSetComponent() && sa.getComponent() != null) {
+            writeNotes(w, sa.getComponent());
+        }
+
+        writeNotes(w, sa);
+    }
+
+    /**
+     * Iterate through the description annotations attached to the SBOL entity
+     * and write out a new '/note' element in the GenBank output for each one
+     *
+     * @param w
+     * @param i
+     * @throws IOException
+     */
+    protected static void writeNotes(Writer w, Identified i) throws IOException {
+        String note = null;
+        boolean hasDescription = false;
+
+        if (i.isSetDescription() && i.getDescription() != null
+                && !i.getDescription().isBlank()) {
+            // Captures the <dcterms:description> tag
+            writeGenBankLine(w, "                     /note=" + "\"" + i.getDescription() + "\"", 80, 21);
+            hasDescription = true;
+        }
+
+        for (Annotation a : i.getAnnotations()) {
+            if (a.isStringValue()) {
+                if (a.getQName().getLocalPart().equals("mutableDescription")) {
+                    // <sbh:mutableDescription> user-edited description from SynBioHub ontology
+                    note = a.getStringValue();
+                } else if (a.getQName().getLocalPart().equals("description")) {
+                    // This does not seem to detect elements with the <dcterms:description> tag?
+                    note = a.getStringValue();
+                } /*else if (a.getQName().getLocalPart().equals("note") && hasDescription) {
+                    // <gbconv:note> from GenBank ontology
+                    // only required to write again if there is a description
+                    note = a.getStringValue();
+                }*/
+            }
+
+            if (note != null && !note.isBlank()) {
+                writeGenBankLine(w, "                     /note=" + "\"" + note + "\"", 80, 21);
+                note = null;
+            }
+        }
     }
 
     private static void writeSequence(Writer w, Sequence sequence, int size) throws IOException {
@@ -1127,6 +1195,8 @@ public class GenBankConverter {
         Method getSortedSequenceAnnotationsByDisplayId = null;
         List<SequenceAnnotation> cmpDefSeqAnns = new ArrayList<>();
 
+        String definition = null;
+
         try {
             getSortedSequenceAnnotationsByDisplayId = ComponentDefinition.class.getDeclaredMethod("getSortedSequenceAnnotationsByDisplayId");
 
@@ -1144,6 +1214,8 @@ public class GenBankConverter {
         } catch (InvocationTargetException ex) {
             Logger.getLogger(GenBankConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        //definition = concatDescription(definition, componentDefinition);
         
         for (SequenceAnnotation sa : cmpDefSeqAnns) {
             String role = "misc_feature   ";
