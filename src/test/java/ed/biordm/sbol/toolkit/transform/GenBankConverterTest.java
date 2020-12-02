@@ -5,8 +5,10 @@
  */
 package ed.biordm.sbol.toolkit.transform;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
@@ -16,7 +18,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
-import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLReader;
@@ -33,6 +34,8 @@ public class GenBankConverterTest {
     GenBankConverter gbConverter = new GenBankConverter();
     SBOLDocument doc;
     static String SEQUENCE_ONTO_PREF = "http://identifiers.org/so/";
+
+    private static final String TMP_PATH = "D:/Temp/sbol/";
 
     @Before
     public void generateSBOLDocument() throws IOException, SBOLValidationException, org.sbolstandard.core2.SBOLConversionException {
@@ -114,6 +117,9 @@ public class GenBankConverterTest {
             System.out.println(label);
             assertTrue(output.contains(label));
         }
+
+        String filePath = TMP_PATH.concat("sll00199_codA_Km_flat.gb");
+        writeOutputToFile(output, filePath);
     }
 
     @Test
@@ -122,7 +128,7 @@ public class GenBankConverterTest {
 
         // ComponentDefinition sll00199Plasmid = doc.getComponentDefinition("backbone", "1.0.0");
         ComponentDefinition sll00199Plasmid = doc.getComponentDefinition("insert", "1.0.0");
-        assertNotNull(sll00199Plasmid);   
+        assertNotNull(sll00199Plasmid);
 
         for (SequenceAnnotation seqAnn : sll00199Plasmid.getSequenceAnnotations()) {
             Writer strWriter = new StringWriter();
@@ -175,5 +181,25 @@ public class GenBankConverterTest {
         }
 
         return label;
+    }
+
+    private boolean writeOutputToFile(String output, String outputFile) {
+        boolean success = false;
+
+        try(FileOutputStream fos = new FileOutputStream(outputFile);
+                BufferedOutputStream bos = new BufferedOutputStream(fos)) {
+            //convert string to byte array
+            byte[] bytes = output.getBytes();
+            //write byte array to file
+            bos.write(bytes);
+            bos.close();
+            fos.close();
+            System.out.print("Data written to file successfully.");
+            success = true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return success;
     }
 }
