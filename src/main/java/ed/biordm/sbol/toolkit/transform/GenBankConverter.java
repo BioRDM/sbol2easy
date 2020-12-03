@@ -1028,7 +1028,7 @@ public class GenBankConverter {
                     if (!isNote) {
                         writeGenBankLine(w, "                     /"
                                 + qNameLocal + "="
-                                + "\"" + a.getStringValue() + "\"", 80, 21);
+                                + "\"" + sanitizeStringValue(a.getStringValue()) + "\"", 80, 21);
                     }
                 }
             } else if (a.isIntegerValue()) {
@@ -1133,7 +1133,8 @@ public class GenBankConverter {
         if (i.isSetDescription() && i.getDescription() != null
                 && !i.getDescription().isBlank()) {
             // Captures the <dcterms:description> tag
-            writeGenBankLine(w, "                     /note=" + "\"" + i.getDescription() + "\"", 80, 21);
+            String cleanDesc = sanitizeStringValue(i.getDescription());
+            writeGenBankLine(w, "                     /note=" + "\"" + cleanDesc + "\"", 80, 21);
             hasDescription = true;
         }
 
@@ -1147,7 +1148,8 @@ public class GenBankConverter {
             }
 
             if (note != null && !note.isBlank()) {
-                writeGenBankLine(w, "                     /note=" + "\"" + note + "\"", 80, 21);
+                String cleanNote = sanitizeStringValue(note);
+                writeGenBankLine(w, "                     /note=" + "\"" + cleanNote + "\"", 80, 21);
                 note = null;
             }
         }
@@ -1454,6 +1456,12 @@ public class GenBankConverter {
             tag = "_" + tag;
         }
         return tag;
+    }
+
+    private static String sanitizeStringValue(String value) {
+        value = value.replaceAll("&#x2028;", "   ");
+        value = value.replaceAll("\n", "   ");
+        return value;
     }
 
     /**
