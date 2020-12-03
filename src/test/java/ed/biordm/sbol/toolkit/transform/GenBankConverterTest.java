@@ -127,6 +127,7 @@ public class GenBankConverterTest {
             for (String description : descs) {
                 System.out.println(description);
                 description = trimGenBankOutputString(description);
+                description = gbConverter.sanitizeStringValue(description);
                 assertTrue(output.contains(description));
             }
 
