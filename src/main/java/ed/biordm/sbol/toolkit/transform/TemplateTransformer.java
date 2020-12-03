@@ -176,7 +176,8 @@ public class TemplateTransformer {
 
         Map<Component, List<Sequence>> cmpSeqMap = new HashMap<>();
         cmpSeqMap = rebuildSequences(newCmpDef, newCmpDef, doc, cmpSeqMap);
-        addCustomSequenceAnnotations(newCmpDef, cmpSeqMap);
+        //does not position child components correctly and raises validation errors
+        //addCustomSequenceAnnotations(newCmpDef, cmpSeqMap);
 
         return newCmpDef;
     }

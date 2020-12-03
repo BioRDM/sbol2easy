@@ -6,15 +6,19 @@
 package ed.biordm.sbol.toolkit.scrapbook;
 
 import static ed.biordm.sbol.toolkit.scrapbook.CyanoTemplates.SeqenceOntoPref;
+import ed.biordm.sbol.toolkit.transform.GenBankConverter;
 import ed.biordm.sbol.toolkit.transform.TemplateTransformer;
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.xml.namespace.QName;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.sbolstandard.core2.AccessType;
 import org.sbolstandard.core2.Component;
@@ -34,18 +38,14 @@ import org.sbolstandard.core2.SequenceOntology;
  */
 public class CyanoRecipeTest {
 
-    //Path templateFile = Paths.get("E:\\Temp\\cyano_full_template.xml");
+    Path templateFile = Paths.get("E:\\Temp\\cyano_full_template.xml");
     //Path templateFile = Paths.get("D:\\Temp\\sbol\\cyano_full_template.xml");
-    //String fName = "cyano_full_template.xml";
-    //File sbolFile = new File(getClass().getResource(fName).getFile());
-    String fName = "D:\\Temp\\sbol\\cyano_full_template.xml";
-    File sbolFile = new File(fName);
 
-    Path templateFile = sbolFile.toPath();
+    private static final String TMP_PATH = "E:/Temp/";
+    //private static final String TMP_PATH = "D:/Temp/sbol/";
 
-    //private static final String TMP_PATH = "E:/Temp/";
-    private static final String TMP_PATH = "D:/Temp/sbol/";
-
+    String version = "1.0.0";
+    
     @Test
     public void makeSll0199() throws Exception {
 
@@ -56,7 +56,6 @@ public class CyanoRecipeTest {
 
         TemplateTransformer transformer = new TemplateTransformer();
 
-        String version = "1.0.0";
         ComponentDefinition template = templateDoc.getComponentDefinition("cyano_codA_Km", version);
         assertNotNull(template);
 
@@ -87,8 +86,24 @@ public class CyanoRecipeTest {
             throw e;
         }
     }
+    
+    @Test
+    public void testGBConversion() throws Exception {
+        SBOLDocument doc = SBOLReader.read(TMP_PATH + "cyano_sl1099.xml");
+        doc.setDefaultURIprefix("http://bio.ed.ac.uk/a_mccormick/cyano_source/");
+        
+        ComponentDefinition sll0199Flat = doc.getComponentDefinition("sl0199_flatten", version);
+        assertNotNull(sll0199Flat);
+        
+        try (Writer w =Files.newBufferedWriter(Paths.get(TMP_PATH).resolve("sl0199_flatten.gb"))) {
+            GenBankConverter.write(sll0199Flat, w);
+        };
+        
+        
+    }
 
     @Test
+    @Ignore("Used to generate sbol with different id/names/labels combination to check rendering")
     public void testNaming() throws Exception {
 
         String version = "1.0.0";

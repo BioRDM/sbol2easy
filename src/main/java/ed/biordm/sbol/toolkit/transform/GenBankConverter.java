@@ -155,7 +155,7 @@ public class GenBankConverter {
      * @throws IOException input/output operation failed
      * @throws SBOLConversionException violates conversion limitations
      */
-    private static void write(ComponentDefinition componentDefinition, Writer w) throws IOException, SBOLConversionException {
+    public static void write(ComponentDefinition componentDefinition, Writer w) throws IOException, SBOLConversionException {
         writeComponentDefinition(componentDefinition, w);
     }
 
@@ -168,15 +168,29 @@ public class GenBankConverter {
      * @throws IOException input/output operation failed
      * @throws SBOLConversionException violates conversion limitations
      */
-    static void write(SBOLDocument sbolDocument, OutputStream out) throws IOException, SBOLConversionException {
-        Writer w = new OutputStreamWriter(out, "UTF-8");
-        for (ComponentDefinition componentDefinition : sbolDocument.getRootComponentDefinitions()) {
-            write(componentDefinition, w);
-        }
-        w.close();
+    public static void write(SBOLDocument sbolDocument, OutputStream out) throws IOException, SBOLConversionException {
+        try (Writer w = new OutputStreamWriter(out, "UTF-8")) {
+            for (ComponentDefinition componentDefinition : sbolDocument.getRootComponentDefinitions()) {
+                write(componentDefinition, w);
+            }
+        } 
     }
 
     private static String convertSOtoGenBank(String soTerm) {
+        
+        // Use the custom term converter to derive the feature type if it's misc_feature
+        String featureType = String.format("%-15s", genBank2SO.termToFeature(soTerm));
+        return featureType;
+        // never null never empty
+        /*
+        String soFeatureType = genBank2SO.termToFeature(soTerm);
+        if (soFeatureType != null && !soFeatureType.isBlank()) {
+            featureType = String.format("%-15s", soFeatureType);
+        }*/
+
+        /*
+        Original implementation
+        
         if (soTerm.equals("SO:0001023")) {
             return String.format("%-15s", "allele");
         }
@@ -424,22 +438,15 @@ public class GenBankConverter {
         if (soTerm.equals("SO:0000204")) {
             return String.format("%-15s", "5'UTR");
         }
+        */
 
-        String featureType = "misc_feature   ";
-
-        // Use the custom term converter to derive the feature type if it's misc_feature
-        String soFeatureType = genBank2SO.termToFeature(soTerm);
-
-        if (soFeatureType != null && !soFeatureType.isBlank()) {
-            featureType = String.format("%-15s", soFeatureType);
-        }
         /*
 		if (soTerm.equals("CDS") || soTerm.equals("promoter") || soTerm.equals("terminator"))
 			return String.format("%-15s", soTerm);
 		else if (soTerm.equals("ribosome_entry_site"))
 			return "RBS            ";
          */
-        return featureType;
+        //return "misc_feature";
     }
 
     private static URI convertGenBanktoSO(String genBankTerm) {
