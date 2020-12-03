@@ -1458,9 +1458,11 @@ public class GenBankConverter {
         return tag;
     }
 
-    private static String sanitizeStringValue(String value) {
+    protected static String sanitizeStringValue(String value) {
         value = value.replaceAll("&#x2028;", "   ");
         value = value.replaceAll("\n", "   ");
+        value = value.replaceAll(System.lineSeparator(), "   ");
+        value = value.replaceAll("\u2028", "   ");
         return value;
     }
 

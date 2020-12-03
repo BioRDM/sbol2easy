@@ -5,7 +5,6 @@
  */
 package ed.biordm.sbol.toolkit.transform;
 
-import static ed.biordm.sbol.toolkit.transform.GenBankConverter.writeNotes;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,6 +17,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
@@ -189,6 +189,16 @@ public class GenBankConverterTest {
                 assertTrue(output.contains(description));
             }
         }
+    }
+
+    @Test
+    public void testSanitizeStringValue() throws Exception {
+        String badString = "BBa_B0015 double terminator\n(B0010-B0012)&#x2028;pC0.082\u2028https://doi.org/10.1104/pp.18.0140                     1";
+
+        String cleanString = gbConverter.sanitizeStringValue(badString);
+
+        String expString = "BBa_B0015 double terminator   (B0010-B0012)   pC0.082   https://doi.org/10.1104/pp.18.0140                     1";
+        assertEquals(expString, cleanString);
     }
 
     private String getSequenceAnnoLabel(SequenceAnnotation seqAnn) {
