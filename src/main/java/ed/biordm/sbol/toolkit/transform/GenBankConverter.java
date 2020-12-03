@@ -91,6 +91,9 @@ public class GenBankConverter {
 
     protected static final GenBank2SO genBank2SO = new GenBank2SO();
 
+    // This array holds the QName local part Strings that should be written as "/note" elements in the GenBank output file
+    protected static final String[] noteQNames = new String[]{"description", "mutableDescription"};
+
     private static void writeGenBankLine(Writer w, String line, int margin, int indent) throws IOException {
         if (line.length() < margin) {
             w.write(line + "\n");
@@ -1003,16 +1006,30 @@ public class GenBankConverter {
             if (a.getQName().getLocalPart().equals("note")) {
                 foundLabel = true;
             }
+
             if (a.isStringValue()) {
+                String qNameLocal = a.getQName().getLocalPart();
+                boolean isNote = false;
+
+                for (String noteQName : noteQNames) {
+                    if (qNameLocal.equals(noteQName)) {
+                        isNote = true;
+                    }
+                }
+
                 try {
                     int aInt = Integer.parseInt(a.getStringValue());
                     writeGenBankLine(w, "                     /"
-                            + a.getQName().getLocalPart() + "="
+                            + qNameLocal + "="
                             + aInt, 80, 21);
                 } catch (NumberFormatException e) {
-                    writeGenBankLine(w, "                     /"
-                            + a.getQName().getLocalPart() + "="
-                            + "\"" + a.getStringValue() + "\"", 80, 21);
+                    // If it's an unrecognised QName, check if it's one of our
+                    // description types that wwill be converted to "/note" later
+                    if (!isNote) {
+                        writeGenBankLine(w, "                     /"
+                                + qNameLocal + "="
+                                + "\"" + a.getStringValue() + "\"", 80, 21);
+                    }
                 }
             } else if (a.isIntegerValue()) {
                 writeGenBankLine(w, "                     /"
@@ -1122,17 +1139,11 @@ public class GenBankConverter {
 
         for (Annotation a : i.getAnnotations()) {
             if (a.isStringValue()) {
-                if (a.getQName().getLocalPart().equals("mutableDescription")) {
-                    // <sbh:mutableDescription> user-edited description from SynBioHub ontology
-                    note = a.getStringValue();
-                } else if (a.getQName().getLocalPart().equals("description")) {
-                    // This does not seem to detect elements with the <dcterms:description> tag?
-                    note = a.getStringValue();
-                } /*else if (a.getQName().getLocalPart().equals("note") && hasDescription) {
-                    // <gbconv:note> from GenBank ontology
-                    // only required to write again if there is a description
-                    note = a.getStringValue();
-                }*/
+                for (String noteQName : noteQNames) {
+                    if (a.getQName().getLocalPart().equals(noteQName)) {
+                        note = a.getStringValue();
+                    }
+                }
             }
 
             if (note != null && !note.isBlank()) {
