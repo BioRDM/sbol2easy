@@ -5,7 +5,8 @@
  */
 package ed.biordm.sbol.toolkit.scrapbook;
 
-import static ed.biordm.sbol.toolkit.scrapbook.CyanoTemplates.SeqenceOntoPref;
+import static ed.biordm.sbol.toolkit.scrapbook.CyanoTemplate.createTemplatePlasmid;
+import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.*;
 import ed.biordm.sbol.toolkit.transform.GenBankConverter;
 import ed.biordm.sbol.toolkit.transform.TemplateTransformer;
 import java.io.File;
@@ -49,27 +50,40 @@ public class CyanoRecipeTest {
     @Test
     public void makeSll0199() throws Exception {
 
-        SBOLDocument templateDoc = SBOLReader.read(templateFile.toFile());
+        //SBOLDocument templateDoc = SBOLReader.read(templateFile.toFile());
+        SBOLDocument templateDoc = new SBOLDocument();
         templateDoc.setDefaultURIprefix("http://bio.ed.ac.uk/a_mccormick/cyano_source/");
         templateDoc.setComplete(true);
         templateDoc.setCreateDefaults(true);
+        
+        
 
         TemplateTransformer transformer = new TemplateTransformer();
 
-        ComponentDefinition template = templateDoc.getComponentDefinition("cyano_codA_Km", version);
+        //ComponentDefinition template = templateDoc.getComponentDefinition("cyano_codA_Km", version);
+        ComponentDefinition template = createTemplatePlasmid(templateDoc, version);
         assertNotNull(template);
 
         String description = template.getDescription();
         ComponentDefinition sll0199 = transformer.instantiateFromTemplate(template, "sll0199", version,
                 description, templateDoc);
+        
+        sll0199.createAnnotation(SBH_DESCRIPTION, "Generate a description for each plasmid, for example\n"
+                + "Recombinant plasmid targetting sll0199");
 
-        String lFlankSeq = "caaggcaaaaccaccgttatcagcagaacgacggcgggaaaaaatgattaaacgaaaaaatttgcaaggattcatagcggttgcccaatctaactcagggagcgacttcagcccacaaaaaacaccactgggcctactgggctattcccattatcatctacattgaagggatagcaagctaatttttatgacggcgatcgccaaaaacaaagaaaattcagcaattaccgtgggtagcaaaaaatccccatctaaagttcagtaaatatagctagaacaaccaagcattttcggcaaagtactattcagatagaacgagaaatgagcttgttctatccgcccggggctgaggctgtataatctacgacgggctgtcaaacattgtgataccatgggcagaagaaaggaaaaacgtccctgatcgcctttttgggcacggagtagggcgttaccccggcccgttcaaccacaagtccctatAGATACAATCGCCAAGAAGT";
+        //String lFlankSeq = "caaggcaaaaccaccgttatcagcagaacgacggcgggaaaaaatgattaaacgaaaaaatttgcaaggattcatagcggttgcccaatctaactcagggagcgacttcagcccacaaaaaacaccactgggcctactgggctattcccattatcatctacattgaagggatagcaagctaatttttatgacggcgatcgccaaaaacaaagaaaattcagcaattaccgtgggtagcaaaaaatccccatctaaagttcagtaaatatagctagaacaaccaagcattttcggcaaagtactattcagatagaacgagaaatgagcttgttctatccgcccggggctgaggctgtataatctacgacgggctgtcaaacattgtgataccatgggcagaagaaaggaaaaacgtccctgatcgcctttttgggcacggagtagggcgttaccccggcccgttcaaccacaagtccctatAGATACAATCGCCAAGAAGT";
+        String lFlankSeq = "CACTAGGCCAACCATAATGGCCATCGGCAAGGCAAAACCACCGTTATCAGCAGAACGACGGCGGGAAAAAATGATTAAACGAAAAAATTTGCAAGGATTCATAGCGGTTGCCCAATCTAACTCAGGGAGCGACTTCAGCCCACAAAAAACACCACTGGGCCTACTGGGCTATTCCCATTATCATCTACATTGAAGGGATAGCAAGCTAATTTTTATGACGGCGATCGCCAAAAACAAAGAAAATTCAGCAATTACCGTGGGTAGCAAAAAATCCCCATCTAAAGTTCAGTAAATATAGCTAGAACAACCAAGCATTTTCGGCAAAGTACTATTCAGATAGAACGAGAAATGAGCTTGTTCTATCCGCCCGGGGCTGAGGCTGTATAATCTACGACGGGCTGTCAAACATTGTGATACCATGGGCAGAAGAAAGGAAAAACGTCCCTGATCGCCTTTTTGGGCACGGAGTAGGGCGTTACCCCGGCCCGTTCAACCACAAGTCCCTATAGATACAATCGCCAAGAAGT";
         transformer.concretizePart(sll0199, "left", "sll0199_left", lFlankSeq, templateDoc);
 
-        String rFlankSeq = "tcagccagctcaatctgtgtgtcgttgatttaagcttaatgctacggggtctgtctccaactccctcagcttctcgcaatggcaaggcaaataatgtttctcttgctgagtagatgttcaggaggacggatcgaaagtctacaaaacagattcttgaccaagccatctacttagaaaaacttctgcgttttggcgatcgcatcttttaagcgagatgcgatttttttgtccattagtttgtattttaatactcttttgttgtttgatttcgtccaagcttttcttggtatgtgggatcttccgtgcccaaaattttatcccagaaagtgaaatatagtcatttcaattaacgatgagagaatttaatgtaaaattatggagtgtacaaaatgaacaggtttaaacaatggcttacagtttagatttaaggcaaagggtagtagcttatatagaagctggaggaaaaataactgaggcttccaagatatataaaataggaaaagcctcgatatacagatggttaaatagagtagatttaagcccaacaaaagtagagcgtcgccatagg";
+        //String rFlankSeq = "tcagccagctcaatctgtgtgtcgttgatttaagcttaatgctacggggtctgtctccaactccctcagcttctcgcaatggcaaggcaaataatgtttctcttgctgagtagatgttcaggaggacggatcgaaagtctacaaaacagattcttgaccaagccatctacttagaaaaacttctgcgttttggcgatcgcatcttttaagcgagatgcgatttttttgtccattagtttgtattttaatactcttttgttgtttgatttcgtccaagcttttcttggtatgtgggatcttccgtgcccaaaattttatcccagaaagtgaaatatagtcatttcaattaacgatgagagaatttaatgtaaaattatggagtgtacaaaatgaacaggtttaaacaatggcttacagtttagatttaaggcaaagggtagtagcttatatagaagctggaggaaaaataactgaggcttccaagatatataaaataggaaaagcctcgatatacagatggttaaatagagtagatttaagcccaacaaaagtagagcgtcgccatagg";
+        String rFlankSeq = "TCAGCCAGCTCAATCTGTGTGTCGTTGATTTAAGCTTAATGCTACGGGGTCTGTCTCCAACTCCCTCAGCTTCTCGCAATGGCAAGGCAAATAATGTTTCTCTTGCTGAGTAGATGTTCAGGAGGACGGATCGAAAGTCTACAAAACAGATTCTTGACCAAGCCATCTACTTAGAAAAACTTCTGCGTTTTGGCGATCGCATCTTTTAAGCGAGATGCGATTTTTTTGTCCATTAGTTTGTATTTTAATACTCTTTTGTTGTTTGATTTCGTCCAAGCTTTTCTTGGTATGTGGGATCTTCCGTGCCCAAAATTTTATCCCAGAAAGTGAAATATAGTCATTTCAATTAACGATGAGAGAATTTAATGTAAAATTATGGAGTGTACAAAATGAACAGGTTTAAACAATGGCTTACAGTTTAGATTTAAGGCAAAGGGTAGTAGCTTATATAGAAGCTGGAGGAAAAATAACTGAGGCTTCCAAGATATATAAAATAGGAAAAGCCTCGATATACAGATGGT";
         transformer.concretizePart(sll0199, "right", "sll0199_right", rFlankSeq, templateDoc);
 
+        sll0199.clearWasDerivedFroms();
+        
         ComponentDefinition sll0199Flat = transformer.flattenSequences(sll0199, "sl0199_flatten", templateDoc);
+        
+        sll0199Flat.clearWasDerivedFroms();
 
         SBOLValidate.validateSBOL(templateDoc, true, true, true);
         if (SBOLValidate.getNumErrors() > 0) {
@@ -88,6 +102,7 @@ public class CyanoRecipeTest {
     }
     
     @Test
+    //@Ignore
     public void testGBConversion() throws Exception {
         SBOLDocument doc = SBOLReader.read(TMP_PATH + "cyano_sl1099.xml");
         doc.setDefaultURIprefix("http://bio.ed.ac.uk/a_mccormick/cyano_source/");

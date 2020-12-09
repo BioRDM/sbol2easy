@@ -5,9 +5,8 @@
  */
 package ed.biordm.sbol.toolkit.transform;
 
-import static ed.biordm.sbol.toolkit.scrapbook.CyanoTemplates.SeqenceOntoPref;
+import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.*;
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +22,6 @@ import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLReader;
 import org.sbolstandard.core2.SBOLValidate;
-import org.sbolstandard.core2.SBOLWriter;
 import org.sbolstandard.core2.Sequence;
 import org.sbolstandard.core2.SequenceAnnotation;
 import org.sbolstandard.core2.SequenceOntology;
@@ -73,12 +71,12 @@ public class SynBioTamerTest {
         ComponentDefinition c180 = cpy.getComponentDefinition("IBMc180", "1");
         assertNotNull(c180);
         
-        assertNull(c180.getAnnotation(SynBioTamer.SB_OWNED));
+        assertNull(c180.getAnnotation(SBH_OWNED));
         
         SequenceAnnotation an = c180.getSequenceAnnotation("annotation18");
         assertNotNull(an);
         
-        Annotation gb = an.getAnnotation(SynBioTamer.GB_FEATURE);
+        Annotation gb = an.getAnnotation(GB_FEATURE);
         assertNotNull(gb);
         assertEquals("insulator",gb.getStringValue());
         assertEquals(Set.of(SequenceOntology.INSULATOR), an.getRoles());
@@ -202,8 +200,8 @@ public class SynBioTamerTest {
         assertEquals(Optional.empty(), instance.mapGenBankFeatureToRole(def));
         assertEquals(Optional.empty(), instance.mapGenBankFeatureToRole(an));
         
-        def.createAnnotation(SynBioTamer.GB_FEATURE, "INSulator");
-        an.createAnnotation(SynBioTamer.GB_FEATURE, "PROmoter");
+        def.createAnnotation(GB_FEATURE, "INSulator");
+        an.createAnnotation(GB_FEATURE, "PROmoter");
         
         assertEquals(Optional.of(SequenceOntology.INSULATOR), instance.mapGenBankFeatureToRole(def));
         assertEquals(Optional.of(SequenceOntology.PROMOTER), instance.mapGenBankFeatureToRole(an));
@@ -223,14 +221,14 @@ public class SynBioTamerTest {
         ComponentDefinition def = doc.createComponentDefinition("comp", ComponentDefinition.DNA_REGION);
         //def.addRole(SequenceOntology.ENGINEERED_REGION);
         def.addRole(SequenceOntology.SEQUENCE_FEATURE);
-        def.createAnnotation(SynBioTamer.GB_FEATURE, "insulator");
+        def.createAnnotation(GB_FEATURE, "insulator");
         
         SequenceAnnotation an = def.createSequenceAnnotation("an", "an");
         an.addRole(SequenceOntology.SEQUENCE_FEATURE);
-        an.createAnnotation(SynBioTamer.GB_FEATURE, "promoter");
+        an.createAnnotation(GB_FEATURE, "promoter");
 
         ComponentDefinition def2 = doc.createComponentDefinition("comp2", ComponentDefinition.DNA_REGION);
-        def2.createAnnotation(SynBioTamer.GB_FEATURE, "cds");
+        def2.createAnnotation(GB_FEATURE, "cds");
         
         instance.fixGenBankRoles(doc);
         
@@ -257,7 +255,7 @@ public class SynBioTamerTest {
 
         ComponentDefinition def = doc.createComponentDefinition("comp", ComponentDefinition.DNA_REGION);
         def.addRole(SequenceOntology.ENGINEERED_REGION);
-        def.createAnnotation(SynBioTamer.GB_FEATURE, "insulator");
+        def.createAnnotation(GB_FEATURE, "insulator");
         
         instance.fixGenBankRoles(doc);
         

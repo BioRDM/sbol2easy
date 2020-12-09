@@ -7,6 +7,8 @@ package ed.biordm.sbol.toolkit.scrapbook;
 
 import ed.biordm.sbol.toolkit.scrapbook.TrevorMetaReader;
 import ed.biordm.sbol.toolkit.scrapbook.TrevorFixer;
+import ed.biordm.sbol.toolkit.transform.CommonAnnotations;
+import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.*;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -45,17 +47,7 @@ public class TrevorFixerTest {
 
     }
 
-    //@Test
-    public void so() {
-        SequenceOntology so = new SequenceOntology();
 
-        URI t = SequenceOntology.NAMESPACE;; //so.getURIbyId("SO:0002232");
-        assertNotNull(t);
-        System.out.println(t);
-
-        System.out.println(TrevorFixer.selection);
-        fail();
-    }
     
     //@Test
     public void runConversion() throws Exception {
@@ -71,7 +63,7 @@ public class TrevorFixerTest {
         
         doc.getComponentDefinitions().forEach(cd -> {
 
-            assertNotNull(cd.getAnnotation(TrevorFixer.description));
+            assertNotNull(cd.getAnnotation(SBH_DESCRIPTION));
         });
 
         SBOLValidate.clearErrors();
@@ -101,7 +93,7 @@ public class TrevorFixerTest {
 
         doc.getComponentDefinitions().forEach(cd -> {
 
-            assertNotNull(cd.getAnnotation(TrevorFixer.description));
+            assertNotNull(cd.getAnnotation(SBH_DESCRIPTION));
         });
 
         SBOLValidate.clearErrors();

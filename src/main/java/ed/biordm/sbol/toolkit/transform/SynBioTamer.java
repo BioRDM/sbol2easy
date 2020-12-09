@@ -5,8 +5,8 @@
  */
 package ed.biordm.sbol.toolkit.transform;
 
+import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.*;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -29,12 +29,7 @@ import org.sbolstandard.core2.TopLevel;
  */
 public class SynBioTamer {
     
-    public static String SeqenceOntoPref = "http://identifiers.org/so/";
-    
-    final static QName SB_OWNED = new QName("http://wiki.synbiohub.org/wiki/Terms/synbiohub#","ownedBy");
-    final static QName SB_TOPLEVEL = new QName("http://wiki.synbiohub.org/wiki/Terms/synbiohub#","topLevel");
-    
-    final static QName GB_FEATURE = new QName("http://sbols.org/genBankConversion#","featureType");
+    //public static String SeqenceOntoPref = "http://identifiers.org/so/";
     
     public static String DEFAULT_NAMESPACE = "https://bio.ed.ac.uk/forsynbio/";
     
@@ -60,7 +55,7 @@ public class SynBioTamer {
         
         fixGenBankRoles(cpy);
         
-        removeAnnotations(cpy, List.of(SB_OWNED, SB_TOPLEVEL));
+        removeAnnotations(cpy, List.of(SBH_OWNED, SBH_TOPLEVEL));
         
         cpy.setComplete(true);
         return cpy;        
@@ -103,7 +98,7 @@ public class SynBioTamer {
     
     public void removeSynBioInternals(SBOLDocument doc) {
         
-        removeAnnotations(doc, List.of(SB_OWNED, SB_TOPLEVEL));
+        removeAnnotations(doc, List.of(SBH_OWNED, SBH_TOPLEVEL));
     }
     
     public void removeAnnotations(SBOLDocument doc, List<QName> subjects) {
