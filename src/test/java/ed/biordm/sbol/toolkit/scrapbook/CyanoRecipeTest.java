@@ -81,7 +81,7 @@ public class CyanoRecipeTest {
 
         sll0199.clearWasDerivedFroms();
         
-        ComponentDefinition sll0199Flat = transformer.flattenSequences(sll0199, "sl0199_flatten", templateDoc);
+        ComponentDefinition sll0199Flat = transformer.flattenSequences2(sll0199, "sl0199_flatten", templateDoc);
         
         sll0199Flat.clearWasDerivedFroms();
 

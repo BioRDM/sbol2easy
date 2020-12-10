@@ -5,9 +5,11 @@
  */
 package ed.biordm.sbol.toolkit.transform;
 
+import static ed.biordm.sbol.toolkit.transform.SynBioTamer.DEFAULT_NAMESPACE;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +21,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.Before;
 import org.sbolstandard.core2.AccessType;
+import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.Location;
@@ -31,6 +34,7 @@ import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.Sequence;
 import org.sbolstandard.core2.SequenceAnnotation;
 import org.sbolstandard.core2.SequenceConstraint;
+import org.sbolstandard.core2.SequenceOntology;
 
 /**
  *
@@ -824,4 +828,244 @@ public class TemplateTransformerTest {
             assertNotNull(newPlasmid.getSequenceConstraint(sll00199Sc.getDisplayId()));
         }
     }
+    
+    @Test
+    public void joinDNASequencesJoins() throws Exception {
+        
+        ComponentDefinition cont = doc.createComponentDefinition("cont", ComponentDefinition.DNA_REGION);
+        
+        Sequence sq1 = doc.createSequence("sq1", "AAA", Sequence.IUPAC_DNA);
+        ComponentDefinition cp1 = doc.createComponentDefinition("cp1", ComponentDefinition.DNA_REGION);
+        cp1.addSequence(sq1);
+        
+        // proteinf first not dna
+        Sequence sq2 = doc.createSequence("sq2p", "ALA", Sequence.IUPAC_PROTEIN);
+        ComponentDefinition cp2 = doc.createComponentDefinition("cp2", ComponentDefinition.DNA_REGION);
+        cp2.addSequence(sq2);
+
+        Sequence sq3 = doc.createSequence("sq3", "TT", Sequence.IUPAC_DNA);
+        ComponentDefinition cp3 = doc.createComponentDefinition("cp3", ComponentDefinition.DNA_REGION);
+        cp3.addSequence(sq3);
+        
+        List<Component> list = List.of(
+                cont.createComponent("cp1", AccessType.PUBLIC, cp1.getIdentity()),
+                cont.createComponent("cp2", AccessType.PUBLIC, cp2.getIdentity()),
+                cont.createComponent("cp3", AccessType.PUBLIC, cp3.getIdentity())
+        );
+        
+        try {
+            templateTransformer.joinDNASequences(list, "cont_seq", doc);
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        
+        sq2 = doc.createSequence("sq2", "C", Sequence.IUPAC_DNA);
+        cp2.addSequence(sq2);        
+        
+        Sequence seq = templateTransformer.joinDNASequences(list, "cont_seq", doc);
+        assertEquals(Sequence.IUPAC_DNA, seq.getEncoding());
+        assertEquals("AAACTT", seq.getElements());
+        
+        
+    }
+    
+    @Test
+    public void createsCmpCopy() throws Exception {
+        doc = testDoc("cyano_gen_template.xml");
+        String version = "1.0.0";
+        
+        ComponentDefinition p = doc.getComponentDefinition("backbone", version);
+        assertNotNull(p);
+        
+        Component comp = p.getComponent("ori_instance");
+        assertNotNull(comp);
+        
+        ComponentDefinition dest = doc.createComponentDefinition("testC", ComponentDefinition.DNA_REGION);
+        
+        Component cpy = templateTransformer.createCmpCopy(comp, dest);
+        assertNotNull(cpy);
+        assertNotNull(dest.getComponent("ori_instance"));
+    }
+    
+    @Test
+    public void createAnnCopy() throws Exception {
+        doc = testDoc("cyano_gen_template.xml");
+        String version = "1.0.0";
+        
+        ComponentDefinition p = doc.getComponentDefinition("backbone", version);
+        assertNotNull(p);
+        
+        SequenceAnnotation s = p.getSequenceAnnotation("AmpR_prom");
+        assertNotNull(s);
+        
+        ComponentDefinition dest = doc.createComponentDefinition("testC", ComponentDefinition.DNA_REGION);
+        
+        
+        SequenceAnnotation cpy = templateTransformer.createAnnCopy(s, dest,10);
+        assertNotNull(cpy);
+        assertSame(cpy, dest.getSequenceAnnotation("AmpR_prom"));
+        
+        assertEquals(Set.of(SequenceOntology.PROMOTER), cpy.getRoles());
+        Annotation a = cpy.getAnnotation(CommonAnnotations.GB_GENE);
+        assertNotNull(a);
+        assertEquals("bla", a.getStringValue());
+        
+        Range r = (Range) cpy.getLocation("AmpR_prom");
+        assertEquals(10+176, r.getStart());
+        assertEquals(10+280, r.getEnd());
+        
+    }  
+    
+    @Test
+    public void copySequenceFeaturesCopiesSeque() throws Exception {
+        
+        ComponentDefinition cont = doc.createComponentDefinition("cont", ComponentDefinition.DNA_REGION);
+        
+        Sequence sq1 = doc.createSequence("sq1", "AAA", Sequence.IUPAC_DNA);
+        ComponentDefinition cp1 = doc.createComponentDefinition("cp1", ComponentDefinition.DNA_REGION);
+        cp1.addSequence(sq1);
+
+        ComponentDefinition subD = doc.createComponentDefinition("sub", ComponentDefinition.DNA_REGION);
+        subD.addRole(SequenceOntology.PROMOTER);
+        Component sub = cp1.createComponent("sub", AccessType.PUBLIC, subD.getIdentity());
+        SequenceAnnotation ann = cp1.createSequenceAnnotation("ann1", "ann1", 1, 2, OrientationType.REVERSECOMPLEMENT);
+        ann.setComponent(sub.getPersistentIdentity());
+        
+        ann  = cp1.createSequenceAnnotation("ann2", "ann2", 1, 3);
+        ann.addRole(SequenceOntology.CDS);
+        
+        Sequence sq2 = doc.createSequence("sq2", "CC", Sequence.IUPAC_DNA);
+        ComponentDefinition cp2 = doc.createComponentDefinition("cp2", ComponentDefinition.DNA_REGION);
+        cp2.addSequence(sq2);
+
+        Sequence sq3 = doc.createSequence("sq3", "TTTT", Sequence.IUPAC_DNA);
+        ComponentDefinition cp3 = doc.createComponentDefinition("cp3", ComponentDefinition.DNA_REGION);
+        cp3.addSequence(sq3);
+
+        ann  = cp3.createSequenceAnnotation("ann3", "ann3", 2, 4);
+        ann.addRole(SequenceOntology.TERMINATOR);
+        ann.createAnnotation(CommonAnnotations.SBH_DESCRIPTION, new URI("https://biodare.ed.ac.uk"));
+        
+        List<Component> list = List.of(
+                cont.createComponent("cp1", AccessType.PUBLIC, cp1.getIdentity()),
+                cont.createComponent("cp2", AccessType.PUBLIC, cp2.getIdentity()),
+                cont.createComponent("cp3", AccessType.PUBLIC, cp3.getIdentity())
+        );
+        
+        ComponentDefinition dest = doc.createComponentDefinition("dest", ComponentDefinition.DNA_REGION);
+        
+        templateTransformer.copySequenceFeatures(list, dest);
+        
+        ann = dest.getSequenceAnnotation("ann1");
+        assertNotNull(ann);
+        assertEquals(ann.getComponent().getDefinitionIdentity(), subD.getPersistentIdentity());
+        assertEquals(1, ((Range)ann.getLocation("ann1")).getStart());
+        assertNotNull(dest.getComponent("sub"));
+
+        ann = dest.getSequenceAnnotation("ann2");
+        assertNotNull(ann);
+        assertEquals(Set.of(SequenceOntology.CDS), ann.getRoles());
+        assertEquals(1, ((Range)ann.getLocation("ann2")).getStart());
+        assertEquals(3, ((Range)ann.getLocation("ann2")).getEnd());
+
+        ann = dest.getSequenceAnnotation("ann3");
+        assertNotNull(ann);
+        assertEquals(Set.of(SequenceOntology.TERMINATOR), ann.getRoles());
+        assertEquals(7, ((Range)ann.getLocation("ann3")).getStart());
+        assertEquals(9, ((Range)ann.getLocation("ann3")).getEnd());
+        assertEquals(new URI("https://biodare.ed.ac.uk"), ann.getAnnotation(CommonAnnotations.SBH_DESCRIPTION).getURIValue());
+        
+        
+    }
+    
+
+    @Test
+    public void convertComponentsToFeaturesAddSequenceAnnotation() throws Exception {
+        
+        ComponentDefinition cont = doc.createComponentDefinition("cont", ComponentDefinition.DNA_REGION);
+        
+        Sequence sq1 = doc.createSequence("sq1", "AAA", Sequence.IUPAC_DNA);
+        ComponentDefinition cp1 = doc.createComponentDefinition("comp1", ComponentDefinition.DNA_REGION);
+        cp1.addRole(SequenceOntology.PROMOTER);
+        cp1.addSequence(sq1);
+
+        // some inner noise
+        ComponentDefinition subD = doc.createComponentDefinition("sub", ComponentDefinition.DNA_REGION);
+        subD.addRole(SequenceOntology.PROMOTER);
+        Component sub = cp1.createComponent("sub", AccessType.PUBLIC, subD.getIdentity());
+        SequenceAnnotation ann = cp1.createSequenceAnnotation("ann1", "ann1", 1, 2, OrientationType.REVERSECOMPLEMENT);
+        ann.setComponent(sub.getPersistentIdentity());        
+        ann  = cp1.createSequenceAnnotation("ann2", "ann2", 1, 3);
+        ann.addRole(SequenceOntology.CDS);
+        
+        Sequence sq2 = doc.createSequence("sq2", "CC", Sequence.IUPAC_DNA);
+        ComponentDefinition cp2 = doc.createComponentDefinition("comp2", ComponentDefinition.DNA_REGION);
+        cp2.setName("Comp 2");
+        cp2.addRole(SequenceOntology.CDS);
+        cp2.addSequence(sq2);
+
+        Sequence sq3 = doc.createSequence("sq3", "TTTT", Sequence.IUPAC_DNA);
+        ComponentDefinition cp3 = doc.createComponentDefinition("comp3", ComponentDefinition.DNA_REGION);
+        cp3.addSequence(sq3);
+        cp3.addRole(SequenceOntology.TERMINATOR);
+        cp3.createAnnotation(CommonAnnotations.SBH_DESCRIPTION, new URI("https://biodare.ed.ac.uk"));
+
+        
+        List<Component> list = List.of(
+                cont.createComponent("cp1", AccessType.PUBLIC, cp1.getIdentity()),
+                cont.createComponent("cp2", AccessType.PUBLIC, cp2.getIdentity()),
+                cont.createComponent("cp3", AccessType.PUBLIC, cp3.getIdentity())
+        );
+        
+        ComponentDefinition dest = doc.createComponentDefinition("dest", ComponentDefinition.DNA_REGION);
+        
+        templateTransformer.convertComponentsToFeatures(list, dest);
+        
+        ann = dest.getSequenceAnnotation("cp1");
+        assertNotNull(ann);
+        assertEquals(1, ((Range)ann.getLocation("cp1")).getStart());
+        assertEquals(3, ((Range)ann.getLocation("cp1")).getEnd());
+        assertEquals(Set.of(SequenceOntology.PROMOTER), ann.getRoles());
+        assertEquals("comp1", ann.getName());
+
+        ann = dest.getSequenceAnnotation("cp2");
+        assertNotNull(ann);
+        assertEquals(4, ((Range)ann.getLocation("cp2")).getStart());
+        assertEquals(5, ((Range)ann.getLocation("cp2")).getEnd());
+        assertEquals(Set.of(SequenceOntology.CDS), ann.getRoles());
+        assertEquals("Comp 2", ann.getName());
+
+        ann = dest.getSequenceAnnotation("cp3");
+        assertNotNull(ann);
+        assertEquals(6, ((Range)ann.getLocation("cp3")).getStart());
+        assertEquals(9, ((Range)ann.getLocation("cp3")).getEnd());
+        assertEquals(Set.of(SequenceOntology.TERMINATOR), ann.getRoles());
+        assertEquals("comp3", ann.getName());  
+        assertEquals(new URI("https://biodare.ed.ac.uk"), ann.getAnnotation(CommonAnnotations.SBH_DESCRIPTION).getURIValue());
+        
+        assertEquals(3, dest.getSequenceAnnotations().size());
+        
+    }
+    
+    public SBOLDocument testDoc(String fileName) throws SBOLValidationException {
+        try {
+            File file = testFile(fileName);
+            SBOLDocument doc = SBOLReader.read(file);
+            doc.setDefaultURIprefix("http://bio.ed.ac.uk/a_mccormick/cyano_source");
+            doc.setComplete(true);
+            doc.setCreateDefaults(true);
+        return doc;
+        } catch (SBOLValidationException| IOException | SBOLConversionException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+    
+    public File testFile(String name) {
+        try {
+            return new File(this.getClass().getResource(name).toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+
+    }    
 }

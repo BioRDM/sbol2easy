@@ -52,7 +52,7 @@ public class CyanoTemplate {
                 ComponentDefinition plasmid = createTemplatePlasmid(doc, version);
                 
                 
-                String fName = "cyano_full_template";
+                String fName = "cyano_gen_template";
                 SBOLValidate.validateSBOL(doc, true, true, true);
 		if (SBOLValidate.getNumErrors() > 0) {
                     for (String error : SBOLValidate.getErrors()) {
