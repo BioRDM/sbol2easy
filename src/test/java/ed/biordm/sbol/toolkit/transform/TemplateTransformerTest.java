@@ -854,7 +854,7 @@ public class TemplateTransformerTest {
         );
         
         try {
-            templateTransformer.joinDNASequences(list, "cont_seq", doc);
+            templateTransformer.joinDNASequences(list, "cont_seq", "1", doc);
         } catch (IllegalArgumentException e) {
             // expected
         }
@@ -862,7 +862,7 @@ public class TemplateTransformerTest {
         sq2 = doc.createSequence("sq2", "C", Sequence.IUPAC_DNA);
         cp2.addSequence(sq2);        
         
-        Sequence seq = templateTransformer.joinDNASequences(list, "cont_seq", doc);
+        Sequence seq = templateTransformer.joinDNASequences(list, "cont_seq", "1", doc);
         assertEquals(Sequence.IUPAC_DNA, seq.getEncoding());
         assertEquals("AAACTT", seq.getElements());
         

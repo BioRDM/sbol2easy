@@ -210,7 +210,7 @@ public class TemplateTransformer {
 
         List<Component> children = template.getSortedComponents();
         
-        Sequence joinedSequence = joinDNASequences(children,cleanName+"_seq", doc);
+        Sequence joinedSequence = joinDNASequences(children, cleanName+"_seq", template.getVersion(),doc);
         newCmpDef.addSequence(joinedSequence);
         
         convertComponentsToFeatures(children, newCmpDef);
@@ -546,11 +546,11 @@ public class TemplateTransformer {
         return newSeq;
     }
 
-    Sequence joinDNASequences(List<Component> components, String displayId, SBOLDocument doc) throws SBOLValidationException {
-        return joinSequences(components, displayId, Sequence.IUPAC_DNA, doc);
+    Sequence joinDNASequences(List<Component> components, String displayId, String version, SBOLDocument doc) throws SBOLValidationException {
+        return joinSequences(components, displayId, version, Sequence.IUPAC_DNA, doc);
     }    
     
-    Sequence joinSequences(List<Component> components, String displayId, URI seqType, SBOLDocument doc) throws SBOLValidationException {
+    Sequence joinSequences(List<Component> components, String displayId, String version, URI seqType, SBOLDocument doc) throws SBOLValidationException {
         
         StringBuilder sb = new StringBuilder();
         for (Component comp: components) {
@@ -562,7 +562,7 @@ public class TemplateTransformer {
             sb.append(seq.getElements());
         }
         
-        return doc.createSequence(displayId, sb.toString(), seqType);
+        return doc.createSequence(displayId, version, sb.toString(), seqType);
     }
     
     Optional<Sequence> getSequence(Component comp, URI seqType) {

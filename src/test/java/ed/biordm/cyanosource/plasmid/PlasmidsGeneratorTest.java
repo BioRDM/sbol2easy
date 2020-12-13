@@ -11,6 +11,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
@@ -164,6 +165,7 @@ public class PlasmidsGeneratorTest {
         String version = "1.0";
         
         Path out = tmp.newFolder().toPath();
+        //Path out = Paths.get("E:/Temp/sbol-test");
         
         instance.generate(name, version, file, out);
         

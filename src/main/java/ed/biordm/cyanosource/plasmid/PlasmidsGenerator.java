@@ -6,6 +6,7 @@
 package ed.biordm.cyanosource.plasmid;
 
 import static ed.biordm.cyanosource.plasmid.CyanoTemplate.createTemplatePlasmid;
+import ed.biordm.sbol.toolkit.transform.CommonAnnotations;
 import ed.biordm.sbol.toolkit.transform.FeaturesReader;
 import ed.biordm.sbol.toolkit.transform.GenBankConverter;
 import ed.biordm.sbol.toolkit.transform.TemplateTransformer;
@@ -48,7 +49,7 @@ public class PlasmidsGenerator {
     public static void main(String[] args) throws SBOLValidationException, SBOLConversionException, IOException, URISyntaxException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
         
         Path outDir = Paths.get("E:/Temp/cyanosource_"+LocalDate.now());
-        Path flanks = Paths.get("E:/Temp/flank-list_20200821.xlsx");
+        Path flanks = Paths.get("E:/Temp/flank-list_20200821_fix.xlsx");
         
         String version = "1.0";
         String name = "cyano_"+version;
@@ -206,7 +207,7 @@ public class PlasmidsGenerator {
         return doc;                
     }
 
-    void addGenne1stGenerationPlasmids(ComponentDefinition template, String gene, String lFlankSeq, String rFlankSeq,
+    protected void addGenne1stGenerationPlasmids(ComponentDefinition template, String gene, String lFlankSeq, String rFlankSeq,
                                 SBOLDocument doc, String version) throws SBOLValidationException {
         
         String description = "";
@@ -227,6 +228,9 @@ public class PlasmidsGenerator {
         
         //to make it top level
         flattenPlasmid.clearWasDerivedFroms();
+        flattenPlasmid.createAnnotation(CommonAnnotations.SBH_DESCRIPTION, 
+                "Version of "+gene+" design without subcomponents (flattened), "
+                + "which is suitable for GenBank export and sequence visualisation");
         
     }
 
