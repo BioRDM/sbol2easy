@@ -16,10 +16,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.SBOLConversionException;
@@ -36,6 +41,7 @@ public class PlasmidsGenerator {
     
     
     public final String CYANO_PREF = "http://bio.ed.ac.uk/a_mccormick/cyano_source/";
+    public int DEF_BATCH = 300;
     
     protected TemplateTransformer transformer = new TemplateTransformer();    
     
@@ -55,34 +61,54 @@ public class PlasmidsGenerator {
     protected void generate(String name, String version, Path flankFile, Path outDir) throws IOException, SBOLValidationException, SBOLConversionException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
     
         System.out.println("Generating ....");
-        SBOLDocument doc = generateFromFile(flankFile, version);
+        List<SBOLDocument> docs = generateFromFile(flankFile, version);
         
         System.out.println("Saving sbols ....");
         Files.createDirectories(outDir);
         
-        if (!name.endsWith(".sbol") && !name.endsWith("xml")) {
-            name = name+".sbol";
+        for (int i = 0; i< docs.size(); i++) {
+            Path file = outDir.resolve(name+"_"+i+".sbol");
+            saveSbol(docs.get(i), file);            
         }
-        Path file = outDir.resolve(name);
-        saveSbol(doc, file);
 
         System.out.println("Saving genbanks ....");
         
         outDir = outDir.resolve("genbank");
         Files.createDirectories(outDir);
         
-        saveFlattened(doc, outDir);
+        for (SBOLDocument doc: docs) {
+            saveFlattened(doc, outDir);
+        }
 
     }
     
-    protected SBOLDocument generateFromFile(Path flankFile, String version) throws IOException, SBOLValidationException {
+    protected List<SBOLDocument> generateFromFile(Path flankFile, String version) throws IOException, SBOLValidationException {
+        return generateFromFile(flankFile, version, DEF_BATCH);
+    }
+    
+    protected List<SBOLDocument> generateFromFile(Path flankFile, String version, int batchSize) throws IOException, SBOLValidationException {
         
         Map<String, String> leftFlanks = readSequences(flankFile, 0);
         Map<String, String> rightFlanks = readSequences(flankFile, 1);   
         
         checkCompletness(leftFlanks, rightFlanks);
         
-        return generatePlasmids(version, leftFlanks, rightFlanks);
+        List<List<String>> batches = splitKeys(leftFlanks.keySet(), batchSize);
+        AtomicInteger done = new AtomicInteger(0);
+        
+        return batches.parallelStream()
+                .map( genes -> {
+        
+                    try {
+                        SBOLDocument doc = generatePlasmids(genes, version, leftFlanks, rightFlanks);
+
+                        System.out.println("Generated part "+done.incrementAndGet()+"/"+batches.size());
+                        return doc;
+                    } catch (SBOLValidationException e) {
+                        throw new IllegalStateException(e.getMessage(),e);
+                    }
+                })
+                .collect(Collectors.toList());
     }
     
     protected void checkCompletness(Map<String, String> leftFlanks, Map<String, String> rightFlanks) {
@@ -104,27 +130,22 @@ public class PlasmidsGenerator {
         }    
     }
     
-    protected SBOLDocument generatePlasmids(String version, Map<String, String> leftFlanks, Map<String, String> rightFlanks) throws SBOLValidationException {
+    protected SBOLDocument generatePlasmids(List<String> genes, String version, Map<String, String> leftFlanks, Map<String, String> rightFlanks) throws SBOLValidationException {
         
         
         SBOLDocument doc = cyanoDocument();
         
         ComponentDefinition template = createTemplatePlasmid(doc, version);
         
-        int generated = 0;
-        for (String gene: leftFlanks.keySet()) {
+        for (String gene: genes) {
             
             String lFlankSeq = leftFlanks.get(gene);
             String rFlankSeq = rightFlanks.get(gene);
-            if (rFlankSeq == null) {
+            if (lFlankSeq == null || rFlankSeq == null) {
                 continue;
             }
             addGenne1stGenerationPlasmids(template, gene, lFlankSeq, rFlankSeq, doc, version);            
-            generated++;
             
-            if (generated % 100 == 0) {
-                System.out.println("Generated "+generated+" current: "+gene);
-            }
         }
         
         return doc;
@@ -209,12 +230,25 @@ public class PlasmidsGenerator {
         
     }
 
-    String extractGene(String key) {
+    protected String extractGene(String key) {
         int ix1 = key.indexOf("_");
         int ix2 = key.lastIndexOf("_");
         if (ix1 < 0 || (ix1+1) >= ix2)
             throw new IllegalArgumentException("Wrong format, expected 0xx0_gene_xxx got: "+key);
         
         return key.substring(ix1+1, ix2);
+    }
+
+    protected List<List<String>> splitKeys(Collection<String> keySet, int batchSize) {
+        
+        List<String> keys = new ArrayList<>(keySet);
+        Collections.sort(keys);
+        
+        List<List<String>> batches = new ArrayList<>();
+        for (int start = 0; start < keys.size(); start+=batchSize) {
+            int end = Math.min(start+batchSize, keys.size());
+            batches.add(keys.subList(start, end));
+        }
+        return batches;
     }
 }

@@ -11,6 +11,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
@@ -104,24 +105,54 @@ public class PlasmidsGeneratorTest {
         
     }
     
+    
     @Test
-    public void generatesFromFile() throws Exception {
+    public void generatePlasmids() throws Exception {
         
         Path file = testFile("flanks.xlsx");
         Map<String, String> leftFlanks = instance.readSequences(file, 0);
         Map<String, String> rightFlanks = instance.readSequences(file, 1);
         String version = "2.1";
         
-        SBOLDocument doc = instance.generatePlasmids(version, leftFlanks, rightFlanks);
+        List<String> genes = List.of("slr0612", "sll1214");
+        SBOLDocument doc = instance.generatePlasmids(genes, version, leftFlanks, rightFlanks);
         assertNotNull(doc);
         
         ComponentDefinition cp = doc.getComponentDefinition("slr0611", version);
         assertNull(cp);
         
+        cp = doc.getComponentDefinition("slr0611", version);
+        assertNull(cp);  
+        
+        cp = doc.getComponentDefinition("sll0558", version);
+        assertNull(cp);  
+        
+        
         cp = doc.getComponentDefinition("slr0612", version);
         assertNotNull(cp);        
         
         cp = doc.getComponentDefinition("sll1214_flatten", version);
+        assertNotNull(cp);        
+    }    
+    
+    @Test
+    public void generateFromFile() throws Exception {
+        
+        Path file = testFile("flanks.xlsx");
+        String version = "2.1";
+        
+        List<SBOLDocument> docs = instance.generateFromFile(file, version, 2);
+        assertNotNull(docs);
+        
+        //assertEquals(2, docs.size());
+        
+        ComponentDefinition cp;
+        
+        
+        cp = docs.get(1).getComponentDefinition("slr0612", version);
+        assertNotNull(cp);        
+        
+        cp = docs.get(1).getComponentDefinition("sll1214_flatten", version);
         assertNotNull(cp);        
     }
     
@@ -136,7 +167,7 @@ public class PlasmidsGeneratorTest {
         
         instance.generate(name, version, file, out);
         
-        Path sbol = out.resolve("cyano.sbol");
+        Path sbol = out.resolve("cyano_0.sbol");
         assertTrue(Files.isRegularFile(sbol));
         
         Path gbs = out.resolve("genbank");
@@ -145,7 +176,29 @@ public class PlasmidsGeneratorTest {
         assertEquals(4, Files.list(gbs).count());
         
     }
-            
+           
+    @Test
+    public void splitKeys() {
+        
+        List<String> keys = List.of();
+        
+        List<List<String>> exp = List.of();
+        
+        assertEquals(exp, instance.splitKeys(keys, 2));
+        
+        keys = List.of("c");
+        exp = List.of(List.of("c"));
+        assertEquals(exp, instance.splitKeys(keys, 2));
+        
+        keys = List.of("c","a");
+        exp = List.of(List.of("a","c"));
+        assertEquals(exp, instance.splitKeys(keys, 2));
+        
+        keys = List.of("c","a","b");
+        exp = List.of(List.of("a","b"), List.of("c"));
+        assertEquals(exp, instance.splitKeys(keys, 2));
+        
+    }
             
     public Path testFile(String name) {
         try {
