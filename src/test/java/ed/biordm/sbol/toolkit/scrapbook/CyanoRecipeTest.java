@@ -68,8 +68,8 @@ public class CyanoRecipeTest {
         ComponentDefinition sll0199 = transformer.instantiateFromTemplate(template, "sll0199", version,
                 description, templateDoc);
         
-        sll0199.createAnnotation(SBH_DESCRIPTION, "Generate a description for each plasmid, for example\n"
-                + "Recombinant plasmid targetting sll0199");
+        //sll0199.createAnnotation(SBH_DESCRIPTION, "Generate a description for each plasmid, for example\n"
+        //        + "Recombinant plasmid targetting sll0199");
 
         //String lFlankSeq = "caaggcaaaaccaccgttatcagcagaacgacggcgggaaaaaatgattaaacgaaaaaatttgcaaggattcatagcggttgcccaatctaactcagggagcgacttcagcccacaaaaaacaccactgggcctactgggctattcccattatcatctacattgaagggatagcaagctaatttttatgacggcgatcgccaaaaacaaagaaaattcagcaattaccgtgggtagcaaaaaatccccatctaaagttcagtaaatatagctagaacaaccaagcattttcggcaaagtactattcagatagaacgagaaatgagcttgttctatccgcccggggctgaggctgtataatctacgacgggctgtcaaacattgtgataccatgggcagaagaaaggaaaaacgtccctgatcgcctttttgggcacggagtagggcgttaccccggcccgttcaaccacaagtccctatAGATACAATCGCCAAGAAGT";
         String lFlankSeq = "CACTAGGCCAACCATAATGGCCATCGGCAAGGCAAAACCACCGTTATCAGCAGAACGACGGCGGGAAAAAATGATTAAACGAAAAAATTTGCAAGGATTCATAGCGGTTGCCCAATCTAACTCAGGGAGCGACTTCAGCCCACAAAAAACACCACTGGGCCTACTGGGCTATTCCCATTATCATCTACATTGAAGGGATAGCAAGCTAATTTTTATGACGGCGATCGCCAAAAACAAAGAAAATTCAGCAATTACCGTGGGTAGCAAAAAATCCCCATCTAAAGTTCAGTAAATATAGCTAGAACAACCAAGCATTTTCGGCAAAGTACTATTCAGATAGAACGAGAAATGAGCTTGTTCTATCCGCCCGGGGCTGAGGCTGTATAATCTACGACGGGCTGTCAAACATTGTGATACCATGGGCAGAAGAAAGGAAAAACGTCCCTGATCGCCTTTTTGGGCACGGAGTAGGGCGTTACCCCGGCCCGTTCAACCACAAGTCCCTATAGATACAATCGCCAAGAAGT";
@@ -79,10 +79,12 @@ public class CyanoRecipeTest {
         String rFlankSeq = "TCAGCCAGCTCAATCTGTGTGTCGTTGATTTAAGCTTAATGCTACGGGGTCTGTCTCCAACTCCCTCAGCTTCTCGCAATGGCAAGGCAAATAATGTTTCTCTTGCTGAGTAGATGTTCAGGAGGACGGATCGAAAGTCTACAAAACAGATTCTTGACCAAGCCATCTACTTAGAAAAACTTCTGCGTTTTGGCGATCGCATCTTTTAAGCGAGATGCGATTTTTTTGTCCATTAGTTTGTATTTTAATACTCTTTTGTTGTTTGATTTCGTCCAAGCTTTTCTTGGTATGTGGGATCTTCCGTGCCCAAAATTTTATCCCAGAAAGTGAAATATAGTCATTTCAATTAACGATGAGAGAATTTAATGTAAAATTATGGAGTGTACAAAATGAACAGGTTTAAACAATGGCTTACAGTTTAGATTTAAGGCAAAGGGTAGTAGCTTATATAGAAGCTGGAGGAAAAATAACTGAGGCTTCCAAGATATATAAAATAGGAAAAGCCTCGATATACAGATGGT";
         transformer.concretizePart(sll0199, "right", "sll0199_right", rFlankSeq, templateDoc);
 
+        //to make it top level
         sll0199.clearWasDerivedFroms();
         
         ComponentDefinition sll0199Flat = transformer.flattenSequences2(sll0199, "sl0199_flatten", templateDoc);
         
+        //to make it top level
         sll0199Flat.clearWasDerivedFroms();
 
         SBOLValidate.validateSBOL(templateDoc, true, true, true);
@@ -102,7 +104,7 @@ public class CyanoRecipeTest {
     }
     
     @Test
-    //@Ignore
+    @Ignore
     public void testGBConversion() throws Exception {
         SBOLDocument doc = SBOLReader.read(TMP_PATH + "cyano_sl1099.xml");
         doc.setDefaultURIprefix("http://bio.ed.ac.uk/a_mccormick/cyano_source/");

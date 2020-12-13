@@ -22,14 +22,12 @@ import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.Identified;
 import org.sbolstandard.core2.Location;
-import org.sbolstandard.core2.OrientationType;
 import org.sbolstandard.core2.Range;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.Sequence;
 import org.sbolstandard.core2.SequenceAnnotation;
 import org.sbolstandard.core2.SequenceConstraint;
-import static org.sbolstandard.examples.Sbol2Terms.component.start;
 
 /**
  *
@@ -51,7 +49,7 @@ public class TemplateTransformer {
      * @throws URISyntaxException
      */
     public ComponentDefinition instantiateFromTemplate(ComponentDefinition template,
-            String newName, String version, String description, SBOLDocument doc) throws SBOLValidationException, URISyntaxException {
+            String newName, String version, String description, SBOLDocument doc) throws SBOLValidationException {
 
         // name should be sanitized for conversion into display id as alphanumeric with _ (replace all non alphanumeric characters with _)
         // it should be deep copy, i.e. the owned object must be copied like component, sequenceanotations, sequenceConstraints
@@ -84,7 +82,7 @@ public class TemplateTransformer {
      * @throws URISyntaxException
      */
     public ComponentDefinition concretizePart(ComponentDefinition parent, String genericComponentId,
-            String newName, String newSequence, SBOLDocument doc) throws SBOLValidationException, URISyntaxException {
+            String newName, String newSequence, SBOLDocument doc) throws SBOLValidationException {
 
         // name shoudl be sanitize for conversion into display id as alphanumeric with _ (replace all not alphanumeri caracters with _)
         // parent has a sub component of the genericComponentId which has to be replaced by the new definiton
@@ -200,7 +198,7 @@ public class TemplateTransformer {
      * @throws SBOLValidationException
      * @throws URISyntaxException
      */
-    public ComponentDefinition flattenSequences2(ComponentDefinition template, String newName, SBOLDocument doc) throws SBOLValidationException, URISyntaxException {
+    public ComponentDefinition flattenSequences2(ComponentDefinition template, String newName, SBOLDocument doc) throws SBOLValidationException {
 
         String cleanName = sanitizeName(newName);
 
@@ -215,9 +213,10 @@ public class TemplateTransformer {
         Sequence joinedSequence = joinDNASequences(children,cleanName+"_seq", doc);
         newCmpDef.addSequence(joinedSequence);
         
+        convertComponentsToFeatures(children, newCmpDef);
+        
         copySequenceFeatures(children, newCmpDef);
         
-        convertComponentsToFeatures(children, newCmpDef);
         
         return newCmpDef;
     }

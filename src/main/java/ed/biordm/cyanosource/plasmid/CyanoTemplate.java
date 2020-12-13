@@ -3,25 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ed.biordm.sbol.toolkit.scrapbook;
+package ed.biordm.cyanosource.plasmid;
 
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.*;
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
-import javax.xml.namespace.QName;
 
 import org.sbolstandard.core2.AccessType;
 import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.OrientationType;
 import org.sbolstandard.core2.RestrictionType;
-import org.sbolstandard.core2.SBOLConversionException;
 import org.sbolstandard.core2.SBOLDocument;
-import org.sbolstandard.core2.SBOLValidate;
 import org.sbolstandard.core2.SBOLValidationException;
-import org.sbolstandard.core2.SBOLWriter;
 import org.sbolstandard.core2.Sequence;
 import org.sbolstandard.core2.SequenceAnnotation;
 import org.sbolstandard.core2.SequenceOntology;
@@ -35,55 +29,18 @@ import org.sbolstandard.core2.SequenceOntology;
 
 public class CyanoTemplate {
 
-    
-    
-	public static void main(String[] args) throws SBOLValidationException, SBOLConversionException, IOException, URISyntaxException {
-		
-		SBOLDocument doc = new SBOLDocument();
-
-		doc.setDefaultURIprefix("http://bio.ed.ac.uk/a_mccormick/cyano_source/");
-		doc.setComplete(true);
-		doc.setCreateDefaults(true);
-                
-		
-		String version = "1.0.0";
-                
-                
-                ComponentDefinition plasmid = createTemplatePlasmid(doc, version);
-                
-                
-                String fName = "cyano_gen_template";
-                SBOLValidate.validateSBOL(doc, true, true, true);
-		if (SBOLValidate.getNumErrors() > 0) {
-                    for (String error : SBOLValidate.getErrors()) {
-                            System.out.println(error);
-                    }
-                    throw new IllegalStateException("Stoping cause of validation errors");
-		}
-                
-		try {
-			SBOLWriter.write(doc, "E:/Temp/"+fName+".xml");
-                } catch (IOException e) {
-			e.printStackTrace();
-                        throw e;
-		}
-		
-	}
-        
     public static ComponentDefinition createTemplatePlasmid(SBOLDocument doc, String version) throws SBOLValidationException {
         
-                ComponentDefinition insert = createCassete(doc, version);
-		
-                ComponentDefinition ampROrg = createBackbone(doc, version);
+        ComponentDefinition insert = createCassete(doc, version);
 
-                //ComponentDefinition endGap = createEndGap(doc, version);
-                
-                ComponentDefinition leftFlank = createLeftFlank(doc, version);
+        ComponentDefinition ampROrg = createBackbone(doc, version);
 
-                ComponentDefinition rightFlank = createRightFlank(doc, version);
-                
-                ComponentDefinition plasmid = assembleTemplatePlasmid(doc, version, ampROrg, leftFlank, insert, rightFlank);  
-                return plasmid;
+        ComponentDefinition leftFlank = createLeftFlank(doc, version);
+
+        ComponentDefinition rightFlank = createRightFlank(doc, version);
+
+        ComponentDefinition plasmid = assembleTemplatePlasmid(doc, version, ampROrg, leftFlank, insert, rightFlank);  
+        return plasmid;
     }    
 
     static ComponentDefinition createCassete(SBOLDocument doc, String version) throws SBOLValidationException {

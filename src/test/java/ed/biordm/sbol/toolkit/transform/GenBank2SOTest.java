@@ -60,6 +60,7 @@ public class GenBank2SOTest {
         assertEquals("CDS",instance.termToFeature(SequenceOntology.CDS));
         assertEquals("gap", instance.termToFeature("http://www.sequenceontology.org/browser/current_svn/term/SO:0000730"));
         assertEquals("Insulator", instance.termToFeature("SO:0000627"));
+        assertEquals("gap", instance.termToFeature("SO:0000730"));
     }
 
     @Test
