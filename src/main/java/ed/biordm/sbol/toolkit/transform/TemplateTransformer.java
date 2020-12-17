@@ -7,6 +7,7 @@ package ed.biordm.sbol.toolkit.transform;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -545,6 +546,84 @@ public class TemplateTransformer {
 
         return newSeq;
     }
+    
+    protected Optional<SequenceAnnotation> getAnnotationForComponent(Component comp, ComponentDefinition parent) {
+        return parent.getSequenceAnnotations().stream()
+                .filter( ann -> ann.getComponent() == comp)
+                .findFirst()
+                ;
+    }
+    
+    protected int getLengthFromLocation(SequenceAnnotation ann) {
+        if (ann.getLocations().size() != 1)
+            throw new IllegalArgumentException("Unsuportend number of locations: "+ann.getLocations().size());
+        
+        Location loc = ann.getLocations().iterator().next();
+        if (loc instanceof Range) {
+            Range range = (Range)loc;
+            return (range.getEnd()-range.getStart())+1;
+        }
+        throw new IllegalArgumentException("Unsuported location type: "+loc);
+    }
+    
+    protected int getChildLength(Component child, ComponentDefinition parent) {
+        int childLength = getSequence(child, Sequence.IUPAC_DNA)
+                                .map(s -> s.getElements().length())
+                                .orElse(0);
+        int locationLength = getAnnotationForComponent(child, parent)
+                                .map( a -> getLengthFromLocation(a))
+                                .orElse(0);
+        if (childLength == 0 && locationLength == 0)
+            throw new IllegalArgumentException("Cannot calculate componet length, which does not have sequence nor"
+                    + " location at parent, c: "+child.getDisplayId()+" p: "+parent.getDisplayId());
+        if (childLength == locationLength)
+            return childLength;
+        if (childLength > 0 && locationLength == 0)
+            return childLength;
+        if (childLength == 0 && locationLength > 0)
+            return locationLength;
+        throw new IllegalArgumentException("Mismatch between component: "+child.getDisplayId()+"length: "+childLength+
+                " and from its location "+locationLength+" one in parent: "+parent.getDisplayId());
+    }
+    
+    protected List<SequenceAnnotation> mapComponentIntoFeatures(Component comp, int compLength, int shift,
+            ComponentDefinition destination) throws SBOLValidationException {
+        
+        List<SequenceAnnotation> features = new ArrayList<>();
+        
+        ComponentDefinition parent = comp.getDefinition();
+        List<Component> children = parent.getSortedComponents();
+        
+        int childShift = shift;
+        
+        for (Component child: children) {
+            int childLength = getChildLength(child, parent);
+            List<SequenceAnnotation> childFeatures = mapComponentIntoFeatures(child, childLength, childShift, destination);
+
+            childShift+=childLength;
+            features.addAll(childFeatures);
+        }
+        
+        //features.add(convertComponentToFeature(comp, length, destination, shift));
+        
+        return features;
+    }
+    
+    protected String joinSequenceElements(ComponentDefinition definition, URI seqType) throws SBOLValidationException {
+        
+        Optional<Sequence> explicit = getSequence(definition, seqType);
+        if (explicit.isPresent()) return explicit.get().getElements();
+        
+        List<Component> children = definition.getSortedComponents();
+        if (children.isEmpty())
+            throw new IllegalArgumentException("Cannot join sequence from component without one: "+definition.getDisplayId());
+        
+        StringBuilder sb = new StringBuilder();
+        for (Component comp: children) {
+            sb.append(joinSequenceElements(comp.getDefinition(), seqType));
+        }
+        return sb.toString();
+    }
 
     Sequence joinDNASequences(List<Component> components, String displayId, String version, SBOLDocument doc) throws SBOLValidationException {
         return joinSequences(components, displayId, version, Sequence.IUPAC_DNA, doc);
@@ -566,17 +645,43 @@ public class TemplateTransformer {
     }
     
     Optional<Sequence> getSequence(Component comp, URI seqType) {
-        ComponentDefinition def = comp.getDefinition();
+        return getSequence(comp.getDefinition(), seqType);
+    }
+    
+    Optional<Sequence> getSequence(ComponentDefinition def, URI seqType) {
         for (Sequence seq : def.getSequences()) {
             if (seq.getEncoding().equals(seqType)) return Optional.of(seq);
         }
         return Optional.empty();
+    }    
+
+    
+    int calculateSequenceLength(ComponentDefinition comp, URI seqType, Map<URI, Integer> lengthCache) {
+        
+        int length = 0;
+        Optional<Sequence> seq = getSequence(comp, seqType);
+        if (seq.isPresent()) {
+            length = seq.get().getElements().length();
+        } else {
+            if (comp.getComponents().isEmpty())
+                throw new IllegalArgumentException("Cannot calculate sequence length with no seq component def: "+comp.getDisplayId());
+            
+            for (Component child : comp.getComponents()) {
+                length+=calculateSequenceLength(child.getDefinition(), seqType, lengthCache);
+            }
+        }
+        lengthCache.put(comp.getIdentity(), length);
+        return length;
     }
     
-    int getDNASequenceLenth(Component comp) {
+    int getDNASequenceLenth(ComponentDefinition comp) {
         return getSequence(comp, Sequence.IUPAC_DNA)
                 .orElseThrow(()-> new IllegalArgumentException("Missing sequence in comp "+comp.getDisplayId()))
                 .getElements().length();
+    }
+    
+    int getDNASequenceLenth(Component comp) {
+        return getDNASequenceLenth(comp.getDefinition());
     }
     
 
@@ -696,7 +801,13 @@ public class TemplateTransformer {
         int length = getDNASequenceLenth(comp);
         ComponentDefinition compD = comp.getDefinition();
         
-        SequenceAnnotation ann = dest.createSequenceAnnotation(comp.getDisplayId(), comp.getDisplayId(), shift+1, shift+length);
+        String id =comp.getDisplayId();
+        int suff = 2;
+        while (dest.getSequenceAnnotation(id) != null) {
+            id = comp.getDisplayId()+"_"+suff++;
+        }
+        
+        SequenceAnnotation ann = dest.createSequenceAnnotation(id, id, shift+1, shift+length);
         
         Set<URI> roles = new HashSet<>(comp.getRoles());
         roles.addAll(compD.getRoles());
@@ -708,4 +819,6 @@ public class TemplateTransformer {
         
         return ann;
     }
+    
+   
 }
