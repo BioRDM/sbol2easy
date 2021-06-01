@@ -102,7 +102,6 @@ public class PlasmidsGenerator {
         
                     try {
                         SBOLDocument doc = generatePlasmids(genes, version, leftFlanks, rightFlanks);
-
                         System.out.println("Generated part "+done.incrementAndGet()+"/"+batches.size());
                         return doc;
                     } catch (SBOLValidationException e) {
@@ -194,7 +193,7 @@ public class PlasmidsGenerator {
         orgFeatures.forEach((key, value) -> {
             value = value.trim();
             if (!value.isEmpty()) {
-                features.put(extractGene(key), value);
+                features.put(extractDisplayId(key), value);
             }
         });
         return features;
@@ -239,7 +238,25 @@ public class PlasmidsGenerator {
         
     }
 
-    protected String extractGene(String key) {
+    protected String extractDisplayId(String key) {
+        int ix1 = key.indexOf("_");
+        int ix2 = key.indexOf("_", ix1+1);
+        if (ix1 < 0 || ix2 < 0 || (ix2 == (ix1+1)) )
+            throw new IllegalArgumentException("Wrong format, expected 0xx0_gene_yyy got: "+key);
+        
+        return "cs"+key.substring(0, ix2);
+    }    
+    
+    protected String extractGeneFromId(String key) {
+        int ix1 = key.indexOf("_");
+        int ix2 = key.lastIndexOf("_");
+        if (ix1 < 0 || (ix1 != ix2))
+            throw new IllegalArgumentException("Wrong format, expected 0xx0_gene got: "+key);
+        
+        return key.substring(ix1+1, key.length());
+    }
+    
+    protected String extractGeneO(String key) {
         int ix1 = key.indexOf("_");
         int ix2 = key.lastIndexOf("_");
         if (ix1 < 0 || (ix1+1) >= ix2)
@@ -247,6 +264,7 @@ public class PlasmidsGenerator {
         
         return key.substring(ix1+1, ix2);
     }
+    
 
     protected List<List<String>> splitKeys(Collection<String> keySet, int batchSize) {
         

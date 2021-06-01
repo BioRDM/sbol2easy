@@ -73,23 +73,69 @@ public class PlasmidsGeneratorTest {
     public void extractsGene() {
         
         String key = "01_g";
-        try {
-            instance.extractGene(key);
-        } catch (IllegalArgumentException e) {};
         
         key = "01";
         try {
-            instance.extractGene(key);
+            instance.extractGeneFromId(key);
         } catch (IllegalArgumentException e) {};        
         
         key = "01__a";
         try {
-            instance.extractGene(key);
+            instance.extractGeneFromId(key);
+        } catch (IllegalArgumentException e) {};        
+
+        key = "0002_slr0612_right";
+        try {
+            instance.extractGeneFromId(key);
+        } catch (IllegalArgumentException e) {};        
+        
+        key = "0002_slr0612";
+        assertEquals("slr0612", instance.extractGeneFromId(key));
+    }
+    
+    @Test
+    public void extractsGeneO() {
+        
+        String key = "01_g";
+        try {
+            instance.extractGeneO(key);
+        } catch (IllegalArgumentException e) {};
+        
+        key = "01";
+        try {
+            instance.extractGeneO(key);
+        } catch (IllegalArgumentException e) {};        
+        
+        key = "01__a";
+        try {
+            instance.extractGeneO(key);
         } catch (IllegalArgumentException e) {};        
         
         key = "0002_slr0612_right";
-        assertEquals("slr0612", instance.extractGene(key));
-    }
+        assertEquals("slr0612", instance.extractGeneO(key));
+    }    
+    
+    @Test
+    public void extractsDisplayId() {
+        
+        String key = "01_g";
+        try {
+            instance.extractDisplayId(key);
+        } catch (IllegalArgumentException e) {};
+        
+        key = "01";
+        try {
+            instance.extractDisplayId(key);
+        } catch (IllegalArgumentException e) {};        
+        
+        key = "01__a";
+        try {
+            instance.extractDisplayId(key);
+        } catch (IllegalArgumentException e) {};        
+        
+        key = "0002_slr0612_right";
+        assertEquals("cs0002_slr0612", instance.extractDisplayId(key));
+    }    
     
     @Test
     public void readsSequences() throws Exception {
@@ -97,11 +143,11 @@ public class PlasmidsGeneratorTest {
         Path file = testFile("flanks.xlsx");
         
         Map<String, String> flanks = instance.readSequences(file, 0);
-        assertTrue(flanks.containsKey("slr0612"));
+        assertTrue(flanks.containsKey("cs0002_slr0612"));
         assertEquals(5, flanks.size());
         
         flanks = instance.readSequences(file, 1);
-        assertTrue(flanks.containsKey("slr0612"));
+        assertTrue(flanks.containsKey("cs0002_slr0612"));
         assertEquals(4, flanks.size());        
         
     }
@@ -115,24 +161,24 @@ public class PlasmidsGeneratorTest {
         Map<String, String> rightFlanks = instance.readSequences(file, 1);
         String version = "2.1";
         
-        List<String> genes = List.of("slr0612", "sll1214");
+        List<String> genes = List.of("cs0002_slr0612", "cs0005_sll1214");
         SBOLDocument doc = instance.generatePlasmids(genes, version, leftFlanks, rightFlanks);
         assertNotNull(doc);
         
-        ComponentDefinition cp = doc.getComponentDefinition("slr0611", version);
+        ComponentDefinition cp = doc.getComponentDefinition("cs0001_slr0611", version);
         assertNull(cp);
         
-        cp = doc.getComponentDefinition("slr0611", version);
+        cp = doc.getComponentDefinition("cs0001_slr0611", version);
         assertNull(cp);  
         
-        cp = doc.getComponentDefinition("sll0558", version);
+        cp = doc.getComponentDefinition("cs0004_sll0558", version);
         assertNull(cp);  
         
         
-        cp = doc.getComponentDefinition("slr0612", version);
+        cp = doc.getComponentDefinition("cs0002_slr0612", version);
         assertNotNull(cp);        
         
-        cp = doc.getComponentDefinition("sll1214_flatten", version);
+        cp = doc.getComponentDefinition("cs0002_slr0612_flatten", version);
         assertNotNull(cp);        
     }    
     
@@ -151,10 +197,10 @@ public class PlasmidsGeneratorTest {
         ComponentDefinition cp;
         
         
-        cp = docs.get(1).getComponentDefinition("slr0612", version);
+        cp = docs.get(0).getComponentDefinition("cs0002_slr0612", version);
         assertNotNull(cp);        
         
-        cp = docs.get(1).getComponentDefinition("sll1214_flatten", version);
+        cp = docs.get(0).getComponentDefinition("cs0002_slr0612_flatten", version);
         assertNotNull(cp);        
     }
     
