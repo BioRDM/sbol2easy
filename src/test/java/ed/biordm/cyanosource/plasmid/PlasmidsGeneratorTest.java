@@ -142,6 +142,7 @@ public class PlasmidsGeneratorTest {
         Path file = testFile("flanks.xlsx");
         String version = "2.1";
         
+        instance.ONLY_FULL = false;        
         List<SBOLDocument> docs = instance.generateFromFile(file, version, 2);
         assertNotNull(docs);
         
@@ -167,6 +168,7 @@ public class PlasmidsGeneratorTest {
         Path out = tmp.newFolder().toPath();
         //Path out = Paths.get("E:/Temp/sbol-test");
         
+        instance.ONLY_FULL = false;
         instance.generate(name, version, file, out);
         
         Path sbol = out.resolve("cyano_0.sbol");
@@ -178,6 +180,24 @@ public class PlasmidsGeneratorTest {
         assertEquals(4, Files.list(gbs).count());
         
     }
+    
+    @Test
+    public void generateStopsOnMissing() throws Exception {
+        
+        Path file = testFile("flanks.xlsx");
+        String name = "cyano";
+        String version = "1.0";
+        
+        Path out = tmp.newFolder().toPath();
+        //Path out = Paths.get("E:/Temp/sbol-test");
+        
+        try {
+            instance.generate(name, version, file, out);
+            fail("Exception expected");
+        } catch (IllegalArgumentException e) {}
+        
+        
+    }    
            
     @Test
     public void splitKeys() {

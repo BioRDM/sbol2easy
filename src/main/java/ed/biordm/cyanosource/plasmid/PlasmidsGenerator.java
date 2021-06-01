@@ -40,7 +40,7 @@ import org.sbolstandard.core2.SBOLWriter;
  */
 public class PlasmidsGenerator {
     
-    
+    public boolean ONLY_FULL = true;
     public final String CYANO_PREF = "http://bio.ed.ac.uk/a_mccormick/cyano_source/";
     public int DEF_BATCH = 300;
     
@@ -114,12 +114,14 @@ public class PlasmidsGenerator {
     
     protected void checkCompletness(Map<String, String> leftFlanks, Map<String, String> rightFlanks) {
         
+        boolean errors = false;
         Set<String> missing = new HashSet<>(leftFlanks.keySet());
         missing.removeAll(rightFlanks.keySet());
         
         if (!missing.isEmpty()) {
             System.out.println("Missing right flank for: "+
                     missing.stream().collect(Collectors.joining(", ")));
+            errors = true;
         }
         
         missing = new HashSet<>(rightFlanks.keySet());
@@ -128,7 +130,10 @@ public class PlasmidsGenerator {
         if (!missing.isEmpty()) {
             System.out.println("Missing left flank for: "+
                     missing.stream().collect(Collectors.joining(", ")));
+            errors = true;
         }    
+        
+        if (ONLY_FULL && errors) throw new IllegalArgumentException("Some ids have one of the flank missing");
     }
     
     protected SBOLDocument generatePlasmids(List<String> genes, String version, Map<String, String> leftFlanks, Map<String, String> rightFlanks) throws SBOLValidationException {
