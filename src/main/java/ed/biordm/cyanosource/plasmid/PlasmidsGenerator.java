@@ -60,12 +60,12 @@ public class PlasmidsGenerator {
         
         
         String version = "1.0";
-        String name = "cyano_"+version;
+        //String name = "cyano_"+version;
         
         PlasmidsGenerator instance = new PlasmidsGenerator();
         
         instance.saveTemplatePlasmid(templateFile);
-        instance.generateFromFiles(name, version,templateFile, flanks, outDir);
+        instance.generateFromFiles(version,templateFile, flanks, outDir);
     }
     
     protected void saveTemplatePlasmid(Path templateFile) throws IOException, SBOLConversionException, SBOLValidationException {
@@ -75,6 +75,11 @@ public class PlasmidsGenerator {
     }    
         
 
+    public void generateFromFiles(String version,Path templateFile, Path flankFile, Path outDir) throws IOException, SBOLValidationException, SBOLConversionException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
+        
+        generateFromFiles("designs", version, templateFile, flankFile, outDir);
+    }
+    
     public void generateFromFiles(String name, String version,Path templateFile, Path flankFile, Path outDir) throws IOException, SBOLValidationException, SBOLConversionException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
         Path sbolDir = outDir.resolve("sbol");
         Path genDir = outDir.resolve("genbank");

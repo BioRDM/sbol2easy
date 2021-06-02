@@ -52,18 +52,18 @@ public class PlasmidsGeneratorTest {
         SBOLDocument doc = instance.cyanoDocument();
         ComponentDefinition templ = createTemplatePlasmid(doc, "1.0");
         
-        String gene = "x";
+        String gene = "s_x";
         String lSeq= "GANNAG";
         String rSeq= "CCNNNCC";
         
         instance.addGenne1stGenerationPlasmids(templ, gene, lSeq, rSeq, doc, version);
         
-        assertNotNull(doc.getComponentDefinition("x", version));
+        assertNotNull(doc.getComponentDefinition("s_x", version));
         assertNotNull(doc.getComponentDefinition("x_left", version));
         assertNotNull(doc.getComponentDefinition("x_right", version));
-        assertNotNull(doc.getComponentDefinition("x_flatten", version));
+        assertNotNull(doc.getComponentDefinition("s_x_flatten", version));
         
-        ComponentDefinition flat = doc.getComponentDefinition("x_flatten", version);
+        ComponentDefinition flat = doc.getComponentDefinition("s_x_flatten", version);
         String seq = flat.getSequences().iterator().next().getElements();
         assertTrue(seq.contains(lSeq));
         assertTrue(seq.contains(rSeq));
