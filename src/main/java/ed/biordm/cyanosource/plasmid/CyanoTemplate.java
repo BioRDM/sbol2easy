@@ -311,7 +311,7 @@ public class CyanoTemplate {
             URI insert, 
             URI rightFlank) throws SBOLValidationException {
 
-        String name = "cyano_codA_Km";
+        String name = "cyano_source_template";
         ComponentDefinition plasmid = doc.createComponentDefinition(name, version, ComponentDefinition.DNA_REGION);
         plasmid.addType(SequenceOntology.CIRCULAR);
         //engineered plasmid

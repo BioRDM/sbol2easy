@@ -50,11 +50,12 @@ public class PlasmidsGenerator {
     protected ComponentUtil coponentUtil = new ComponentUtil();
     
     public static void main(String[] args) throws SBOLValidationException, SBOLConversionException, IOException, URISyntaxException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
+        Path tempDir = Paths.get("E:/Temp");
         
-        Path outDir = Paths.get("E:/Temp/cyanosource_"+LocalDate.now());
+        Path outDir = tempDir.resolve("cyanosource_"+LocalDate.now());
         Files.createDirectories(outDir);
         
-        Path flanks = Paths.get("E:/Temp/flank-list_20200821_fix2.xlsx");
+        Path flanks = tempDir.resolve("flank-list_20200821_fix2.xlsx");
         Path templateFile = outDir.resolve("cyano_template.xml");
         
         
@@ -252,12 +253,14 @@ public class PlasmidsGenerator {
         return doc;                
     }
 
-    protected void addGenne1stGenerationPlasmids(ComponentDefinition template, String gene, String lFlankSeq, String rFlankSeq,
+    protected void addGenne1stGenerationPlasmids(ComponentDefinition template, String displayId, String lFlankSeq, String rFlankSeq,
                                 SBOLDocument doc, String version) throws SBOLValidationException {
         
+        String gene = extractGeneFromId(displayId);
         String description = "";
-        ComponentDefinition plasmid = transformer.instantiateFromTemplate(template, gene, version,
+        ComponentDefinition plasmid = transformer.instantiateFromTemplate(template, displayId, version,
                 description, doc);
+        
         
         //sll0199.createAnnotation(SBH_DESCRIPTION, "Generate a description for each plasmid, for example\n"
         //        + "Recombinant plasmid targetting sll0199");
@@ -269,7 +272,7 @@ public class PlasmidsGenerator {
         //to make it top level
         plasmid.clearWasDerivedFroms();
         
-        ComponentDefinition flattenPlasmid = transformer.flattenSequences2(plasmid, gene+"_flatten", doc);
+        ComponentDefinition flattenPlasmid = transformer.flattenSequences2(plasmid, displayId+"_flatten", doc);
         
         //to make it top level
         flattenPlasmid.clearWasDerivedFroms();
