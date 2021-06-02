@@ -7,6 +7,7 @@ package ed.biordm.cyanosource.plasmid;
 
 import static ed.biordm.cyanosource.plasmid.CyanoTemplate.createTemplatePlasmid;
 import ed.biordm.sbol.toolkit.transform.CommonAnnotations;
+import ed.biordm.sbol.toolkit.transform.ComponentUtil;
 import ed.biordm.sbol.toolkit.transform.FeaturesReader;
 import ed.biordm.sbol.toolkit.transform.GenBankConverter;
 import ed.biordm.sbol.toolkit.transform.TemplateTransformer;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.SBOLConversionException;
 import org.sbolstandard.core2.SBOLDocument;
+import org.sbolstandard.core2.SBOLReader;
 import org.sbolstandard.core2.SBOLValidate;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.SBOLWriter;
@@ -44,50 +46,69 @@ public class PlasmidsGenerator {
     public final String CYANO_PREF = "http://bio.ed.ac.uk/a_mccormick/cyano_source/";
     public int DEF_BATCH = 300;
     
-    protected TemplateTransformer transformer = new TemplateTransformer();    
+    protected TemplateTransformer transformer = new TemplateTransformer();  
+    protected ComponentUtil coponentUtil = new ComponentUtil();
     
     public static void main(String[] args) throws SBOLValidationException, SBOLConversionException, IOException, URISyntaxException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
         
         Path outDir = Paths.get("E:/Temp/cyanosource_"+LocalDate.now());
-        Path flanks = Paths.get("E:/Temp/flank-list_20200821_fix.xlsx");
+        Files.createDirectories(outDir);
+        
+        Path flanks = Paths.get("E:/Temp/flank-list_20200821_fix2.xlsx");
+        Path templateFile = outDir.resolve("cyano_template.xml");
+        
         
         String version = "1.0";
         String name = "cyano_"+version;
         
         PlasmidsGenerator instance = new PlasmidsGenerator();
         
-        instance.generate(name, version, flanks, outDir);
+        instance.saveTemplatePlasmid(templateFile);
+        instance.generateFromFiles(name, version,templateFile, flanks, outDir);
     }
     
-    protected void generate(String name, String version, Path flankFile, Path outDir) throws IOException, SBOLValidationException, SBOLConversionException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
+    protected void saveTemplatePlasmid(Path templateFile) throws IOException, SBOLConversionException, SBOLValidationException {
+        SBOLDocument templateDoc = cyanoDocument();
+        ComponentDefinition template = createTemplatePlasmid(templateDoc, "1.0");
+        SBOLWriter.write(templateDoc, templateFile.toFile());
+    }    
+        
+
+    public void generateFromFiles(String name, String version,Path templateFile, Path flankFile, Path outDir) throws IOException, SBOLValidationException, SBOLConversionException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
+        Path sbolDir = outDir.resolve("sbol");
+        Path genDir = outDir.resolve("genbank");
+        
+        generateFromFiles(name, version, templateFile, flankFile, sbolDir, genDir);
+    } 
+    
+    protected void generateFromFiles(String name, String version,Path templateFile, Path flankFile, Path sbolDir, Path genDir) throws IOException, SBOLValidationException, SBOLConversionException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
     
         System.out.println("Generating ....");
-        List<SBOLDocument> docs = generateFromFile(flankFile, version);
+        List<SBOLDocument> docs =  generateFromFileTemplate(templateFile, flankFile, version);
         
         System.out.println("Saving sbols ....");
-        Files.createDirectories(outDir);
+        Files.createDirectories(sbolDir);
         
         for (int i = 0; i< docs.size(); i++) {
-            Path file = outDir.resolve(name+"_"+i+".sbol");
+            Path file = sbolDir.resolve(name+"_"+i+".xml");
             saveSbol(docs.get(i), file);            
         }
 
         System.out.println("Saving genbanks ....");
         
-        outDir = outDir.resolve("genbank");
-        Files.createDirectories(outDir);
+        Files.createDirectories(genDir);
         
         for (SBOLDocument doc: docs) {
-            saveFlattened(doc, outDir);
+            saveFlattened(doc, genDir);
         }
 
     }
     
-    protected List<SBOLDocument> generateFromFile(Path flankFile, String version) throws IOException, SBOLValidationException {
-        return generateFromFile(flankFile, version, DEF_BATCH);
+    protected List<SBOLDocument> generateFromFileTemplate(Path templateFile, Path flankFile, String version) throws IOException, SBOLValidationException {
+        return  generateFromFileTemplate(templateFile, flankFile, version, DEF_BATCH);
     }
     
-    protected List<SBOLDocument> generateFromFile(Path flankFile, String version, int batchSize) throws IOException, SBOLValidationException {
+    protected List<SBOLDocument>  generateFromFileTemplate(Path templateFile, Path flankFile, String version, int batchSize) throws IOException, SBOLValidationException {
         
         Map<String, String> leftFlanks = readSequences(flankFile, 0);
         Map<String, String> rightFlanks = readSequences(flankFile, 1);   
@@ -101,10 +122,10 @@ public class PlasmidsGenerator {
                 .map( genes -> {
         
                     try {
-                        SBOLDocument doc = generatePlasmids(genes, version, leftFlanks, rightFlanks);
+                        SBOLDocument doc = generatePlasmidsFromTemplate(templateFile, genes, version, leftFlanks, rightFlanks);
                         System.out.println("Generated part "+done.incrementAndGet()+"/"+batches.size());
                         return doc;
-                    } catch (SBOLValidationException e) {
+                    } catch (SBOLValidationException|SBOLConversionException e) {
                         throw new IllegalStateException(e.getMessage(),e);
                     }
                 })
@@ -135,26 +156,46 @@ public class PlasmidsGenerator {
         if (ONLY_FULL && errors) throw new IllegalArgumentException("Some ids have one of the flank missing");
     }
     
-    protected SBOLDocument generatePlasmids(List<String> genes, String version, Map<String, String> leftFlanks, Map<String, String> rightFlanks) throws SBOLValidationException {
-        
+
+    protected SBOLDocument generatePlasmidsInSitu(List<String> displayIds, String version, Map<String, String> leftFlanks, Map<String, String> rightFlanks) throws SBOLValidationException {
         
         SBOLDocument doc = cyanoDocument();
-        
         ComponentDefinition template = createTemplatePlasmid(doc, version);
         
-        for (String gene: genes) {
+        return generatePlasmidsFromTemplate(template, displayIds, version, leftFlanks, rightFlanks,doc);
+    }
+
+    protected SBOLDocument generatePlasmidsFromTemplate(Path templateFile, List<String> displayIds, String version, Map<String, String> leftFlanks, Map<String, String> rightFlanks) throws SBOLValidationException, SBOLConversionException {
+
+        try {
+            SBOLDocument doc = SBOLReader.read(templateFile.toFile());
+            doc.setDefaultURIprefix(CYANO_PREF);
+            doc.setComplete(true);
+            doc.setCreateDefaults(true);            
             
-            String lFlankSeq = leftFlanks.get(gene);
-            String rFlankSeq = rightFlanks.get(gene);
+            ComponentDefinition template = coponentUtil.extractRootComponent(doc);
+            return generatePlasmidsFromTemplate(template, displayIds, version, leftFlanks, rightFlanks, doc);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Cannot read sbol file: "+templateFile);
+        }
+    }
+    
+    protected SBOLDocument generatePlasmidsFromTemplate(ComponentDefinition template, List<String> displayIds, String version, Map<String, String> leftFlanks, Map<String, String> rightFlanks, SBOLDocument doc) throws SBOLValidationException {
+        
+        
+        for (String displayId: displayIds) {
+            
+            String lFlankSeq = leftFlanks.get(displayId);
+            String rFlankSeq = rightFlanks.get(displayId);
             if (lFlankSeq == null || rFlankSeq == null) {
                 continue;
             }
-            addGenne1stGenerationPlasmids(template, gene, lFlankSeq, rFlankSeq, doc, version);            
+            addGenne1stGenerationPlasmids(template, displayId, lFlankSeq, rFlankSeq, doc, version);            
             
         }
         
         return doc;
-    }
+    }    
     
     
     protected void saveFlattened(SBOLDocument doc, Path dir) throws IOException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
