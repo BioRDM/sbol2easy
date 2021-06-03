@@ -5,7 +5,10 @@
  */
 package ed.biordm.sbol.toolkit.transform;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -23,6 +26,7 @@ import org.sbolstandard.core2.SequenceOntology;
  */
 public class GenBank2SO {
     
+    final static String DEF_FILE = "genbank2SO.csv";
     
     final Map<String,URI> features2terms;
     final Map<String,String> terms2features;
@@ -98,25 +102,29 @@ public class GenBank2SO {
         
         URL file = GenBank2SO.class.getResource("genbank2SO.csv");
         
+        
         if (file == null ) {
             throw new IllegalStateException("Missing default ontology file");
         }
         
-        try (Stream<String> lines = Files.lines(Paths.get(file.toURI()))) {
-            
-            LinkedHashMap<String,String> map = new LinkedHashMap<>();
+        try (BufferedReader definitions = new BufferedReader(
+                new InputStreamReader(GenBank2SO.class.getResourceAsStream(DEF_FILE)))) 
+        {
+            try (Stream<String> lines = definitions.lines()) {
 
-            lines.skip(1)
-                 .map(s -> s.split(","))
-                 .filter( tokens -> tokens.length >= 1)
-                 .filter( tokens -> !tokens[0].trim().isEmpty())
-                 .forEach( tokens -> {
-                     map.put(tokens[0], tokens[1]);
-                 });
-            
-            return map;
-            
-        } catch (IOException | URISyntaxException e) {
+                LinkedHashMap<String,String> map = new LinkedHashMap<>();
+
+                lines.skip(1)
+                     .map(s -> s.split(","))
+                     .filter( tokens -> tokens.length >= 1)
+                     .filter( tokens -> !tokens[0].trim().isEmpty())
+                     .forEach( tokens -> {
+                         map.put(tokens[0], tokens[1]);
+                     });
+
+                return map;
+            }           
+        } catch (IOException  e) {
             throw new RuntimeException("Cannot read default genbank mapping: "+e.getMessage(),e);
         }
     }
