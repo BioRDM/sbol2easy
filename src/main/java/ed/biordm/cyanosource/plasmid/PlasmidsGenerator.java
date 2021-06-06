@@ -46,7 +46,7 @@ import org.sbolstandard.core2.SBOLWriter;
 public class PlasmidsGenerator {
     
     public boolean ONLY_FULL = true;
-    public int DEF_BATCH = 200;
+    public int DEF_BATCH = 100;
     
     protected TemplateTransformer transformer = new TemplateTransformer();  
     protected ComponentUtil coponentUtil = new ComponentUtil();
