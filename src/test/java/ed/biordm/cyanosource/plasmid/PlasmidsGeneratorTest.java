@@ -7,6 +7,7 @@ package ed.biordm.cyanosource.plasmid;
 
 
 import static ed.biordm.cyanosource.plasmid.CyanoTemplate.createTemplatePlasmid;
+import static ed.biordm.cyanosource.plasmid.CyanoTemplate.cyanoDocument;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -49,7 +50,7 @@ public class PlasmidsGeneratorTest {
     public void adds1stGenerationPlasmids() throws Exception {
         
         String version = "2.0";
-        SBOLDocument doc = instance.cyanoDocument();
+        SBOLDocument doc = cyanoDocument();
         ComponentDefinition templ = createTemplatePlasmid(doc, "1.0");
         
         String gene = "s_x";
@@ -157,7 +158,7 @@ public class PlasmidsGeneratorTest {
     }
     
     protected Path tmpTemplate() throws IOException, SBOLConversionException, SBOLValidationException {
-        SBOLDocument templateDoc = instance.cyanoDocument();
+        SBOLDocument templateDoc = cyanoDocument();
         ComponentDefinition template = createTemplatePlasmid(templateDoc, "1.0");
         Path templateFile = tmp.newFile().toPath();
         SBOLWriter.write(templateDoc, templateFile.toFile());

@@ -5,7 +5,9 @@
  */
 package ed.biordm.cyanosource.plasmid;
 
+import static ed.biordm.cyanosource.plasmid.CyanoTemplate.CYANO_PREF;
 import static ed.biordm.cyanosource.plasmid.CyanoTemplate.createTemplatePlasmid;
+import static ed.biordm.cyanosource.plasmid.CyanoTemplate.cyanoDocument;
 import ed.biordm.sbol.toolkit.transform.CommonAnnotations;
 import ed.biordm.sbol.toolkit.transform.ComponentUtil;
 import ed.biordm.sbol.toolkit.transform.FeaturesReader;
@@ -43,7 +45,6 @@ import org.sbolstandard.core2.SBOLWriter;
 public class PlasmidsGenerator {
     
     public boolean ONLY_FULL = true;
-    public final String CYANO_PREF = "http://bio.ed.ac.uk/a_mccormick/cyano_source/";
     public int DEF_BATCH = 300;
     
     protected TemplateTransformer transformer = new TemplateTransformer();  
@@ -248,15 +249,7 @@ public class PlasmidsGenerator {
     
     
     
-    protected SBOLDocument cyanoDocument() {
-        SBOLDocument doc = new SBOLDocument();
 
-        doc.setDefaultURIprefix(CYANO_PREF);
-        doc.setComplete(true);
-        doc.setCreateDefaults(true);
-
-        return doc;                
-    }
 
     protected void addGenne1stGenerationPlasmids(ComponentDefinition template, String displayId, String lFlankSeq, String rFlankSeq,
                                 SBOLDocument doc, String version) throws SBOLValidationException {
