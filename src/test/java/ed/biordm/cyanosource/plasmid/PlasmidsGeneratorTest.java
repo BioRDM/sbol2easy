@@ -7,6 +7,7 @@ package ed.biordm.cyanosource.plasmid;
 
 
 import static ed.biordm.cyanosource.plasmid.CyanoTemplate.createTemplatePlasmid;
+import static ed.biordm.cyanosource.plasmid.CyanoTemplate.cyanoDocument;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -49,21 +50,21 @@ public class PlasmidsGeneratorTest {
     public void adds1stGenerationPlasmids() throws Exception {
         
         String version = "2.0";
-        SBOLDocument doc = instance.cyanoDocument();
+        SBOLDocument doc = cyanoDocument();
         ComponentDefinition templ = createTemplatePlasmid(doc, "1.0");
         
-        String gene = "s_x";
+        String gene = "b_x";
         String lSeq= "GANNAG";
         String rSeq= "CCNNNCC";
         
         instance.addGenne1stGenerationPlasmids(templ, gene, lSeq, rSeq, doc, version);
         
-        assertNotNull(doc.getComponentDefinition("s_x", version));
+        assertNotNull(doc.getComponentDefinition("csb_x_codA", version));
         assertNotNull(doc.getComponentDefinition("x_left", version));
         assertNotNull(doc.getComponentDefinition("x_right", version));
-        assertNotNull(doc.getComponentDefinition("s_x_flatten", version));
+        assertNotNull(doc.getComponentDefinition("csb_x_codA_flatten", version));
         
-        ComponentDefinition flat = doc.getComponentDefinition("s_x_flatten", version);
+        ComponentDefinition flat = doc.getComponentDefinition("csb_x_codA_flatten", version);
         String seq = flat.getSequences().iterator().next().getElements();
         assertTrue(seq.contains(lSeq));
         assertTrue(seq.contains(rSeq));
@@ -124,21 +125,21 @@ public class PlasmidsGeneratorTest {
         
         String key = "01_g";
         try {
-            instance.extractDisplayId(key);
+            instance.extractDesignId(key);
         } catch (IllegalArgumentException e) {};
         
         key = "01";
         try {
-            instance.extractDisplayId(key);
+            instance.extractDesignId(key);
         } catch (IllegalArgumentException e) {};        
         
         key = "01__a";
         try {
-            instance.extractDisplayId(key);
+            instance.extractDesignId(key);
         } catch (IllegalArgumentException e) {};        
         
         key = "0002_slr0612_right";
-        assertEquals("cs0002_slr0612", instance.extractDisplayId(key));
+        assertEquals("0002_slr0612", instance.extractDesignId(key));
     }    
     
     @Test
@@ -147,17 +148,17 @@ public class PlasmidsGeneratorTest {
         Path file = testFile("flanks.xlsx");
         
         Map<String, String> flanks = instance.readSequences(file, 0);
-        assertTrue(flanks.containsKey("cs0002_slr0612"));
+        assertTrue(flanks.containsKey("0002_slr0612"));
         assertEquals(5, flanks.size());
         
         flanks = instance.readSequences(file, 1);
-        assertTrue(flanks.containsKey("cs0002_slr0612"));
+        assertTrue(flanks.containsKey("0002_slr0612"));
         assertEquals(4, flanks.size());        
         
     }
     
     protected Path tmpTemplate() throws IOException, SBOLConversionException, SBOLValidationException {
-        SBOLDocument templateDoc = instance.cyanoDocument();
+        SBOLDocument templateDoc = cyanoDocument();
         ComponentDefinition template = createTemplatePlasmid(templateDoc, "1.0");
         Path templateFile = tmp.newFile().toPath();
         SBOLWriter.write(templateDoc, templateFile.toFile());
@@ -175,24 +176,24 @@ public class PlasmidsGeneratorTest {
         Map<String, String> leftFlanks = instance.readSequences(file, 0);
         Map<String, String> rightFlanks = instance.readSequences(file, 1);
         
-        List<String> genes = List.of("cs0002_slr0612", "cs0005_sll1214");
+        List<String> genes = List.of("0002_slr0612", "0005_sll1214");
         SBOLDocument doc = instance.generatePlasmidsFromTemplate(templateFile, genes, version, leftFlanks, rightFlanks);
         assertNotNull(doc);
         
-        ComponentDefinition cp = doc.getComponentDefinition("cs0001_slr0611", version);
+        ComponentDefinition cp = doc.getComponentDefinition("cs0001_slr0611_codA", version);
         assertNull(cp);
         
-        cp = doc.getComponentDefinition("cs0001_slr0611", version);
+        cp = doc.getComponentDefinition("cs0001_slr0611_codA", version);
         assertNull(cp);  
         
-        cp = doc.getComponentDefinition("cs0004_sll0558", version);
+        cp = doc.getComponentDefinition("cs0004_sll0558_codA", version);
         assertNull(cp);  
         
         
-        cp = doc.getComponentDefinition("cs0002_slr0612", version);
+        cp = doc.getComponentDefinition("cs0002_slr0612_codA", version);
         assertNotNull(cp);        
         
-        cp = doc.getComponentDefinition("cs0002_slr0612_flatten", version);
+        cp = doc.getComponentDefinition("cs0002_slr0612_codA_flatten", version);
         assertNotNull(cp);        
     }    
     
@@ -204,24 +205,25 @@ public class PlasmidsGeneratorTest {
         Map<String, String> rightFlanks = instance.readSequences(file, 1);
         String version = "2.1";
         
-        List<String> genes = List.of("cs0002_slr0612", "cs0005_sll1214");
+        List<String> genes = List.of("0002_slr0612", "0005_sll1214");
         SBOLDocument doc = instance.generatePlasmidsInSitu(genes, version, leftFlanks, rightFlanks);
         assertNotNull(doc);
         
-        ComponentDefinition cp = doc.getComponentDefinition("cs0001_slr0611", version);
+        ComponentDefinition cp = doc.getComponentDefinition("cs0001_slr0611_codA", version);
         assertNull(cp);
         
-        cp = doc.getComponentDefinition("cs0001_slr0611", version);
+        cp = doc.getComponentDefinition("cs0001_slr0611_codA", version);
         assertNull(cp);  
         
-        cp = doc.getComponentDefinition("cs0004_sll0558", version);
+        cp = doc.getComponentDefinition("cs0004_sll0558_codA", version);
         assertNull(cp);  
         
+        //doc.getRootComponentDefinitions().forEach( c -> System.out.println(c.getDisplayId()));
         
-        cp = doc.getComponentDefinition("cs0002_slr0612", version);
+        cp = doc.getComponentDefinition("cs0002_slr0612_codA", version);
         assertNotNull(cp);        
         
-        cp = doc.getComponentDefinition("cs0002_slr0612_flatten", version);
+        cp = doc.getComponentDefinition("cs0002_slr0612_codA_flatten", version);
         assertNotNull(cp);        
     }     
     
@@ -242,10 +244,10 @@ public class PlasmidsGeneratorTest {
         ComponentDefinition cp;
         
         
-        cp = docs.get(0).getComponentDefinition("cs0002_slr0612", version);
+        cp = docs.get(0).getComponentDefinition("cs0002_slr0612_codA", version);
         assertNotNull(cp);        
         
-        cp = docs.get(0).getComponentDefinition("cs0002_slr0612_flatten", version);
+        cp = docs.get(0).getComponentDefinition("cs0002_slr0612_codA_flatten", version);
         assertNotNull(cp);        
     }
     
@@ -316,6 +318,24 @@ public class PlasmidsGeneratorTest {
         exp = List.of(List.of("a","b"), List.of("c"));
         assertEquals(exp, instance.splitKeys(keys, 2));
         
+    }
+    
+    @Test
+    public void setTemplateVariableReplaces() {
+        
+        String template = "I am {gene} {gene} {name}";
+        String var = "missing";
+        String val = "X";
+        
+        assertEquals(template, instance.setTemplateVariable(var, val, template));
+        
+        var = "gene";
+        String exp = "I am X X {name}";
+        assertEquals(exp, instance.setTemplateVariable(var, val, template));
+        
+        var = "name";
+        exp = "I am {gene} {gene} X";
+        assertEquals(exp, instance.setTemplateVariable(var, val, template));
     }
             
     public Path testFile(String name) {

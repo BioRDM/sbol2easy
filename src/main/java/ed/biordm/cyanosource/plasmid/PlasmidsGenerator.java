@@ -5,8 +5,11 @@
  */
 package ed.biordm.cyanosource.plasmid;
 
+import static ed.biordm.cyanosource.plasmid.CyanoTemplate.CYANO_PREF;
 import static ed.biordm.cyanosource.plasmid.CyanoTemplate.createTemplatePlasmid;
+import static ed.biordm.cyanosource.plasmid.CyanoTemplate.cyanoDocument;
 import ed.biordm.sbol.toolkit.transform.CommonAnnotations;
+import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SBH_DESCRIPTION;
 import ed.biordm.sbol.toolkit.transform.ComponentUtil;
 import ed.biordm.sbol.toolkit.transform.FeaturesReader;
 import ed.biordm.sbol.toolkit.transform.GenBankConverter;
@@ -43,8 +46,7 @@ import org.sbolstandard.core2.SBOLWriter;
 public class PlasmidsGenerator {
     
     public boolean ONLY_FULL = true;
-    public final String CYANO_PREF = "http://bio.ed.ac.uk/a_mccormick/cyano_source/";
-    public int DEF_BATCH = 300;
+    public int DEF_BATCH = 200;
     
     protected TemplateTransformer transformer = new TemplateTransformer();  
     protected ComponentUtil coponentUtil = new ComponentUtil();
@@ -125,10 +127,10 @@ public class PlasmidsGenerator {
         AtomicInteger done = new AtomicInteger(0);
         
         return batches.parallelStream()
-                .map( genes -> {
+                .map( keys -> {
         
                     try {
-                        SBOLDocument doc = generatePlasmidsFromTemplate(templateFile, genes, version, leftFlanks, rightFlanks);
+                        SBOLDocument doc = generatePlasmidsFromTemplate(templateFile, keys, version, leftFlanks, rightFlanks);
                         System.out.println("Generated part "+done.incrementAndGet()+"/"+batches.size());
                         return doc;
                     } catch (SBOLValidationException|SBOLConversionException e) {
@@ -171,7 +173,7 @@ public class PlasmidsGenerator {
         return generatePlasmidsFromTemplate(template, displayIds, version, leftFlanks, rightFlanks,doc);
     }
 
-    protected SBOLDocument generatePlasmidsFromTemplate(Path templateFile, List<String> displayIds, String version, Map<String, String> leftFlanks, Map<String, String> rightFlanks) throws SBOLValidationException, SBOLConversionException {
+    protected SBOLDocument generatePlasmidsFromTemplate(Path templateFile, List<String> keys, String version, Map<String, String> leftFlanks, Map<String, String> rightFlanks) throws SBOLValidationException, SBOLConversionException {
 
         try {
             SBOLDocument doc = SBOLReader.read(templateFile.toFile());
@@ -180,23 +182,23 @@ public class PlasmidsGenerator {
             doc.setCreateDefaults(true);            
             
             ComponentDefinition template = coponentUtil.extractRootComponent(doc);
-            return generatePlasmidsFromTemplate(template, displayIds, version, leftFlanks, rightFlanks, doc);
+            return generatePlasmidsFromTemplate(template, keys, version, leftFlanks, rightFlanks, doc);
         } catch (IOException e) {
             throw new IllegalArgumentException("Cannot read sbol file: "+templateFile);
         }
     }
     
-    protected SBOLDocument generatePlasmidsFromTemplate(ComponentDefinition template, List<String> displayIds, String version, Map<String, String> leftFlanks, Map<String, String> rightFlanks, SBOLDocument doc) throws SBOLValidationException {
+    protected SBOLDocument generatePlasmidsFromTemplate(ComponentDefinition template, List<String> keys, String version, Map<String, String> leftFlanks, Map<String, String> rightFlanks, SBOLDocument doc) throws SBOLValidationException {
         
         
-        for (String displayId: displayIds) {
+        for (String key: keys) {
             
-            String lFlankSeq = leftFlanks.get(displayId);
-            String rFlankSeq = rightFlanks.get(displayId);
+            String lFlankSeq = leftFlanks.get(key);
+            String rFlankSeq = rightFlanks.get(key);
             if (lFlankSeq == null || rFlankSeq == null) {
                 continue;
             }
-            addGenne1stGenerationPlasmids(template, displayId, lFlankSeq, rFlankSeq, doc, version);            
+            addGenne1stGenerationPlasmids(template, key, lFlankSeq, rFlankSeq, doc, version);            
             
         }
         
@@ -240,7 +242,7 @@ public class PlasmidsGenerator {
         orgFeatures.forEach((key, value) -> {
             value = value.trim();
             if (!value.isEmpty()) {
-                features.put(extractDisplayId(key), value);
+                features.put(extractDesignId(key), value);
             }
         });
         return features;
@@ -248,27 +250,56 @@ public class PlasmidsGenerator {
     
     
     
-    protected SBOLDocument cyanoDocument() {
-        SBOLDocument doc = new SBOLDocument();
+    protected String setTemplateVariable(String variable, String value, String template) {
+        
+        String pattern = "\\{"+variable+"}";
+        return template.replaceAll(pattern, value);
+    }
+    
+    protected String setTemplateVariables(String key, String gene, String name, String displayId, String linkId, String template) {
 
-        doc.setDefaultURIprefix(CYANO_PREF);
-        doc.setComplete(true);
-        doc.setCreateDefaults(true);
-
-        return doc;                
+        template = setTemplateVariable("key", key, template);
+        template = setTemplateVariable("gene", gene, template);
+        template = setTemplateVariable("name", name, template);
+        template = setTemplateVariable("displayId", displayId, template);
+        template = setTemplateVariable("linkId", linkId, template);
+        return template;
     }
 
-    protected void addGenne1stGenerationPlasmids(ComponentDefinition template, String displayId, String lFlankSeq, String rFlankSeq,
+    protected void addGenne1stGenerationPlasmids(ComponentDefinition template, String key, String lFlankSeq, String rFlankSeq,
                                 SBOLDocument doc, String version) throws SBOLValidationException {
         
-        String gene = extractGeneFromId(displayId);
-        String description = "";
+        
+        String gene = extractGeneFromId(key);
+        String name = key+"-codA";
+        String displayId = "cs"+key+"_codA"; //cant contain -
+        String linkId = name.replace("_", "");
+        String description = "Recombinant plasmid targeting "+gene;
+        
         ComponentDefinition plasmid = transformer.instantiateFromTemplate(template, displayId, version,
                 description, doc);
+        plasmid.setName(name);
         
-        
-        //sll0199.createAnnotation(SBH_DESCRIPTION, "Generate a description for each plasmid, for example\n"
-        //        + "Recombinant plasmid targetting sll0199");
+        if (plasmid.getDescription() != null) {
+            description = plasmid.getDescription();
+            description = setTemplateVariables(key, gene, name, displayId, linkId, description);
+            plasmid.setDescription(description);
+        }
+        if (plasmid.getAnnotation(SBH_DESCRIPTION) != null) {
+            String fullDescription = plasmid.getAnnotation(SBH_DESCRIPTION).getStringValue();
+            fullDescription = setTemplateVariables(key, gene, name, displayId, linkId, fullDescription);            
+            plasmid.getAnnotation(SBH_DESCRIPTION).setStringValue(fullDescription);
+        } else {
+            /*
+            String fullDescription = "Recombinant plasmid targeting "+gene+"\n"+
+            "Target organism: Synechocystis sp. PCC 6803\n"+
+            "Assembly method: XXX\n"+
+            "CyanoSource record: <a href=\"https://cyanosource.ac.uk/plasmid/"+linkId+"\">"+
+                    "https://cyanosource.ac.uk/plasmid/"+linkId+"</a>";
+            */
+            String fullDescription = "Describe me";
+            plasmid.createAnnotation(SBH_DESCRIPTION, fullDescription);
+        }
 
         transformer.concretizePart(plasmid, "left", gene+"_left", lFlankSeq, doc);
 
@@ -282,11 +313,12 @@ public class PlasmidsGenerator {
         //to make it top level
         flattenPlasmid.clearWasDerivedFroms();
         flattenPlasmid.createAnnotation(CommonAnnotations.SBH_DESCRIPTION, 
-                "Version of "+gene+" design without subcomponents (flattened), "
+                "Version of "+displayId+" design without subcomponents (flattened), "
                 + "which is suitable for GenBank export and sequence visualisation");
         
     }
 
+    /*
     protected String extractDisplayId(String key) {
         int ix1 = key.indexOf("_");
         int ix2 = key.indexOf("_", ix1+1);
@@ -294,6 +326,15 @@ public class PlasmidsGenerator {
             throw new IllegalArgumentException("Wrong format, expected 0xx0_gene_yyy got: "+key);
         
         return "cs"+key.substring(0, ix2);
+    }*/    
+    
+    protected String extractDesignId(String key) {
+        int ix1 = key.indexOf("_");
+        int ix2 = key.indexOf("_", ix1+1);
+        if (ix1 < 0 || ix2 < 0 || (ix2 == (ix1+1)) )
+            throw new IllegalArgumentException("Wrong format, expected 0xx0_gene_yyy got: "+key);
+        
+        return key.substring(0, ix2);
     }    
     
     protected String extractGeneFromId(String key) {
