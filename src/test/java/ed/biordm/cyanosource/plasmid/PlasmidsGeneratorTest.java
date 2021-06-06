@@ -62,9 +62,9 @@ public class PlasmidsGeneratorTest {
         assertNotNull(doc.getComponentDefinition("csb_x_codA", version));
         assertNotNull(doc.getComponentDefinition("x_left", version));
         assertNotNull(doc.getComponentDefinition("x_right", version));
-        assertNotNull(doc.getComponentDefinition("csb_x_codA_flatten", version));
+        assertNotNull(doc.getComponentDefinition("csb_x_codA_flat", version));
         
-        ComponentDefinition flat = doc.getComponentDefinition("csb_x_codA_flatten", version);
+        ComponentDefinition flat = doc.getComponentDefinition("csb_x_codA_flat", version);
         String seq = flat.getSequences().iterator().next().getElements();
         assertTrue(seq.contains(lSeq));
         assertTrue(seq.contains(rSeq));
@@ -193,7 +193,7 @@ public class PlasmidsGeneratorTest {
         cp = doc.getComponentDefinition("cs0002_slr0612_codA", version);
         assertNotNull(cp);        
         
-        cp = doc.getComponentDefinition("cs0002_slr0612_codA_flatten", version);
+        cp = doc.getComponentDefinition("cs0002_slr0612_codA_flat", version);
         assertNotNull(cp);        
     }    
     
@@ -223,7 +223,7 @@ public class PlasmidsGeneratorTest {
         cp = doc.getComponentDefinition("cs0002_slr0612_codA", version);
         assertNotNull(cp);        
         
-        cp = doc.getComponentDefinition("cs0002_slr0612_codA_flatten", version);
+        cp = doc.getComponentDefinition("cs0002_slr0612_codA_flat", version);
         assertNotNull(cp);        
     }     
     
@@ -247,7 +247,7 @@ public class PlasmidsGeneratorTest {
         cp = docs.get(0).getComponentDefinition("cs0002_slr0612_codA", version);
         assertNotNull(cp);        
         
-        cp = docs.get(0).getComponentDefinition("cs0002_slr0612_codA_flatten", version);
+        cp = docs.get(0).getComponentDefinition("cs0002_slr0612_codA_flat", version);
         assertNotNull(cp);        
     }
     

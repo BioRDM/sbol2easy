@@ -209,7 +209,7 @@ public class PlasmidsGenerator {
     protected void saveFlattened(SBOLDocument doc, Path dir) throws IOException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
         
         for (ComponentDefinition comp : doc.getComponentDefinitions()) {
-            if (comp.getDisplayId().endsWith("flatten")) {
+            if (comp.getDisplayId().endsWith("flat")) {
                 Path file = dir.resolve(comp.getDisplayId()+".gb");
                 try (Writer out = Files.newBufferedWriter(file)) {
                     GenBankConverter.write(comp, out);
@@ -308,8 +308,8 @@ public class PlasmidsGenerator {
         //to make it top level
         plasmid.clearWasDerivedFroms();
         
-        ComponentDefinition flattenPlasmid = transformer.flattenSequences2(plasmid, displayId+"_flatten", doc);
-        
+        ComponentDefinition flattenPlasmid = transformer.flattenSequences2(plasmid, displayId+"_flat", doc);
+        flattenPlasmid.setName(name+" flat");
         //to make it top level
         flattenPlasmid.clearWasDerivedFroms();
         flattenPlasmid.createAnnotation(CommonAnnotations.SBH_DESCRIPTION, 
