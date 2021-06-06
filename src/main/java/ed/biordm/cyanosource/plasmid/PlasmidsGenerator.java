@@ -312,7 +312,7 @@ public class PlasmidsGenerator {
         flattenPlasmid.setName(name+" flat");
         //to make it top level
         flattenPlasmid.clearWasDerivedFroms();
-        flattenPlasmid.createAnnotation(CommonAnnotations.SBH_DESCRIPTION, 
+        flattenPlasmid.createAnnotation(CommonAnnotations.SBH_NOTES, 
                 "Version of "+displayId+" design without subcomponents (flattened), "
                 + "which is suitable for GenBank export and sequence visualisation");
         
