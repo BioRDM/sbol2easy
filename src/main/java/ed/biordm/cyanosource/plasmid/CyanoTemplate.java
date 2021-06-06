@@ -373,9 +373,18 @@ public class CyanoTemplate {
         
         plasmid.createAnnotation(CREATOR,"Alistair McCormick");
         plasmid.createAnnotation(CREATOR,"Anja Nenninger");
-        //plasmid.createAnnotation(SBH_DESCRIPTION,"Do we want some general template description?");
         
+        String description = "Recombinant plasmid targeting {gene}";
+        plasmid.setDescription(description);
         
+        String fullDescription = "Recombinant plasmid targeting {gene}\n"+
+        "Target organism: Synechocystis sp. PCC 6803\n"+
+        "Assembly method: XXX\n"+
+        "CyanoSource record: <a href=\"https://cyanosource.ac.uk/plasmid/{linkId}\">"+
+                "https://cyanosource.ac.uk/plasmid/{linkId}</a>";
+        
+        plasmid.createAnnotation(SBH_DESCRIPTION,fullDescription);
+            
         Component aC = plasmid.createComponent("backbone", AccessType.PUBLIC, backbone);
         Component lC = plasmid.createComponent("left", AccessType.PUBLIC, leftFlank);
         Component iC = plasmid.createComponent("insert", AccessType.PUBLIC, insert);
