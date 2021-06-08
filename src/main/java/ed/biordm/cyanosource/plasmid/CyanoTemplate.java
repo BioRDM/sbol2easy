@@ -379,7 +379,7 @@ public class CyanoTemplate {
         
         String fullDescription = "Recombinant plasmid targeting {gene}\n"+
         "Target organism: Synechocystis sp. PCC 6803\n"+
-        "Assembly method: XXX\n"+
+        "Assembly method: MoClo\n"+
         "CyanoSource record: <a href=\"https://cyanosource.ac.uk/plasmid/{linkId}\">"+
                 "https://cyanosource.ac.uk/plasmid/{linkId}</a>";
         
