@@ -45,6 +45,7 @@ public class SynBioTamer {
         cpy.setDefaultURIprefix(newNameSpace);
         cpy.setComplete(false);
         
+        
         cpy.createCopy(org);
         
         if (removeCollections) {
@@ -57,7 +58,7 @@ public class SynBioTamer {
         
         removeAnnotations(cpy, List.of(SBH_OWNED, SBH_TOPLEVEL));
         
-        cpy.setComplete(true);
+        cpy.setComplete(org.isComplete());
         return cpy;        
     }    
     
