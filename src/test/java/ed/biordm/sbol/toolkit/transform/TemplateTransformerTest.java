@@ -5,6 +5,7 @@
  */
 package ed.biordm.sbol.toolkit.transform;
 
+import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SO;
 import static ed.biordm.sbol.toolkit.transform.SynBioTamer.DEFAULT_NAMESPACE;
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.Location;
 import org.sbolstandard.core2.OrientationType;
 import org.sbolstandard.core2.Range;
+import org.sbolstandard.core2.RestrictionType;
 import org.sbolstandard.core2.SBOLConversionException;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLReader;
@@ -1046,6 +1048,62 @@ public class TemplateTransformerTest {
         assertEquals(3, dest.getSequenceAnnotations().size());
         
     }
+    
+    
+    @Test
+    public void flattensCopiesDeepAnnotations() throws Exception {
+        
+        ComponentDefinition cont = doc.createComponentDefinition("cont", ComponentDefinition.DNA_REGION);
+        
+        Sequence sq1 = doc.createSequence("sq1", "AAA", Sequence.IUPAC_DNA);
+        ComponentDefinition cp1 = doc.createComponentDefinition("cp1", ComponentDefinition.DNA_REGION);
+        cp1.addSequence(sq1);
+        cp1.addRole(SequenceOntology.PROMOTER); 
+        
+        Sequence sq2 = doc.createSequence("sq2", "CCCC", Sequence.IUPAC_DNA);
+        ComponentDefinition cp2 = doc.createComponentDefinition("cp2", ComponentDefinition.DNA_REGION);
+        cp2.addSequence(sq2);
+        cp2.addRole(SequenceOntology.CDS);
+        
+        SequenceAnnotation cp2ann1 = cp2.createSequenceAnnotation("AarI_2", "AarI_2", 1, 2);
+        cp2ann1.addRole(SO("SO:0001687"));
+        
+        Sequence sq3 = doc.createSequence("sq3", "TT", Sequence.IUPAC_DNA);
+        ComponentDefinition cp3 = doc.createComponentDefinition("cp3", ComponentDefinition.DNA_REGION);
+        cp3.addSequence(sq3);
+        cp3.addRole(SequenceOntology.TERMINATOR);
+        
+        Component cp1i = cont.createComponent("cp1i", AccessType.PUBLIC, cp1.getPersistentIdentity());
+        Component cp2i = cont.createComponent("cp2i", AccessType.PUBLIC, cp2.getPersistentIdentity());
+        Component cp3i = cont.createComponent("cp3i", AccessType.PUBLIC, cp3.getPersistentIdentity());
+  
+        cont.createSequenceConstraint("cs1", RestrictionType.PRECEDES, cp1i.getIdentity(), cp2i.getIdentity());
+        cont.createSequenceConstraint("cs2", RestrictionType.PRECEDES, cp2i.getIdentity(), cp3i.getIdentity());
+
+        ComponentDefinition flat = templateTransformer.flattenSequences2(cont, "flat", doc);
+        
+        String seq = templateTransformer.getSequence(flat, Sequence.IUPAC_DNA)
+                .map( s -> s.getElements())
+                .get();
+        
+        assertEquals("AAACCCCTT", seq);
+        
+        List<SequenceAnnotation> anns = flat.getSortedSequenceAnnotations();
+        
+        SequenceAnnotation ann = anns.get(0);
+        assertEquals(cp1.getRoles(), ann.getRoles());
+
+        ann = anns.get(1);
+        assertEquals(cp2ann1.getRoles(), ann.getRoles());
+        
+        ann = anns.get(2);
+        assertEquals(cp2.getRoles(), ann.getRoles());
+
+        
+        ann = anns.get(3);
+        assertEquals(cp3.getRoles(), ann.getRoles());
+    }
+    
     
     public SBOLDocument testDoc(String fileName) throws SBOLValidationException {
         try {

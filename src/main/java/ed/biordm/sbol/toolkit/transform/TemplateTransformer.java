@@ -566,12 +566,15 @@ public class TemplateTransformer {
     }
     
     Optional<Sequence> getSequence(Component comp, URI seqType) {
-        ComponentDefinition def = comp.getDefinition();
+        return getSequence(comp.getDefinition(), seqType);
+    }
+    
+    Optional<Sequence> getSequence(ComponentDefinition def, URI seqType) {
         for (Sequence seq : def.getSequences()) {
             if (seq.getEncoding().equals(seqType)) return Optional.of(seq);
         }
         return Optional.empty();
-    }
+    }    
     
     int getDNASequenceLenth(Component comp) {
         return getSequence(comp, Sequence.IUPAC_DNA)
