@@ -210,7 +210,7 @@ public class TemplateTransformer {
 
         List<Component> children = template.getSortedComponents();
         
-        Sequence joinedSequence = joinDNASequences(children, cleanName+"_seq", template.getVersion(),doc);
+        Sequence joinedSequence = joinDNASequences(template, cleanName+"_seq", template.getVersion(),doc);
         newCmpDef.addSequence(joinedSequence);
         
         convertComponentsToFeatures(children, newCmpDef);
@@ -546,10 +546,15 @@ public class TemplateTransformer {
         return newSeq;
     }
 
-    Sequence joinDNASequences(List<Component> components, String displayId, String version, SBOLDocument doc) throws SBOLValidationException {
-        return joinSequences(components, displayId, version, Sequence.IUPAC_DNA, doc);
+    Sequence joinDNASequences(ComponentDefinition def, String displayId, String version, SBOLDocument doc) throws SBOLValidationException {
+        
+        String seq = getJoinedSequenceElements(def, Sequence.IUPAC_DNA)
+                .orElseThrow( () -> new IllegalArgumentException("Cannot join component without sequence "+def.getDisplayId()));
+        
+        return doc.createSequence(displayId, version, seq, Sequence.IUPAC_DNA);
     }    
     
+    @Deprecated
     Sequence joinSequences(List<Component> components, String displayId, String version, URI seqType, SBOLDocument doc) throws SBOLValidationException {
         
         StringBuilder sb = new StringBuilder();
@@ -574,7 +579,32 @@ public class TemplateTransformer {
             if (seq.getEncoding().equals(seqType)) return Optional.of(seq);
         }
         return Optional.empty();
-    }    
+    }
+    
+    Optional<String> getSequenceElements(ComponentDefinition def, URI seqType) {
+        for (Sequence seq : def.getSequences()) {
+            if (seq.getEncoding().equals(seqType)) return Optional.of(seq.getElements());
+        }
+        return Optional.empty();        
+    }
+    
+    Optional<String> getJoinedSequenceElements(ComponentDefinition def, URI seqType) throws SBOLValidationException {
+        
+        Optional<String> concrete = getSequenceElements(def, seqType);
+        if (concrete.isPresent()) return concrete;
+        if (def.getComponents().isEmpty()) return Optional.empty();
+        
+        StringBuilder sb = new StringBuilder();
+        for (Component comp : def.getSortedComponents()) {
+            
+            String part = getJoinedSequenceElements(comp.getDefinition(), seqType)
+                    .orElseThrow( () -> new IllegalArgumentException("Cannot join elements from component without sequence "+
+                             comp.getDisplayId()+" in "+def.getDisplayId()));
+            sb.append(part);            
+        }
+        
+        return Optional.of(sb.toString());        
+    }
     
     int getDNASequenceLenth(Component comp) {
         return getSequence(comp, Sequence.IUPAC_DNA)
