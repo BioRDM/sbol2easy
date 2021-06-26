@@ -358,7 +358,7 @@ public class TemplateTransformer {
         if (origCmp != null) {
             if (origCmp.getIdentity() == null) {
                 if (origCmp.getDisplayId() == null) {
-                    System.out.println("Original Component Display ID is null!");
+                    //System.out.println("Original Component Display ID is null!");
                 } else {
                     newSeqAnn.setComponent(origCmp.getDisplayId());
                 }

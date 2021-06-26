@@ -142,18 +142,18 @@ public class TemplateTransformerTest {
         int start = 1;
         int seqAnnCount = 1;
         for (Component cmp : newCmp.getSortedComponents()) {
-            System.out.println(cmp.getDisplayId());
+            //System.out.println(cmp.getDisplayId());
 
             ComponentDefinition curCmpDef = cmp.getDefinition();
-            System.out.println(curCmpDef.getDisplayId());
+            //System.out.println(curCmpDef.getDisplayId());
 
             for (SequenceAnnotation seqAnn : curCmpDef.getSequenceAnnotations()) {
                 System.out.println(seqAnn.getDisplayId());
 
                 for (Location loc : seqAnn.getLocations()) {
                     Range range = (Range) loc;
-                    System.out.println(range.getStart());
-                    System.out.println(range.getEnd());
+                    //System.out.println(range.getStart());
+                    //System.out.println(range.getEnd());
 
                     //String seqAnnDispId = newCmp
 
@@ -167,14 +167,14 @@ public class TemplateTransformerTest {
         Set<String> saDisplayIds = new HashSet<>( Arrays.asList(saDisplayIdsArr) );
 
         for (SequenceAnnotation seqAnn : newCmp.getSequenceAnnotations()) {
-            System.out.println("New sequence annotation:");
-            System.out.println(seqAnn.getDisplayId());
+            //System.out.println("New sequence annotation:");
+            //System.out.println(seqAnn.getDisplayId());
             assertTrue(saDisplayIds.contains(seqAnn.getDisplayId()));
         }
 
         for (SequenceAnnotation seqAnn : newCmpFlat.getSequenceAnnotations()) {
-            System.out.println("New sequence annotation:");
-            System.out.println(seqAnn.getDisplayId());
+            //System.out.println("New sequence annotation:");
+            //System.out.println(seqAnn.getDisplayId());
             assertTrue(saDisplayIds.contains(seqAnn.getDisplayId()));
         }
     }
@@ -288,7 +288,7 @@ public class TemplateTransformerTest {
 
         String genericComponentId = "right";
         Component replaced = parent.getComponent(genericComponentId);
-        System.out.println("Replaced component displayId: " + replaced.getDisplayId());
+        //System.out.println("Replaced component displayId: " + replaced.getDisplayId());
         assertNotNull(replaced);
         ComponentDefinition replacedDef = doc.getComponentDefinition(replaced.getDefinitionIdentity());
         assertNotNull(replacedDef);
@@ -334,7 +334,7 @@ public class TemplateTransformerTest {
             ComponentDefinition subjectCD = sc.getSubjectDefinition();
 
             if(objectCD == replacedDef || subjectCD == replacedDef) {
-                System.out.println("Old SequenceConstraint detected!");
+                //System.out.println("Old SequenceConstraint detected!");
                 assertTrue(Boolean.FALSE);
             } else {
                 if(objectCD == newDef) {
@@ -355,8 +355,8 @@ public class TemplateTransformerTest {
         int cmpCount = 0;
 
         for (ComponentDefinition cmpDef : cmpDefs) {
-            System.out.println(cmpDef.getDisplayId());
-            System.out.println(cmpDef.getIdentity());
+            //System.out.println(cmpDef.getDisplayId());
+            //System.out.println(cmpDef.getIdentity());
 
             String cmpDefId = cmpDef.getDisplayId();
 
@@ -365,7 +365,7 @@ public class TemplateTransformerTest {
                 Component subCmp = cmpDef.getComponent("left");
                 // String genericComponentId = subCmp.getIdentity().toString();
                 String genericComponentId = subCmp.getDisplayId();
-                System.out.println(genericComponentId);
+                //System.out.println(genericComponentId);
                 String newName = "test_left_".concat(String.valueOf(cmpCount));
                 String newSequence = "GATTACA";
 
@@ -382,8 +382,8 @@ public class TemplateTransformerTest {
                 for (Component child : origCmps) {
                     Component newCmp = newCmps.get(count);
 
-                    System.out.println(child.getDisplayId());
-                    System.out.println(newCmp.getDisplayId());
+                    //System.out.println(child.getDisplayId());
+                    //System.out.println(newCmp.getDisplayId());
                 }
 
                 cmpCount += 1;
@@ -409,7 +409,7 @@ public class TemplateTransformerTest {
         int cmpCount = 0;
 
         for (Sequence sequence : template.getSequences()) {
-            System.out.println("Initial sequence: " + sequence.getElements());
+            //System.out.println("Initial sequence: " + sequence.getElements());
         }
 
         String newName = "sll00199_codA_Km!/new_1";
@@ -420,7 +420,7 @@ public class TemplateTransformerTest {
 
         String expFlattenedSeq = buildSll00199CodAKmSequence();
         for (Sequence sequence : parent.getSequences()) {
-            System.out.println("Flattened sequence:\n" + sequence.getElements());
+            //System.out.println("Flattened sequence:\n" + sequence.getElements());
             assertEquals(expFlattenedSeq, sequence.getElements());
         }
 
@@ -439,7 +439,7 @@ public class TemplateTransformerTest {
         assertNotNull(parent);
 
         for (Sequence sequence : parent.getSequences()) {
-            System.out.println("Flattened sequence:\n" + sequence.getElements());
+            //System.out.println("Flattened sequence:\n" + sequence.getElements());
             assertNotEquals(expFlattenedSeq, sequence.getElements());
         }
     }
@@ -486,8 +486,8 @@ public class TemplateTransformerTest {
         templateTransformer.addChildSequenceAnnotations(template, doc, childSeqAnns);
 
         for (SequenceAnnotation seqAnn : childSeqAnns) {
-            System.out.println(seqAnn.getIdentity());
-            System.out.println(seqAnn.getComponentIdentity());
+            //System.out.println(seqAnn.getIdentity());
+            //System.out.println(seqAnn.getComponentIdentity());
             assertTrue(saDisplayIds.contains(seqAnn.getDisplayId()));
         }
     }
@@ -524,8 +524,8 @@ public class TemplateTransformerTest {
         for (SequenceAnnotation seqAnn : templateFlat.getSequenceAnnotations()) {
             //System.out.println(seqAnn.getComponentDefinition().getDisplayId());
             //System.out.println(seqAnn.getComponent().getDisplayId());
-            System.out.println(seqAnn.getIdentity());
-            System.out.println(seqAnn.getComponentIdentity());
+            //System.out.println(seqAnn.getIdentity());
+            //System.out.println(seqAnn.getComponentIdentity());
             assertTrue(saDisplayIds.contains(seqAnn.getDisplayId()));
         }
 
@@ -545,7 +545,7 @@ public class TemplateTransformerTest {
 
             for(Location loc : locations) {
                 Range range = (Range) loc;
-                System.out.println(range.getStart());
+                //System.out.println(range.getStart());
                 assertTrue(starts.contains((Integer)range.getStart()));
                 assertTrue(ends.contains((Integer)range.getEnd()));
             }
@@ -593,7 +593,7 @@ public class TemplateTransformerTest {
 
         String genericComponentId = "right";
         Component replaced = parent.getComponent(genericComponentId);
-        System.out.println("Replaced component displayId: " + replaced.getDisplayId());
+        //System.out.println("Replaced component displayId: " + replaced.getDisplayId());
         assertNotNull(replaced);
         ComponentDefinition replacedDef = doc.getComponentDefinition(replaced.getDefinitionIdentity());
         assertNotNull(replacedDef);
@@ -701,12 +701,12 @@ public class TemplateTransformerTest {
 
         // Check component instances match
         for (Component cmp : sll00199Plasmid.getSortedComponents()) {
-            System.out.println(cmp.getDisplayId());
+            //System.out.println(cmp.getDisplayId());
             //assertNotNull(newPlasmid.getComponent(cmp.getDisplayId()));
         }
 
         for (Component cmp : newPlasmid.getSortedComponents()) {
-            System.out.println(cmp.getDisplayId());
+            //System.out.println(cmp.getDisplayId());
             //assertNotNull(sll00199Plasmid.getComponent(cmp.getDisplayId()));
         }
 
@@ -759,13 +759,13 @@ public class TemplateTransformerTest {
 
         // Get sequence annos and verify they match in new component
         for (SequenceAnnotation seqAnn : npSAs) {
-            System.out.println(seqAnn.getIdentity());
-            System.out.println(seqAnn.getComponentIdentity());
+            //System.out.println(seqAnn.getIdentity());
+            //System.out.println(seqAnn.getComponentIdentity());
         }
 
         for (SequenceAnnotation seqAnn : sll00199SAs) {
-            System.out.println(seqAnn.getIdentity());
-            System.out.println(seqAnn.getComponentIdentity());
+            //System.out.println(seqAnn.getIdentity());
+            //System.out.println(seqAnn.getComponentIdentity());
         }
 
         // Add the flattened sequences to the parent component's SequenceAnnotation components
@@ -774,12 +774,12 @@ public class TemplateTransformerTest {
 
         // Check component instances match
         for (Component cmp : sll00199PlasmidFlat.getSortedComponents()) {
-            System.out.println(cmp.getDisplayId());
+            //System.out.println(cmp.getDisplayId());
             //assertNotNull(newPlasmidFlat.getComponent(cmp.getDisplayId()));
         }
 
         for (Component cmp : newPlasmidFlat.getSortedComponents()) {
-            System.out.println(cmp.getDisplayId());
+            //System.out.println(cmp.getDisplayId());
             //assertNotNull(sll00199PlasmidFlat.getComponent(cmp.getDisplayId()));
         }
 
@@ -789,8 +789,8 @@ public class TemplateTransformerTest {
         // Get sequence annos and verify they match in new component
         for (SequenceAnnotation seqAnn : npFlatSAs) {
             // How to verify these objets are equivalent in each plasmid?
-            System.out.println(seqAnn.getIdentity());
-            System.out.println(seqAnn.getComponentIdentity());
+            //System.out.println(seqAnn.getIdentity());
+            //System.out.println(seqAnn.getComponentIdentity());
         }
 
         //assertEquals(sll00199PlasmidFlatSAs.size(), npFlatSAs.size());
@@ -798,8 +798,8 @@ public class TemplateTransformerTest {
         // why does this method return 'NNN...' strings for new plasmid?
         // something to do with the SequenceAnnotations having null linked components.
         // But can't set the components on the SAs because of circular reference error?
-        System.out.println(sll00199PlasmidFlat.getImpliedNucleicAcidSequence());
-        System.out.println(newPlasmidFlat.getImpliedNucleicAcidSequence());
+        //System.out.println(sll00199PlasmidFlat.getImpliedNucleicAcidSequence());
+        //System.out.println(newPlasmidFlat.getImpliedNucleicAcidSequence());
 
         assertEquals(sll00199PlasmidFlat.getImpliedNucleicAcidSequence().length(),
                 newPlasmidFlat.getImpliedNucleicAcidSequence().length());
@@ -1051,7 +1051,7 @@ public class TemplateTransformerTest {
     
     
     @Test
-    public void flattensCopiesDeepAnnotations() throws Exception {
+    public void flattensCopiesChildrenAnnotations() throws Exception {
         
         ComponentDefinition cont = doc.createComponentDefinition("cont", ComponentDefinition.DNA_REGION);
         
