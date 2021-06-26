@@ -606,6 +606,26 @@ public class TemplateTransformer {
         return Optional.of(sb.toString());        
     }
     
+    int getJoinedSequenceLength(ComponentDefinition def, URI seqType) {
+        
+        Optional<String> concrete = getSequenceElements(def, seqType);
+        if (concrete.isPresent()) return concrete.get().length();
+        if (def.getComponents().isEmpty()) 
+            throw new IllegalArgumentException("Cannot calculate length from missing sequence in comp "+def.getDisplayId());
+        
+        int length = 0;
+        for (Component comp : def.getComponents()) {
+            
+            length += getJoinedSequenceLength(comp.getDefinition(), seqType);
+        }
+        
+        return length;        
+    }    
+
+    int getJoinedDNASequenceLength(Component comp) throws SBOLValidationException {
+        return getJoinedSequenceLength(comp.getDefinition(), Sequence.IUPAC_DNA);
+    }
+    
     int getDNASequenceLenth(Component comp) {
         return getSequence(comp, Sequence.IUPAC_DNA)
                 .orElseThrow(()-> new IllegalArgumentException("Missing sequence in comp "+comp.getDisplayId()))
@@ -646,12 +666,18 @@ public class TemplateTransformer {
     }
 
     void copySequenceFeatures(List<Component> children, ComponentDefinition dest) throws SBOLValidationException {
+        copySequenceFeatures(children, dest, 0);
+    }    
+    
+    void copySequenceFeatures(List<Component> children, ComponentDefinition dest, int shift) throws SBOLValidationException {
         
-        int shift = 0;
         for (Component comp: children) {
             ComponentDefinition def = comp.getDefinition();
             copySequenceFeatures(def, dest, shift);
-            shift+=getDNASequenceLenth(comp);
+            if (abstractComp(comp)) {
+                copySequenceFeatures(def.getSortedComponents(), dest, shift);
+            }
+            shift+=getJoinedDNASequenceLength(comp);
         }
     }
 
@@ -716,17 +742,26 @@ public class TemplateTransformer {
     }
 
     void convertComponentsToFeatures(List<Component> children, ComponentDefinition dest) throws SBOLValidationException {
-        int shift = 0;
+        convertComponentsToFeatures(children, dest, 0);
+    }    
+    
+    void convertComponentsToFeatures(List<Component> children, ComponentDefinition dest, int shift) throws SBOLValidationException {
         for (Component comp: children) {
             convertComponentToFeature(comp, dest, shift);
-            shift+=getDNASequenceLenth(comp);
+            if (abstractComp(comp)) {
+                convertComponentsToFeatures(comp.getDefinition().getSortedComponents(), dest, shift);
+            }
+            shift+=getJoinedDNASequenceLength(comp);
         }
     }
     
+    boolean abstractComp(Component comp) {
+        return getSequence(comp, Sequence.IUPAC_DNA).isEmpty();
+    }
 
     SequenceAnnotation convertComponentToFeature(Component comp, ComponentDefinition dest, int shift) throws SBOLValidationException {
         
-        int length = getDNASequenceLenth(comp);
+        int length = getJoinedDNASequenceLength(comp);
         ComponentDefinition compD = comp.getDefinition();
         
         SequenceAnnotation ann = dest.createSequenceAnnotation(comp.getDisplayId(), comp.getDisplayId(), shift+1, shift+length);

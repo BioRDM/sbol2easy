@@ -946,6 +946,78 @@ public class TemplateTransformerTest {
     }    
     
     @Test
+    public void getJoinedSequenceLengthWorksWithSimpleCases() throws Exception {
+        
+        ComponentDefinition cont = doc.createComponentDefinition("cont", ComponentDefinition.DNA_REGION);
+        
+        try {
+            templateTransformer.getJoinedSequenceLength(cont, Sequence.IUPAC_DNA);
+            fail();
+        } catch (IllegalArgumentException e) {}
+        
+        Sequence sq1 = doc.createSequence("sq1", "AAA", Sequence.IUPAC_DNA);
+        ComponentDefinition cp1 = doc.createComponentDefinition("cp1", ComponentDefinition.DNA_REGION);
+        cp1.addSequence(sq1);
+        
+        assertEquals(3, templateTransformer.getJoinedSequenceLength(cp1, Sequence.IUPAC_DNA));
+                
+    }    
+    
+    @Test
+    public void getJoinedSequenceLengthCalculatesRecursively() throws Exception {
+        
+        ComponentDefinition cont = doc.createComponentDefinition("cont", ComponentDefinition.DNA_REGION);
+        
+        Sequence sq1 = doc.createSequence("sq1", "AAA", Sequence.IUPAC_DNA);
+        ComponentDefinition cp1 = doc.createComponentDefinition("cp1", ComponentDefinition.DNA_REGION);
+        cp1.addSequence(sq1);
+        
+        // proteinf first not dna
+        Sequence sq2 = doc.createSequence("sq2p", "ALA", Sequence.IUPAC_PROTEIN);
+        ComponentDefinition cp2 = doc.createComponentDefinition("cp2", ComponentDefinition.DNA_REGION);
+        cp2.addSequence(sq2);
+
+        Sequence sq3 = doc.createSequence("sq3", "TT", Sequence.IUPAC_DNA);
+        ComponentDefinition cp3 = doc.createComponentDefinition("cp3", ComponentDefinition.DNA_REGION);
+        cp3.addSequence(sq3);
+        
+        Component i1 = cont.createComponent("cp1", AccessType.PUBLIC, cp1.getIdentity());
+        Component i2 = cont.createComponent("cp2", AccessType.PUBLIC, cp2.getIdentity());
+        Component i3 = cont.createComponent("cp3", AccessType.PUBLIC, cp3.getIdentity());        
+        
+        cont.createSequenceConstraint("cs1", RestrictionType.PRECEDES, i1.getPersistentIdentity(), i2.getPersistentIdentity());
+        cont.createSequenceConstraint("cs2", RestrictionType.PRECEDES, i2.getPersistentIdentity(), i3.getPersistentIdentity());
+        
+        
+        try {
+            templateTransformer.getJoinedSequenceLength(cont, Sequence.IUPAC_DNA);
+        } catch (IllegalArgumentException e) {
+            // expected as cp2 does not have dna
+        }
+        
+        sq2 = doc.createSequence("sq2", "C", Sequence.IUPAC_DNA);
+        cp2.addSequence(sq2);        
+        
+        int len = templateTransformer.getJoinedSequenceLength(cont, Sequence.IUPAC_DNA);
+        assertEquals("AAACTT".length(), len); 
+        
+        Sequence sq4 = doc.createSequence("sq4", "GG", Sequence.IUPAC_DNA);
+        ComponentDefinition cp4 = doc.createComponentDefinition("cp4", ComponentDefinition.DNA_REGION);
+        cp4.addSequence(sq4);
+        
+        ComponentDefinition cont2 = doc.createComponentDefinition("cont2", ComponentDefinition.DNA_REGION);
+        Component i4 = cont2.createComponent("cp4", AccessType.PUBLIC, cont.getIdentity());
+        Component i5 = cont2.createComponent("cp5", AccessType.PUBLIC, cp4.getIdentity());
+        
+        cont2.createSequenceConstraint("cs3", RestrictionType.PRECEDES, i4.getPersistentIdentity(), i5.getPersistentIdentity());
+        
+        len = templateTransformer.getJoinedSequenceLength(cont2, Sequence.IUPAC_DNA);
+        assertEquals("AAACTTGG".length(), len); 
+        
+    }    
+    
+    
+    @Test
     public void createsCmpCopy() throws Exception {
         doc = testDoc("cyano_gen_template.xml");
         String version = "1.0.0";
@@ -1357,7 +1429,7 @@ public class TemplateTransformerTest {
         Sequence sq4 = doc.createSequence("sq4", "GGGG", Sequence.IUPAC_DNA);
         ComponentDefinition sub2 = doc.createComponentDefinition("sub2", ComponentDefinition.DNA_REGION);
         sub2.addSequence(sq4);
-        sub2.addRole(SequenceOntology.CDS);
+        sub2.addRole(SO("SO:0001800"));
         
         ComponentDefinition cont = doc.createComponentDefinition("cont", ComponentDefinition.DNA_REGION);
         Component sub1i = cont.createComponent("sub1i", AccessType.PUBLIC, sub1.getPersistentIdentity());
@@ -1380,21 +1452,24 @@ public class TemplateTransformerTest {
         assertEquals(cp1.getRoles(), ann.getRoles());
         
         ann = anns.get(1);
+        assertEquals(sub1.getRoles(), ann.getRoles());
+        
+        ann = anns.get(2);
         assertEquals(cp2ann1.getRoles(), ann.getRoles());
         assertEquals(cp2ann1.getDisplayId(), ann.getDisplayId());
         
-        ann = anns.get(2);
+        ann = anns.get(3);
         assertEquals(cp2.getRoles(), ann.getRoles());
 
-        ann = anns.get(3);
+        ann = anns.get(4);
         assertEquals(cp2ann2.getRoles(), ann.getRoles());
         assertEquals(cp2ann2.getDisplayId(), ann.getDisplayId());
         assertEquals(subCp1.getPersistentIdentity(), ann.getComponentDefinition().getPersistentIdentity());
         
-        ann = anns.get(4);
+        ann = anns.get(5);
         assertEquals(cp3.getRoles(), ann.getRoles());
         
-        ann = anns.get(5);
+        ann = anns.get(6);
         assertEquals(sub2.getRoles(), ann.getRoles());        
         
         assertEquals(1, flat.getComponents().size());
