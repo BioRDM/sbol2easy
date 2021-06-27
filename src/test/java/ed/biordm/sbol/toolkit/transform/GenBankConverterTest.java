@@ -37,6 +37,8 @@ import org.sbolstandard.core2.SequenceAnnotation;
 public class GenBankConverterTest {
 
     TemplateTransformer templateTransformer = new TemplateTransformer();
+    ComponentFlattener flattener = new ComponentFlattener();
+    
     GenBankConverter gbConverter = new GenBankConverter();
     SBOLDocument doc;
     static String SEQUENCE_ONTO_PREF = "http://identifiers.org/so/";
@@ -83,7 +85,7 @@ public class GenBankConverterTest {
 
         String newName = "sll00199_codA_Km".concat("_johnny");
 
-        ComponentDefinition newPlasmidFlat = templateTransformer.flattenSequences(sll00199Plasmid, newName.concat("_flat"), doc);
+        ComponentDefinition newPlasmidFlat = flattener.flattenSequences2(sll00199Plasmid, newName.concat("_flat"), doc);
         newPlasmidFlat.addRole(new URI(SEQUENCE_ONTO_PREF+"SO:0000637"));
 
         // Writer sysOutWriter = new BufferedWriter(new OutputStreamWriter(System.out));

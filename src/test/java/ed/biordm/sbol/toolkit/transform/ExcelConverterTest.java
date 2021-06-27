@@ -153,10 +153,10 @@ public class ExcelConverterTest {
                     newDoc.createSequence(rightFlankName.concat("_seq"), seq.getElements(), Sequence.IUPAC_DNA);
                 }*/
                 // Finally, flatten the new sequences into the parent plasmid definition
-                newCyanoCDFlat = templateTransformer.flattenSequences(newCyanoCD, newPlasmidName.concat("_flat"), newDoc);
+                //newCyanoCDFlat = templateTransformer.flattenSequences(newCyanoCD, newPlasmidName.concat("_flat"), newDoc);
 
                 // Add arbitrary(?) SequenceAnnotations. What are the rules for these annotations?
-                Component seqCmp = newCyanoCDFlat.getComponent("ampR");
+                //Component seqCmp = newCyanoCDFlat.getComponent("ampR");
             } catch (SBOLValidationException ex) {
                 ex.printStackTrace();
             } catch (URISyntaxException ex) {

@@ -34,6 +34,7 @@ import org.sbolstandard.core2.SequenceConstraint;
 public class TemplateTransformerTestFull {
 
     TemplateTransformer templateTransformer = new TemplateTransformer();
+    ComponentFlattener flattener = new ComponentFlattener();
     SBOLDocument doc;
     static String SEQUENCE_ONTO_PREF = "http://identifiers.org/so/";
 
@@ -156,7 +157,7 @@ public class TemplateTransformerTestFull {
         //       they violate the unique naming rule (since 'backbone' component
         //       definition also contains the same annotations)
         */
-        ComponentDefinition newPlasmidFlat = templateTransformer.flattenSequences(sll00199Plasmid, newName.concat("_flat"), doc);
+        ComponentDefinition newPlasmidFlat = flattener.flattenSequences2(sll00199Plasmid, newName.concat("_flat"), doc);
         newPlasmidFlat.addRole(new URI(SEQUENCE_ONTO_PREF+"SO:0000637"));
 
         System.out.println(newPlasmidFlat.getDescription());
@@ -219,171 +220,6 @@ public class TemplateTransformerTestFull {
         }
     }
 
-    @Test
-    public void testAddCustomSequenceAnnotations() throws Exception {
-        // Get original sll00199 component definition for comparison
-        assertNotNull(doc);
-
-        // Copy Template
-        ComponentDefinition sll00199Plasmid = doc.getComponentDefinition("sll00199_codA_Km", "1.0.0");
-        assertNotNull(sll00199Plasmid);
-
-        ComponentDefinition sll00199PlasmidFlat = doc.getComponentDefinition("sll00199_codA_Km_flat", "1.0.0");
-        assertNotNull(sll00199PlasmidFlat);
-
-        Map<Component, List<Sequence>> cmpSeqMap = new HashMap<>();
-        //cmpSeqMap = templateTransformer.rebuildSequences(sll00199Plasmid, sll00199Plasmid, doc, cmpSeqMap);
-        templateTransformer.addCustomSequenceAnnotations(sll00199Plasmid, cmpSeqMap);
-        
-        Set<SequenceAnnotation> sll00199PlasmidFlatSAs = sll00199PlasmidFlat.getSequenceAnnotations();
-        Set<SequenceAnnotation> npFlatSAs = sll00199Plasmid.getSequenceAnnotations();
-
-        // will be empty because no sub-components have been added to parent yet
-        assertEquals(0, npFlatSAs.size());
-
-        cmpSeqMap = templateTransformer.rebuildSequences(sll00199Plasmid, sll00199Plasmid, doc, cmpSeqMap);
-        templateTransformer.addCustomSequenceAnnotations(sll00199Plasmid, cmpSeqMap);
-        npFlatSAs = sll00199Plasmid.getSequenceAnnotations();
-
-        assertEquals(33, npFlatSAs.size());
-
-        // Get sequence annos and verify they match in new component
-        for (SequenceAnnotation seqAnn : npFlatSAs) {
-            // How to verify these objets are equivalent in each plasmid?
-            System.out.println(seqAnn.getIdentity());
-            System.out.println(seqAnn.getComponentIdentity());
-        }
-    }
-
-    /*@Test
-    public void testCreateNewFlatPlasmid() throws Exception {
-        // Get original sll00199 component definition for comparison
-        assertNotNull(doc);
-
-        ComponentDefinition sll00199PlasmidFlat = doc.getComponentDefinition("sll00199_codA_Km_flat", "1.0.0");
-        assertNotNull(sll00199PlasmidFlat);
-
-        // Copy Template
-        ComponentDefinition templatePlasmid = doc.getComponentDefinition("cyano_codA_Km", "1.0.0");
-        assertNotNull(templatePlasmid);
-
-        String newName = "sll00199_codA_Km_johnny";
-        String version = "1.0.0";
-        String description = "Test plasmid creation";
-        ComponentDefinition newPlasmid = templateTransformer.instantiateFromTemplate(templatePlasmid, newName, version, description, doc);
-
-        ComponentDefinition originD = doc.getComponentDefinition("ori", version);
-        Component origin =  newPlasmid.createComponent("ori_instance", AccessType.PUBLIC, originD.getIdentity());
-        //SequenceAnnotation an = newPlasmid.createSequenceAnnotation("ori", "ori", 1228, 1816);
-        //an.setComponent(origin.getIdentity());
-
-        // Left sequence elements
-        // doc.getSequence("sll00199_left_seq")
-        String ltSeq = "caaggcaaaaccaccgttatcagcagaacgacggcgggaaaaaatgattaaacgaaaaaatttgcaaggattcatagcggttgcccaatctaactcagggagcgacttcagcccacaaaaaacaccactgggcctactgggctattcccattatcatctacattgaagggatagcaagctaatttttatgacggcgatcgccaaaaacaaagaaaattcagcaattaccgtgggtagcaaaaaatccccatctaaagttcagtaaatatagctagaacaaccaagcattttcggcaaagtactattcagatagaacgagaaatgagcttgttctatccgcccggggctgaggctgtataatctacgacgggctgtcaaacattgtgataccatgggcagaagaaaggaaaaacgtccctgatcgcctttttgggcacggagtagggcgttaccccggcccgttcaaccacaagtccctatAGATACAATCGCCAAGAAGT";
-        String genericCmpId = "left";
-
-        templateTransformer.concretizePart(newPlasmid, genericCmpId, "test_left",
-                ltSeq, doc);
-
-        // Right sequence elements
-        // doc.getSequence("sll00199_right_seq")
-        String rtSeq = "tcagccagctcaatctgtgtgtcgttgatttaagcttaatgctacggggtctgtctccaactccctcagcttctcgcaatggcaaggcaaataatgtttctcttgctgagtagatgttcaggaggacggatcgaaagtctacaaaacagattcttgaccaagccatctacttagaaaaacttctgcgttttggcgatcgcatcttttaagcgagatgcgatttttttgtccattagtttgtattttaatactcttttgttgtttgatttcgtccaagcttttcttggtatgtgggatcttccgtgcccaaaattttatcccagaaagtgaaatatagtcatttcaattaacgatgagagaatttaatgtaaaattatggagtgtacaaaatgaacaggtttaaacaatggcttacagtttagatttaaggcaaagggtagtagcttatatagaagctggaggaaaaataactgaggcttccaagatatataaaataggaaaagcctcgatatacagatggttaaatagagtagatttaagcccaacaaaagtagagcgtcgccatagg";
-        genericCmpId = "right";
-
-        templateTransformer.concretizePart(newPlasmid, genericCmpId, "test_right",
-                rtSeq, doc);
 
 
-        ComponentDefinition newLtCD = newPlasmid.getComponent("test_left").getDefinition();
-        ComponentDefinition newRtCD = newPlasmid.getComponent("test_right").getDefinition();
-
-        Set<Sequence> newLtCDSeqs = newLtCD.getSequences();
-        Set<Sequence> newRtCDSeqs = newRtCD.getSequences();
-
-        // assuming only one sequence per flank
-        String newLtSeqEls = ((Sequence)newLtCDSeqs.toArray()[0]).getElements();
-        String newRtSeqEls = ((Sequence)newRtCDSeqs.toArray()[0]).getElements();
-
-        assertEquals(ltSeq, newLtSeqEls);
-
-        assertEquals(rtSeq, newRtSeqEls);
-
-        Set<SequenceAnnotation> npSAs = newPlasmid.getSequenceAnnotations();
-
-        // Get sequence annos and verify they match in new component
-        for (SequenceAnnotation seqAnn : npSAs) {
-            System.out.println(seqAnn.getIdentity());
-            System.out.println(seqAnn.getComponentIdentity());
-        }
-
-        // Add the flattened sequences to the parent component's SequenceAnnotation components
-        ComponentDefinition newPlasmidFlat = templateTransformer.flattenSequences(newPlasmid, newName.concat("_flat"), doc);
-        newPlasmidFlat.addRole(new URI(SEQUENCE_ONTO_PREF+"SO:0000637"));
-
-        // Add arbitrary(?) SequenceAnnotations. What are the rules for these annotations?
-        Component seqCmp = newPlasmidFlat.getComponent("ampR");
-        //an.setComponent(seqCmp.getIdentity());
-
-        seqCmp = newPlasmidFlat.getComponent("test_left");
-        //an.setComponent(seqCmp.getIdentity());
-
-        // Check component instances match
-        for (Component cmp : sll00199PlasmidFlat.getSortedComponents()) {
-            System.out.println(cmp.getDisplayId());
-            //assertNotNull(newPlasmidFlat.getComponent(cmp.getDisplayId()));
-        }
-
-        for (Component cmp : newPlasmidFlat.getSortedComponents()) {
-            System.out.println(cmp.getDisplayId());
-            //assertNotNull(sll00199PlasmidFlat.getComponent(cmp.getDisplayId()));
-        }
-
-        Set<SequenceAnnotation> sll00199PlasmidFlatSAs = sll00199PlasmidFlat.getSequenceAnnotations();
-        Set<SequenceAnnotation> npFlatSAs = newPlasmidFlat.getSequenceAnnotations();
-
-        // Get sequence annos and verify they match in new component
-        for (SequenceAnnotation seqAnn : npFlatSAs) {
-            // How to verify these objets are equivalent in each plasmid?
-            System.out.println(seqAnn.getIdentity());
-            System.out.println(seqAnn.getComponentIdentity());
-        }
-
-        //assertEquals(sll00199PlasmidFlatSAs.size(), npFlatSAs.size());
-
-        // why does this method return 'NNN...' strings for new plasmid?
-        // something to do with the SequenceAnnotations having null linked components.
-        // But can't set the components on the SAs because of circular reference error?
-        System.out.println(sll00199PlasmidFlat.getImpliedNucleicAcidSequence());
-        System.out.println(newPlasmidFlat.getImpliedNucleicAcidSequence());
-
-        // This test fails
-        assertEquals(sll00199PlasmidFlat.getImpliedNucleicAcidSequence().length(),
-                newPlasmidFlat.getImpliedNucleicAcidSequence().length());
-
-        Set<Sequence> sll00199PlasmidFlatSeqs = sll00199PlasmidFlat.getSequences();
-        Set<Sequence> npFlatSeqs = newPlasmidFlat.getSequences();
-        
-        String npFlatSeqEls = ((Sequence)npFlatSeqs.toArray()[0]).getElements();
-        String sll00199PlasmidFlatSeqEls = ((Sequence)sll00199PlasmidFlatSeqs.toArray()[0]).getElements();
-
-        assertEquals(npFlatSeqEls, sll00199PlasmidFlatSeqEls);
-
-        // Check sequence constraints match
-        Set<SequenceConstraint> sll00199SFlatSCs = sll00199PlasmidFlat.getSequenceConstraints();
-        Set<SequenceConstraint> npFlatSCs = newPlasmidFlat.getSequenceConstraints();
-
-        for (SequenceConstraint sc : npFlatSCs) {
-            SequenceConstraint npSc = newPlasmid.getSequenceConstraint(sc.getDisplayId());
-            //assertEquals(sc.getSubject().getDefinition().getWasDerivedFroms(), npSc.getSubject().getDefinition().getWasDerivedFroms());
-            assertNotNull(sll00199PlasmidFlat.getSequenceConstraint(npSc.getDisplayId()));
-        }
-
-        for (SequenceConstraint sc : sll00199SFlatSCs) {
-            SequenceConstraint sll00199Sc = sll00199PlasmidFlat.getSequenceConstraint(sc.getDisplayId());
-            //assertNotNull(npSc);
-            //assertEquals(sc.getObject().getDefinition().getWasDerivedFroms(), npSc.getObject().getDefinition().getWasDerivedFroms());
-            //assertEquals(sc.getSubject().getDefinition().getWasDerivedFroms(), npSc.getSubject().getDefinition().getWasDerivedFroms());
-            assertNotNull(newPlasmid.getSequenceConstraint(sll00199Sc.getDisplayId()));
-        }
-    }*/
 }
