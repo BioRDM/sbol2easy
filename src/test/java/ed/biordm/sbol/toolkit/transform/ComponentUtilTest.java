@@ -141,6 +141,7 @@ public class ComponentUtilTest {
         assertNotNull(dest.getComponent("ori_instance"));
     }    
     
+            
     @Test
     public void createAnnCopy() throws Exception {
         doc = testDoc("cyano_gen_template.xml");

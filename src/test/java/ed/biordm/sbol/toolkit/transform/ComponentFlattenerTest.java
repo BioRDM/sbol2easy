@@ -6,6 +6,7 @@
 package ed.biordm.sbol.toolkit.transform;
 
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SO;
+import static ed.biordm.sbol.toolkit.transform.ComponentUtil.emptyDocument;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -37,16 +38,15 @@ public class ComponentFlattenerTest {
     }
     
     ComponentFlattener instance = new ComponentFlattener();
+    
     SBOLDocument doc;
     
     @Before
     public void initSBOLDocument() throws IOException, SBOLValidationException, org.sbolstandard.core2.SBOLConversionException {
 
-        doc = new SBOLDocument();
-        doc.setDefaultURIprefix("http://bio.ed.ac.uk/biordm/");
-        doc.setComplete(true);
-        doc.setCreateDefaults(true);
-    }
+        doc = emptyDocument();
+        
+     }
     
     @Test
     public void flattensUsesChildDispIdAndDefForNaming() throws Exception {
@@ -375,10 +375,7 @@ public class ComponentFlattenerTest {
         cont.createSequenceConstraint("cs1", RestrictionType.PRECEDES, sub1i.getIdentity(), sub2i.getIdentity());
         
 
-        SBOLDocument dest = new SBOLDocument();
-        dest.setDefaultURIprefix("http://bio.ed.ac.uk/biordm2222/");
-        dest.setComplete(true);
-        dest.setCreateDefaults(true);
+        SBOLDocument dest = emptyDocument();
         
         ComponentDefinition flat = instance.flattenDesign(cont, "flat", dest);
         
@@ -419,6 +416,72 @@ public class ComponentFlattenerTest {
         //System.out.println(newC.getPersistentIdentity());
         //System.out.println(newC.getDefinition().getPersistentIdentity());
         //System.out.println(flat.getPersistentIdentity());
+        
+    }    
+    
+    
+    @Test
+    public void flattensAllTopLevelsFromADocument() throws Exception {
+        
+        // first subctomponent, abstract with inner structure
+        ComponentDefinition sub1 = doc.createComponentDefinition("sub1", ComponentDefinition.DNA_REGION);
+        sub1.addRole(SO("SO:0001500"));
+        
+        Sequence sq1 = doc.createSequence("sq1", "AAA", Sequence.IUPAC_DNA);
+        ComponentDefinition cp1 = doc.createComponentDefinition("cp1", ComponentDefinition.DNA_REGION);
+        cp1.addSequence(sq1);
+        cp1.addRole(SequenceOntology.PROMOTER); 
+        
+        Sequence sq2 = doc.createSequence("sq2", "CCCC", Sequence.IUPAC_DNA);
+        ComponentDefinition cp2 = doc.createComponentDefinition("cp2", ComponentDefinition.DNA_REGION);
+        cp2.addSequence(sq2);
+        cp2.addRole(SequenceOntology.CDS);
+        
+        SequenceAnnotation cp2ann1 = cp2.createSequenceAnnotation("AarI_2", "AarI_2", 1, 2);
+        cp2ann1.addRole(SO("SO:0001687"));
+        
+        ComponentDefinition subCp1 = doc.createComponentDefinition("subCp1", ComponentDefinition.DNA_REGION);
+        subCp1.addRole(SO("SO:0001600"));
+        Component subCp1i = cp2.createComponent("subCp1i", AccessType.PUBLIC, subCp1.getPersistentIdentity());        
+        SequenceAnnotation cp2ann2 = cp2.createSequenceAnnotation("Over_2", "Over_2", 2, 4);
+        cp2ann2.setComponent(subCp1i.getPersistentIdentity());
+        
+        
+        Sequence sq3 = doc.createSequence("sq3", "TT", Sequence.IUPAC_DNA);
+        ComponentDefinition cp3 = doc.createComponentDefinition("cp3", ComponentDefinition.DNA_REGION);
+        cp3.addSequence(sq3);
+        cp3.addRole(SequenceOntology.TERMINATOR);
+        
+        Component cp1i = sub1.createComponent("cp1i", AccessType.PUBLIC, cp1.getPersistentIdentity());
+        Component cp2i = sub1.createComponent("cp2i", AccessType.PUBLIC, cp2.getPersistentIdentity());
+        Component cp3i = sub1.createComponent("cp3i", AccessType.PUBLIC, cp3.getPersistentIdentity());
+  
+        sub1.createSequenceConstraint("cs1", RestrictionType.PRECEDES, cp1i.getIdentity(), cp2i.getIdentity());
+        sub1.createSequenceConstraint("cs2", RestrictionType.PRECEDES, cp2i.getIdentity(), cp3i.getIdentity());
+        
+        // second subcomponent, concrete
+        Sequence sq4 = doc.createSequence("sq4", "GGGG", Sequence.IUPAC_DNA);
+        ComponentDefinition sub2 = doc.createComponentDefinition("sub2", ComponentDefinition.DNA_REGION);
+        sub2.addSequence(sq4);
+        sub2.addRole(SO("SO:0001800"));
+        
+        
+
+        SBOLDocument dest = emptyDocument();
+
+        List<ComponentDefinition> flattened = instance.flattenDesigns(doc, "_flat", dest);
+        
+        assertEquals(2, flattened.size());
+        
+        assertNotNull(dest.getComponentDefinition(sub1.getDisplayId()+"_flat",sub1.getVersion()));
+        assertNotNull(dest.getComponentDefinition(sub2.getDisplayId()+"_flat",sub2.getVersion()));
+        
+        ComponentDefinition flat = dest.getComponentDefinition(sub1.getDisplayId()+"_flat",sub1.getVersion());
+        String seq = instance.getSequenceElements(flat, Sequence.IUPAC_DNA)
+                .get();
+        
+        assertEquals("AAACCCCTT", seq);
+        
         
     }    
     
