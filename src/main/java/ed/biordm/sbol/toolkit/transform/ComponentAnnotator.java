@@ -17,7 +17,7 @@ import org.sbolstandard.core2.SBOLDocument;
 public class ComponentAnnotator {
     
     
-    public Outcome annotate(SBOLDocument source, Path metaFile, boolean appendDesc, 
+    public Outcome annotate(SBOLDocument source, Path metaFile, boolean overwriteDesc, 
             boolean stopOnMissingId, boolean stopOnMissingMeta) {
         
         throw new UnsupportedOperationException("Not implemented yet");
