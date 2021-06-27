@@ -415,7 +415,7 @@ public class ComponentFlattenerTest {
         
         assertEquals(1, flat.getComponents().size());
         
-        //Component newC = flat.getComponents().iterator().next();
+        Component newC = flat.getComponents().iterator().next();
         //System.out.println(newC.getPersistentIdentity());
         //System.out.println(newC.getDefinition().getPersistentIdentity());
         //System.out.println(flat.getPersistentIdentity());
