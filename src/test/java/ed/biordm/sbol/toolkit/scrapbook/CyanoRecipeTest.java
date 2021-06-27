@@ -7,6 +7,7 @@ package ed.biordm.sbol.toolkit.scrapbook;
 
 import static ed.biordm.sbol.toolkit.scrapbook.CyanoTemplate.createTemplatePlasmid;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.*;
+import ed.biordm.sbol.toolkit.transform.ComponentFlattener;
 import ed.biordm.sbol.toolkit.transform.GenBankConverter;
 import ed.biordm.sbol.toolkit.transform.TemplateTransformer;
 import java.io.File;
@@ -57,7 +58,7 @@ public class CyanoRecipeTest {
         templateDoc.setCreateDefaults(true);
         
         
-
+        ComponentFlattener flattener = new ComponentFlattener();
         TemplateTransformer transformer = new TemplateTransformer();
 
         //ComponentDefinition template = templateDoc.getComponentDefinition("cyano_codA_Km", version);
@@ -82,7 +83,7 @@ public class CyanoRecipeTest {
         //to make it top level
         sll0199.clearWasDerivedFroms();
         
-        ComponentDefinition sll0199Flat = transformer.flattenSequences2(sll0199, "sl0199_flatten", templateDoc);
+        ComponentDefinition sll0199Flat = flattener.flattenSequences2(sll0199, "sl0199_flatten", templateDoc);
         
         //to make it top level
         sll0199Flat.clearWasDerivedFroms();

@@ -34,6 +34,9 @@ import org.sbolstandard.core2.SequenceConstraint;
  * @author tzielins
  */
 public class TemplateTransformer {
+    
+    final ComponentUtil util = new ComponentUtil();
+    
 
     /**
      * Creates new instance of component definition using the provided template.
@@ -54,7 +57,7 @@ public class TemplateTransformer {
         // name should be sanitized for conversion into display id as alphanumeric with _ (replace all non alphanumeric characters with _)
         // it should be deep copy, i.e. the owned object must be copied like component, sequenceanotations, sequenceConstraints
         // that should be already handled by doc.crateCopy method.
-        String cleanName = sanitizeName(newName);
+        String cleanName = util.sanitizeName(newName);
 
         ComponentDefinition copy = (ComponentDefinition) doc.createCopy(template, cleanName, version);
         copy.setName(newName);
@@ -94,7 +97,7 @@ public class TemplateTransformer {
         // in the parent component defition the sequenceAnotations and sequeceConstraints have to be updated to point
         // to new component instead of genericComponentId
         // it returns the new sub component definion not the parent so it can be further customized if needed
-        String cleanName = sanitizeName(newName);
+        String cleanName = util.sanitizeName(newName);
 
         Component cmp = parent.getComponent(genericComponentId);
         ComponentDefinition prevCmpDef = cmp.getDefinition();
@@ -171,7 +174,7 @@ public class TemplateTransformer {
         // a new component instance has to be created in the top component using the same component definition
         // and then it has to be set in the sequence annotations (grandfather cannot use its granchilids components directly
         // in the sequence annotations.
-        String cleanName = sanitizeName(newName);
+        String cleanName = util.sanitizeName(newName);
 
         ComponentDefinition newCmpDef = (ComponentDefinition) doc.createCopy(template, cleanName, template.getVersion());
         newCmpDef.setName(cleanName);
@@ -185,53 +188,9 @@ public class TemplateTransformer {
         return newCmpDef;
     }
 
-    /**
-     * Creates new component definiton which contains a flattened sequence from
-     * its subcomponents. The new component has its sequence annotated using its
-     * subocmponents annotations
-     *
-     * @param template component for which a sequence should be generated
-     * @param newName name (converted to diplayid) for the new component
-     * defintion
-     * @param doc including sbol document
-     * @return new component definition with explicit sequence
-     * @throws SBOLValidationException
-     * @throws URISyntaxException
-     */
-    public ComponentDefinition flattenSequences2(ComponentDefinition template, String newName, SBOLDocument doc) throws SBOLValidationException {
 
-        String cleanName = sanitizeName(newName);
-
-        //ComponentDefinition newCmpDef = (ComponentDefinition) doc.createCopy(template, cleanName, template.getVersion());
-        ComponentDefinition newCmpDef = doc.createComponentDefinition(cleanName, template.getVersion(), template.getTypes());
-        newCmpDef.setName(newName);
-        newCmpDef.addWasDerivedFrom(template.getIdentity());
-        copyMeta(template, newCmpDef);
-
-        List<Component> children = template.getSortedComponents();
-        
-        Sequence joinedSequence = joinDNASequences(template, cleanName+"_seq", template.getVersion(),doc);
-        newCmpDef.addSequence(joinedSequence);
-        
-        convertComponentsToFeatures(children, newCmpDef);
-        
-        copySequenceFeatures(children, newCmpDef);
-        
-        
-        return newCmpDef;
-    }
     
-    /**
-     * name should be sanitized for conversion into display id as alphanumeric
-     * with _ (replace all non alphanumeric characters with _)
-     *
-     * @param name
-     * @return The sanitized string
-     */
-    protected String sanitizeName(String name) {
-        String cleanName = name.replaceAll("[^\\p{IsAlphabetic}\\p{IsDigit}]", "_");
-        return cleanName;
-    }
+
 
     /**
      * recursively adds SequenceAnnotation objects from child components into
@@ -546,234 +505,5 @@ public class TemplateTransformer {
         return newSeq;
     }
 
-    Sequence joinDNASequences(ComponentDefinition def, String displayId, String version, SBOLDocument doc) throws SBOLValidationException {
-        
-        String seq = getJoinedSequenceElements(def, Sequence.IUPAC_DNA)
-                .orElseThrow( () -> new IllegalArgumentException("Cannot join component without sequence "+def.getDisplayId()));
-        
-        return doc.createSequence(displayId, version, seq, Sequence.IUPAC_DNA);
-    }    
-    
-    @Deprecated
-    Sequence joinSequences(List<Component> components, String displayId, String version, URI seqType, SBOLDocument doc) throws SBOLValidationException {
-        
-        StringBuilder sb = new StringBuilder();
-        for (Component comp: components) {
-            
-            Sequence seq = getSequence(comp, seqType)
-                    .orElseThrow( () -> new IllegalArgumentException("Cannot join component without sequence "+comp.getDisplayId()));
-            
-            
-            sb.append(seq.getElements());
-        }
-        
-        return doc.createSequence(displayId, version, sb.toString(), seqType);
-    }
-    
-    Optional<Sequence> getSequence(Component comp, URI seqType) {
-        return getSequence(comp.getDefinition(), seqType);
-    }
-    
-    Optional<Sequence> getSequence(ComponentDefinition def, URI seqType) {
-        for (Sequence seq : def.getSequences()) {
-            if (seq.getEncoding().equals(seqType)) return Optional.of(seq);
-        }
-        return Optional.empty();
-    }
-    
-    Optional<String> getSequenceElements(ComponentDefinition def, URI seqType) {
-        for (Sequence seq : def.getSequences()) {
-            if (seq.getEncoding().equals(seqType)) return Optional.of(seq.getElements());
-        }
-        return Optional.empty();        
-    }
-    
-    Optional<String> getJoinedSequenceElements(ComponentDefinition def, URI seqType) throws SBOLValidationException {
-        
-        Optional<String> concrete = getSequenceElements(def, seqType);
-        if (concrete.isPresent()) return concrete;
-        if (def.getComponents().isEmpty()) return Optional.empty();
-        
-        StringBuilder sb = new StringBuilder();
-        for (Component comp : def.getSortedComponents()) {
-            
-            String part = getJoinedSequenceElements(comp.getDefinition(), seqType)
-                    .orElseThrow( () -> new IllegalArgumentException("Cannot join elements from component without sequence "+
-                             comp.getDisplayId()+" in "+def.getDisplayId()));
-            sb.append(part);            
-        }
-        
-        return Optional.of(sb.toString());        
-    }
-    
-    int getJoinedSequenceLength(ComponentDefinition def, URI seqType) {
-        
-        Optional<String> concrete = getSequenceElements(def, seqType);
-        if (concrete.isPresent()) return concrete.get().length();
-        if (def.getComponents().isEmpty()) 
-            throw new IllegalArgumentException("Cannot calculate length from missing sequence in comp "+def.getDisplayId());
-        
-        int length = 0;
-        for (Component comp : def.getComponents()) {
-            
-            length += getJoinedSequenceLength(comp.getDefinition(), seqType);
-        }
-        
-        return length;        
-    }    
 
-    int getJoinedDNASequenceLength(Component comp) throws SBOLValidationException {
-        return getJoinedSequenceLength(comp.getDefinition(), Sequence.IUPAC_DNA);
-    }
-    
-    int getDNASequenceLenth(Component comp) {
-        return getSequence(comp, Sequence.IUPAC_DNA)
-                .orElseThrow(()-> new IllegalArgumentException("Missing sequence in comp "+comp.getDisplayId()))
-                .getElements().length();
-    }
-    
-
-    void copyMeta(ComponentDefinition src, ComponentDefinition dest) throws SBOLValidationException {
-        
-        dest.setDescription(src.getDescription());
-        dest.setRoles(src.getRoles());
-        copyAnnotations(src, dest);
-        
-    }
-    
-    void copyAnnotations(Identified src, Identified dest) throws SBOLValidationException {
-        for (Annotation annotation : src.getAnnotations()) {
-            
-            Annotation newAnn = dest.createAnnotation(annotation.getQName(), "");
-		if (annotation.isBooleanValue()) {
-			newAnn.setBooleanValue(annotation.getBooleanValue());
-		} else if (annotation.isDoubleValue()) {
-			newAnn.setDoubleValue(annotation.getDoubleValue());
-		} else if (annotation.isIntegerValue()) {
-			newAnn.setIntegerValue(annotation.getIntegerValue());
-		} else if (annotation.isStringValue()) {
-			newAnn.setStringValue(annotation.getStringValue());
-		} else if (annotation.isURIValue()) {
-			newAnn.setURIValue(annotation.getURIValue());
-		} else if (annotation.isNestedAnnotations()) {
-			newAnn.setNestedQName(annotation.getNestedQName());
-			newAnn.setNestedIdentity(annotation.getNestedIdentity());
-			newAnn.setAnnotations(annotation.getAnnotations());
-		} else {
-			throw new IllegalStateException("SBol validation: sbol-12203");
-		}            
-        }        
-    }
-
-    void copySequenceFeatures(List<Component> children, ComponentDefinition dest) throws SBOLValidationException {
-        copySequenceFeatures(children, dest, 0);
-    }    
-    
-    void copySequenceFeatures(List<Component> children, ComponentDefinition dest, int shift) throws SBOLValidationException {
-        
-        for (Component comp: children) {
-            ComponentDefinition def = comp.getDefinition();
-            copySequenceFeatures(def, dest, shift);
-            if (abstractComp(comp)) {
-                copySequenceFeatures(def.getSortedComponents(), dest, shift);
-            }
-            shift+=getJoinedDNASequenceLength(comp);
-        }
-    }
-
-    void copySequenceFeatures(ComponentDefinition src, ComponentDefinition dest, int shift) throws SBOLValidationException {
-        
-        for (SequenceAnnotation ann: src.getSequenceAnnotations()) {
-            //ann.get
-            
-            SequenceAnnotation feature = createAnnCopy(ann, dest, shift);
-            if (ann.isSetComponent()) {
-                Component comp = createCmpCopy(ann.getComponent(), dest);
-                feature.setComponent(comp.getPersistentIdentity());
-            }
-        }
-    }
-
-    Component createCmpCopy(Component src, ComponentDefinition dest) throws SBOLValidationException {
-        
-        Component copy = dest.createComponent(src.getDisplayId(), src.getAccess(), src.getDefinitionIdentity());
-        copyMeta(src, copy);
-        return copy;
-    }
-    
-    void copyMeta(Component src, Component dst) throws SBOLValidationException {
-        dst.setName(src.getName());
-        dst.setDescription(src.getDescription());
-        dst.setRoles(src.getRoles());
-        dst.setWasDerivedFroms(src.getWasDerivedFroms());
-        dst.setWasGeneratedBys(src.getWasGeneratedBys());
-    }
-
-    SequenceAnnotation createAnnCopy(SequenceAnnotation ann, ComponentDefinition dest, int shift) throws SBOLValidationException {
-        
-        Iterator<Location> locations = ann.getLocations().iterator();
-        Location l = locations.next();
-        if (!( l instanceof Range)) {
-            throw new IllegalArgumentException("Unsupported location type: "+l.getClass().getSimpleName());
-        }
-        Range first = (Range)l;
-        
-        SequenceAnnotation cpy = dest.createSequenceAnnotation(ann.getDisplayId(), first.getDisplayId(), 
-                shift+first.getStart(), shift+first.getEnd(), first.getOrientation());
-        
-        locations.forEachRemaining( loc -> {
-            if (!( loc instanceof Range)) {
-                throw new IllegalArgumentException("Unsupported location type: "+loc.getClass().getSimpleName());
-            }
-            try {
-                Range range = (Range)loc;
-                cpy.addRange(range.getDisplayId(), shift+range.getStart(), shift+range.getEnd(), range.getOrientation());
-            } catch (SBOLValidationException e) {
-                throw new IllegalStateException(e);
-            }
-        });
-        
-        cpy.setDescription(ann.getDescription());
-        cpy.setName(ann.getName());
-        cpy.setRoles(ann.getRoles());
-        copyAnnotations(ann, cpy);
-        
-        return cpy;
-    }
-
-    void convertComponentsToFeatures(List<Component> children, ComponentDefinition dest) throws SBOLValidationException {
-        convertComponentsToFeatures(children, dest, 0);
-    }    
-    
-    void convertComponentsToFeatures(List<Component> children, ComponentDefinition dest, int shift) throws SBOLValidationException {
-        for (Component comp: children) {
-            convertComponentToFeature(comp, dest, shift);
-            if (abstractComp(comp)) {
-                convertComponentsToFeatures(comp.getDefinition().getSortedComponents(), dest, shift);
-            }
-            shift+=getJoinedDNASequenceLength(comp);
-        }
-    }
-    
-    boolean abstractComp(Component comp) {
-        return getSequence(comp, Sequence.IUPAC_DNA).isEmpty();
-    }
-
-    SequenceAnnotation convertComponentToFeature(Component comp, ComponentDefinition dest, int shift) throws SBOLValidationException {
-        
-        int length = getJoinedDNASequenceLength(comp);
-        ComponentDefinition compD = comp.getDefinition();
-        
-        SequenceAnnotation ann = dest.createSequenceAnnotation(comp.getDisplayId(), comp.getDisplayId(), shift+1, shift+length);
-        
-        Set<URI> roles = new HashSet<>(comp.getRoles());
-        roles.addAll(compD.getRoles());
-        
-        ann.setRoles(roles);
-        ann.setName( compD.getName() != null ? compD.getName() : compD.getDisplayId());
-        ann.setDescription(compD.getDescription());
-        copyAnnotations(compD, ann);
-        
-        return ann;
-    }
 }

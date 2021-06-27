@@ -10,6 +10,7 @@ import static ed.biordm.cyanosource.plasmid.CyanoTemplate.createTemplatePlasmid;
 import static ed.biordm.cyanosource.plasmid.CyanoTemplate.cyanoDocument;
 import ed.biordm.sbol.toolkit.transform.CommonAnnotations;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SBH_DESCRIPTION;
+import ed.biordm.sbol.toolkit.transform.ComponentFlattener;
 import ed.biordm.sbol.toolkit.transform.ComponentUtil;
 import ed.biordm.sbol.toolkit.transform.FeaturesReader;
 import ed.biordm.sbol.toolkit.transform.GenBankConverter;
@@ -48,8 +49,9 @@ public class PlasmidsGenerator {
     public boolean ONLY_FULL = true;
     public int DEF_BATCH = 100;
     
-    protected TemplateTransformer transformer = new TemplateTransformer();  
-    protected ComponentUtil coponentUtil = new ComponentUtil();
+    final protected TemplateTransformer transformer = new TemplateTransformer();  
+    final protected ComponentUtil coponentUtil = new ComponentUtil();
+    final protected ComponentFlattener flattener = new ComponentFlattener();
     
     public static void main(String[] args) throws SBOLValidationException, SBOLConversionException, IOException, URISyntaxException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
         Path tempDir = Paths.get("E:/Temp");
@@ -308,7 +310,7 @@ public class PlasmidsGenerator {
         //to make it top level
         plasmid.clearWasDerivedFroms();
         
-        ComponentDefinition flattenPlasmid = transformer.flattenSequences2(plasmid, displayId+"_flat", doc);
+        ComponentDefinition flattenPlasmid = flattener.flattenSequences2(plasmid, displayId+"_flat", doc);
         flattenPlasmid.setName(name+" flat");
         //to make it top level
         flattenPlasmid.clearWasDerivedFroms();
