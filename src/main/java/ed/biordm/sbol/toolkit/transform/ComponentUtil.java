@@ -7,6 +7,8 @@ package ed.biordm.sbol.toolkit.transform;
 
 import static ed.biordm.cyanosource.plasmid.CyanoTemplate.CYANO_PREF;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.BIORDM_PREF;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Set;
 import org.sbolstandard.core2.Annotation;
@@ -15,10 +17,12 @@ import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.Identified;
 import org.sbolstandard.core2.Location;
 import org.sbolstandard.core2.Range;
+import org.sbolstandard.core2.SBOLConversionException;
 import org.sbolstandard.core2.SBOLDocument;
 import static org.sbolstandard.core2.SBOLHack.getSBOLDocument;
 import org.sbolstandard.core2.SBOLValidate;
 import org.sbolstandard.core2.SBOLValidationException;
+import org.sbolstandard.core2.SBOLWriter;
 import org.sbolstandard.core2.Sequence;
 import org.sbolstandard.core2.SequenceAnnotation;
 
@@ -160,6 +164,13 @@ public class ComponentUtil {
                 .orElseThrow(() -> new IllegalArgumentException("Missing coponent: "+displayId));
     }
     
+    public String nameOrId(Identified def) {
+        if (def.getName() != null && !def.getName().isBlank()) {
+            return def.getName();
+        }
+        return def.getDisplayId();
+    }
+    
     public static void validateSbol(SBOLDocument doc) {
         validateSbol(doc, true);
     }   
@@ -173,7 +184,7 @@ public class ComponentUtil {
             }            
         }        
         if (SBOLValidate.getNumErrors() > 0) {
-            throw new IllegalStateException("Stoping cause of validation error: "+SBOLValidate.getErrors().get(0));
+            throw new IllegalStateException("SBOL validation error: "+SBOLValidate.getErrors().get(0));
         }                
     }  
     
@@ -185,5 +196,18 @@ public class ComponentUtil {
         doc.setCreateDefaults(true);
 
         return doc;                
+    } 
+    
+    public static void saveValidSbol(SBOLDocument doc, Path file) throws IOException, SBOLConversionException {
+        
+        SBOLValidate.clearErrors();
+        SBOLValidate.validateSBOL(doc, true, true, true);
+        if (SBOLValidate.getNumErrors() > 0) {
+            for (String error : SBOLValidate.getErrors()) {
+                throw new IllegalStateException("SBOL validation error before saving: "+error);
+            }            
+        }
+
+        SBOLWriter.write(doc, file.toFile());
     }    
 }

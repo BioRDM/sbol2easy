@@ -78,7 +78,7 @@ public class ComponentFlattener {
         List<ComponentDefinition> flattened = new ArrayList<>();
         
         for (ComponentDefinition comp : source.getRootComponentDefinitions()) {
-            ComponentDefinition flat = flattenDesign(comp, comp.getDisplayId()+nameSuffix, destDoc);
+            ComponentDefinition flat = flattenDesign(comp, util.nameOrId(comp)+nameSuffix, destDoc);
             flattened.add(flat);
         }
         

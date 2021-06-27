@@ -39,6 +39,7 @@ import org.sbolstandard.core2.SBOLReader;
 import org.sbolstandard.core2.SBOLValidate;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.SBOLWriter;
+import static ed.biordm.sbol.toolkit.transform.ComponentUtil.saveValidSbol;
 
 /**
  *
@@ -75,7 +76,7 @@ public class PlasmidsGenerator {
     protected void saveTemplatePlasmid(Path templateFile) throws IOException, SBOLConversionException, SBOLValidationException {
         SBOLDocument templateDoc = cyanoDocument();
         ComponentDefinition template = createTemplatePlasmid(templateDoc, "1.0");
-        SBOLWriter.write(templateDoc, templateFile.toFile());
+        saveValidSbol(templateDoc, templateFile);
     }    
         
 
@@ -101,7 +102,7 @@ public class PlasmidsGenerator {
         
         for (int i = 0; i< docs.size(); i++) {
             Path file = sbolDir.resolve(name+"_"+i+".xml");
-            saveSbol(docs.get(i), file);            
+            saveValidSbol(docs.get(i), file);            
         }
 
         System.out.println("Saving genbanks ....");
@@ -220,18 +221,7 @@ public class PlasmidsGenerator {
         }
     }
     
-    protected void saveSbol(SBOLDocument doc, Path file) throws IOException, SBOLConversionException {
-        
-        SBOLValidate.clearErrors();
-        SBOLValidate.validateSBOL(doc, true, true, true);
-        if (SBOLValidate.getNumErrors() > 0) {
-            for (String error : SBOLValidate.getErrors()) {
-                throw new IllegalStateException("Stoping cause of validation error: "+error);
-            }            
-        }
 
-        SBOLWriter.write(doc, file.toFile());
-    }
     
     protected Map<String, String> readSequences(Path file, int sheet) throws IOException {
         

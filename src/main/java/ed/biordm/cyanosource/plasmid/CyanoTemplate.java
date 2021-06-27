@@ -6,6 +6,8 @@
 package ed.biordm.cyanosource.plasmid;
 
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.*;
+import static ed.biordm.sbol.toolkit.transform.ComponentUtil.saveValidSbol;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -53,7 +55,7 @@ public class CyanoTemplate {
         SBOLDocument templateDoc = cyanoDocument();
         ComponentDefinition template = createTemplatePlasmid(templateDoc, version);
         validateSbol(templateDoc);
-        SBOLWriter.write(templateDoc, templateFile.toFile());        
+        saveValidSbol(templateDoc, templateFile);        
     }
 
     public static SBOLDocument cyanoDocument() {
@@ -398,6 +400,8 @@ public class CyanoTemplate {
                 
         return plasmid;
     }
+
+
     
 
     
