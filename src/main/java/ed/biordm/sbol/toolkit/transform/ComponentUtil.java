@@ -5,6 +5,8 @@
  */
 package ed.biordm.sbol.toolkit.transform;
 
+import static ed.biordm.cyanosource.plasmid.CyanoTemplate.CYANO_PREF;
+import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.BIORDM_PREF;
 import java.util.Iterator;
 import java.util.Set;
 import org.sbolstandard.core2.Annotation;
@@ -14,8 +16,10 @@ import org.sbolstandard.core2.Identified;
 import org.sbolstandard.core2.Location;
 import org.sbolstandard.core2.Range;
 import org.sbolstandard.core2.SBOLDocument;
+import static org.sbolstandard.core2.SBOLHack.getSBOLDocument;
 import org.sbolstandard.core2.SBOLValidate;
 import org.sbolstandard.core2.SBOLValidationException;
+import org.sbolstandard.core2.Sequence;
 import org.sbolstandard.core2.SequenceAnnotation;
 
 /**
@@ -47,9 +51,28 @@ public class ComponentUtil {
     
     Component createCmpCopy(Component src, ComponentDefinition dest) throws SBOLValidationException {
         
-        Component copy = dest.createComponent(src.getDisplayId(), src.getAccess(), src.getDefinitionIdentity());
+        SBOLDocument destDoc = getSBOLDocument(dest);
+        ComponentDefinition def = src.getDefinition();
+        if (!isLocal(def, destDoc)) {
+            def = copyCompDef(def, destDoc);
+        }
+        
+        Component copy = dest.createComponent(src.getDisplayId(), src.getAccess(), def.getPersistentIdentity());
         copyMeta(src, copy);
         return copy;
+    }
+    
+    boolean isLocal(ComponentDefinition def, SBOLDocument doc) {
+        return getSBOLDocument(def) == doc;
+    }
+    
+    ComponentDefinition copyCompDef(ComponentDefinition org, SBOLDocument doc) throws SBOLValidationException {
+        for (Sequence seq: org.getSequences()) {
+            doc.createCopy(seq);
+        }
+        return (ComponentDefinition)doc.createCopy(org);
+        //doc.createRecursiveCopy(doc, org);
+        //return doc.getComponentDefinition(org.getDisplayId(), org.getVersion());
     }
     
     void copyMeta(Component src, Component dst) throws SBOLValidationException {
@@ -152,5 +175,15 @@ public class ComponentUtil {
         if (SBOLValidate.getNumErrors() > 0) {
             throw new IllegalStateException("Stoping cause of validation error: "+SBOLValidate.getErrors().get(0));
         }                
+    }  
+    
+    public static SBOLDocument emptyDocument() {
+        SBOLDocument doc = new SBOLDocument();
+
+        doc.setDefaultURIprefix(BIORDM_PREF);
+        doc.setComplete(true);
+        doc.setCreateDefaults(true);
+
+        return doc;                
     }    
 }

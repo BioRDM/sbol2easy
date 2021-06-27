@@ -310,7 +310,7 @@ public class PlasmidsGenerator {
         //to make it top level
         plasmid.clearWasDerivedFroms();
         
-        ComponentDefinition flattenPlasmid = flattener.flattenSequences2(plasmid, displayId+"_flat", doc);
+        ComponentDefinition flattenPlasmid = flattener.flattenDesign(plasmid, displayId+"_flat", doc);
         flattenPlasmid.setName(name+" flat");
         //to make it top level
         flattenPlasmid.clearWasDerivedFroms();

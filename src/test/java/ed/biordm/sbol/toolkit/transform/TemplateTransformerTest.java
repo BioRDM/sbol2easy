@@ -140,7 +140,7 @@ public class TemplateTransformerTest {
         }
 
         // Test flattened sequence annotations
-        ComponentDefinition newCmpFlat = flattener.flattenSequences2(newCmp, "johnny_cyano_codA_Km_flat", doc);
+        ComponentDefinition newCmpFlat = flattener.flattenDesign(newCmp, "johnny_cyano_codA_Km_flat", doc);
 
         int start = 1;
         int seqAnnCount = 1;
@@ -417,7 +417,7 @@ public class TemplateTransformerTest {
 
         String newName = "sll00199_codA_Km!/new_1";
         ComponentDefinition parent = (ComponentDefinition) doc.createCopy(template, "copy", "1.0.0");
-        flattener.flattenSequences2(parent, newName, doc);
+        flattener.flattenDesign(parent, newName, doc);
 
         assertNotNull(parent);
 
@@ -437,7 +437,7 @@ public class TemplateTransformerTest {
 
         newName = "sll00199_codA_Km!/new_2";
         parent = (ComponentDefinition) doc.createCopy(template, "copy2", "1.0.0");
-        flattener.flattenSequences2(parent, newName, doc);
+        flattener.flattenDesign(parent, newName, doc);
 
         assertNotNull(parent);
 
@@ -661,7 +661,7 @@ public class TemplateTransformerTest {
         }
 
         // Add the flattened sequences to the parent component's SequenceAnnotation components
-        ComponentDefinition newPlasmidFlat = flattener.flattenSequences2(newPlasmid, newName.concat("_flat"), doc);
+        ComponentDefinition newPlasmidFlat = flattener.flattenDesign(newPlasmid, newName.concat("_flat"), doc);
         newPlasmidFlat.addRole(new URI(SEQUENCE_ONTO_PREF+"SO:0000637"));
 
         // Check component instances match

@@ -157,7 +157,7 @@ public class TemplateTransformerTestFull {
         //       they violate the unique naming rule (since 'backbone' component
         //       definition also contains the same annotations)
         */
-        ComponentDefinition newPlasmidFlat = flattener.flattenSequences2(sll00199Plasmid, newName.concat("_flat"), doc);
+        ComponentDefinition newPlasmidFlat = flattener.flattenDesign(sll00199Plasmid, newName.concat("_flat"), doc);
         newPlasmidFlat.addRole(new URI(SEQUENCE_ONTO_PREF+"SO:0000637"));
 
         System.out.println(newPlasmidFlat.getDescription());

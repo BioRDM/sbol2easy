@@ -31,6 +31,7 @@ public class CommonAnnotations {
     public static final QName GB_PRODUCT = new QName(GEN_BANK_PREF, "product","gbconv");
     public final static QName GB_FEATURE = new QName(GEN_BANK_PREF,"featureType","gbconv");
     
+    public static final String BIORDM_PREF = "http://bio.ed.ac.uk/biordm/";
     
     public static final URI SO(String termId) {
         try {

@@ -85,7 +85,7 @@ public class GenBankConverterTest {
 
         String newName = "sll00199_codA_Km".concat("_johnny");
 
-        ComponentDefinition newPlasmidFlat = flattener.flattenSequences2(sll00199Plasmid, newName.concat("_flat"), doc);
+        ComponentDefinition newPlasmidFlat = flattener.flattenDesign(sll00199Plasmid, newName.concat("_flat"), doc);
         newPlasmidFlat.addRole(new URI(SEQUENCE_ONTO_PREF+"SO:0000637"));
 
         // Writer sysOutWriter = new BufferedWriter(new OutputStreamWriter(System.out));

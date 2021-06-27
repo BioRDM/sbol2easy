@@ -26,18 +26,19 @@ public class ComponentFlattener {
     final ComponentUtil util = new ComponentUtil();
     
     /**
-     * Creates new component definiton which contains a flattened sequence from
+     * Creates new component definition which contains a flattened sequence from
      * its subcomponents. The new component has its sequence annotated using its
-     * subocmponents annotations
+     * subcomponents annotations
      *
      * @param template component for which a sequence should be generated
      * @param newName name (converted to diplayid) for the new component
      * defintion
-     * @param doc including sbol document
+     * @param doc sbol document used to create the new definition
      * @return new component definition with explicit sequence
-     * @throws SBOLValidationException
+     * @throws SBOLValidationException from sbol library
+     * @throws IllegalArgumentException if definition is abstract i.e. does not have sequences in the comp tree
      */
-    public ComponentDefinition flattenSequences2(ComponentDefinition template, String newName, SBOLDocument doc) throws SBOLValidationException {
+    public ComponentDefinition flattenDesign(ComponentDefinition template, String newName, SBOLDocument doc) throws SBOLValidationException {
 
         String cleanName = util.sanitizeName(newName);
 

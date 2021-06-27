@@ -123,6 +123,25 @@ public class ComponentUtilTest {
     }
     
     @Test
+    public void createsCmpCopyInUnrelatedDoc() throws Exception {
+        SBOLDocument org = testDoc("cyano_gen_template.xml");
+        String version = "1.0.0";
+        
+        ComponentDefinition p = org.getComponentDefinition("backbone", version);
+        assertNotNull(p);
+        
+        Component comp = p.getComponent("ori_instance");
+        assertNotNull(comp);
+        
+        doc = instance.emptyDocument();
+        ComponentDefinition dest = doc.createComponentDefinition("testC", ComponentDefinition.DNA_REGION);
+        
+        Component cpy = instance.createCmpCopy(comp, dest);
+        assertNotNull(cpy);
+        assertNotNull(dest.getComponent("ori_instance"));
+    }    
+    
+    @Test
     public void createAnnCopy() throws Exception {
         doc = testDoc("cyano_gen_template.xml");
         String version = "1.0.0";
