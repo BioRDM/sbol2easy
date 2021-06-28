@@ -19,7 +19,9 @@ import java.util.Optional;
 public class MetaRecord {
     
     public Optional<String> displayId = Optional.empty();
+    public Optional<String> version = Optional.empty();
     public Optional<String> name = Optional.empty();
+    public Optional<String> summary = Optional.empty();
     public Optional<String> description = Optional.empty();
     public Optional<String> notes = Optional.empty();
     public Optional<String> variable = Optional.empty();
@@ -32,7 +34,9 @@ public class MetaRecord {
     public int hashCode() {
         int hash = 7;
         hash = 47 * hash + Objects.hashCode(this.displayId);
+        hash = 47 * hash + Objects.hashCode(this.version);
         hash = 47 * hash + Objects.hashCode(this.name);
+        hash = 47 * hash + Objects.hashCode(this.summary);
         hash = 47 * hash + Objects.hashCode(this.description);
         hash = 47 * hash + Objects.hashCode(this.notes);
         hash = 47 * hash + Objects.hashCode(this.variable);
@@ -57,7 +61,13 @@ public class MetaRecord {
         if (!Objects.equals(this.displayId, other.displayId)) {
             return false;
         }
+        if (!Objects.equals(this.version, other.version)) {
+            return false;
+        }
         if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (!Objects.equals(this.summary, other.summary)) {
             return false;
         }
         if (!Objects.equals(this.description, other.description)) {

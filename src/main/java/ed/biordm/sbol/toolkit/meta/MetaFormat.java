@@ -16,10 +16,12 @@ import java.util.Optional;
  *
  * @author tzielins
  */
-public class MetaLocations {
+public class MetaFormat {
     
     public Optional<Integer> displayId = Optional.empty();
+    public Optional<Integer> version = Optional.empty();
     public Optional<Integer> name = Optional.empty();
+    public Optional<Integer> summary = Optional.empty();    
     public Optional<Integer> description = Optional.empty();
     public Optional<Integer> notes = Optional.empty();
     public Optional<Integer> variable = Optional.empty();
@@ -34,7 +36,9 @@ public class MetaLocations {
     public int hashCode() {
         int hash = 7;
         hash = 47 * hash + Objects.hashCode(this.displayId);
+        hash = 47 * hash + Objects.hashCode(this.version);        
         hash = 47 * hash + Objects.hashCode(this.name);
+        hash = 47 * hash + Objects.hashCode(this.summary);
         hash = 47 * hash + Objects.hashCode(this.description);
         hash = 47 * hash + Objects.hashCode(this.notes);
         hash = 47 * hash + Objects.hashCode(this.variable);
@@ -55,14 +59,20 @@ public class MetaLocations {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final MetaLocations other = (MetaLocations) obj;
+        final MetaFormat other = (MetaFormat) obj;
         if (this.cols != other.cols) {
             return false;
         }
         if (!Objects.equals(this.displayId, other.displayId)) {
             return false;
         }
+        if (!Objects.equals(this.version, other.version)) {
+            return false;
+        }
         if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (!Objects.equals(this.summary, other.summary)) {
             return false;
         }
         if (!Objects.equals(this.description, other.description)) {

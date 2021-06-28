@@ -51,10 +51,11 @@ public class ExcelMetaReaderTest {
     public void parseHeader() {
     
         List<String> header = List.of("","display_id","name","variable","author","author",
-                "description","notes","attachment_filename","left","right","");
+                "description","notes","attachment_filename","left","right","version","");
         
-        MetaLocations exp = new MetaLocations();
+        MetaFormat exp = new MetaFormat();
         exp.displayId = Optional.of(1);
+        exp.version = Optional.of(11);
         exp.name = Optional.of(2);
         exp.variable = Optional.of(3);
         exp.authors = List.of(4,5);
@@ -63,7 +64,7 @@ public class ExcelMetaReaderTest {
         exp.attachment = Optional.of(8);
         exp.extras.put("left",9);
         exp.extras.put("right",10);
-        exp.cols = 11;
+        exp.cols = 12;
         
         assertEquals(exp, instance.parseHeader(header));
                 
@@ -73,11 +74,12 @@ public class ExcelMetaReaderTest {
     @Test
     public void parseMeta() {
     
-        List<String> header = List.of("","display_id","name","variable","author","author",
+        List<String> header = List.of("version","display_id","name","variable","author","author",
                 "description","notes","attachment_filename","left","right","");
         
-        MetaLocations def = new MetaLocations();
+        MetaFormat def = new MetaFormat();
         def.displayId = Optional.of(1);
+        def.version = Optional.of(0);
         def.name = Optional.of(2);
         def.variable = Optional.of(3);
         def.authors = List.of(4,5);
@@ -88,11 +90,12 @@ public class ExcelMetaReaderTest {
         def.extras.put("right",10);
         def.cols = 11;
 
-        List<String> row = List.of("","id1","name","variable","author1","author2",
+        List<String> row = List.of("1.1","id1","name","variable","author1","author2",
                 "description","notes","attach","A","B");
         
         MetaRecord exp = new MetaRecord();
         exp.displayId = Optional.of("id1");
+        exp.version = Optional.of("1.1");
         exp.name = Optional.of("name");
         exp.variable = Optional.of("variable");
         exp.authors = List.of("author1","author2");

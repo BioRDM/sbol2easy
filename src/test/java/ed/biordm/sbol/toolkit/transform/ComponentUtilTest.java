@@ -8,6 +8,10 @@ package ed.biordm.sbol.toolkit.transform;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +24,7 @@ import org.sbolstandard.core2.Range;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLReader;
 import org.sbolstandard.core2.SBOLValidationException;
+import org.sbolstandard.core2.Sequence;
 import org.sbolstandard.core2.SequenceAnnotation;
 import org.sbolstandard.core2.SequenceOntology;
 
@@ -39,10 +44,8 @@ public class ComponentUtilTest {
     public void setUp() {
         instance = new ComponentUtil();
         
-        doc = new SBOLDocument();
-        doc.setDefaultURIprefix("http://bio.ed.ac.uk/a_mccormick/cyano_source/");
-        doc.setComplete(true);
-        doc.setCreateDefaults(true);        
+        doc = ComponentUtil.emptyDocument();
+
     }
 
     @Test
@@ -102,6 +105,39 @@ public class ComponentUtilTest {
         c1.createComponent("c3_insta", AccessType.PUBLIC, c3.getPersistentIdentity());        
         assertSame(c3, instance.extractComponent(name, doc));
         
+    }
+    @Test
+    public void extractsDisplayIds() throws Exception {
+        ComponentDefinition cont = doc.createComponentDefinition("cont", ComponentDefinition.DNA_REGION);
+        
+        Sequence sq1 = doc.createSequence("sq1", "AAA", Sequence.IUPAC_DNA);
+        ComponentDefinition cp1 = doc.createComponentDefinition("cp1","1.0", ComponentDefinition.DNA_REGION);
+        cp1.addSequence(sq1);
+        cp1.addRole(SequenceOntology.PROMOTER); 
+        
+        doc.createComponentDefinition("cp1","1.2", ComponentDefinition.DNA_REGION);
+        doc.createComponentDefinition("cp1","0.2", ComponentDefinition.DNA_REGION);
+        
+        ComponentDefinition cp2 = doc.createComponentDefinition("cp2", ComponentDefinition.DNA_REGION);
+        cp2.addRole(SequenceOntology.CDS);
+        
+        ComponentDefinition cp3 = doc.createComponentDefinition("cp3", ComponentDefinition.DNA_REGION);
+        cp3.addRole(SequenceOntology.TERMINATOR);
+        
+        Component cp1i = cont.createComponent("cp1i", AccessType.PUBLIC, cp1.getPersistentIdentity());
+        Component cp2i = cont.createComponent("cp2i", AccessType.PUBLIC, cp2.getPersistentIdentity());
+        Component cp3i = cont.createComponent("cp3i", AccessType.PUBLIC, cp3.getPersistentIdentity());        
+        
+        
+        Map<String,List<String>> exp = new HashMap<>();
+        List<String> l = new ArrayList<>();
+        l.add(null);
+        exp.put("cont", l);
+        exp.put("cp1", List.of("1.2","1.0","0.2"));
+        exp.put("cp2", l);
+        exp.put("cp3", l);
+        
+        assertEquals(exp, instance.extractComponentsVersionedDisplayIds(doc));
     }
     
     @Test
@@ -170,6 +206,51 @@ public class ComponentUtilTest {
         assertEquals(10+280, r.getEnd());
         
     }  
+    
+    @Test
+    public void addsAnnotation() throws Exception {
+        
+        ComponentDefinition comp = doc.createComponentDefinition("comp","1", ComponentDefinition.DNA_REGION);
+        
+        instance.addAnnotation(comp, CommonAnnotations.SBH_DESCRIPTION, "Tomek");
+        
+        assertNotNull(comp.getAnnotation(CommonAnnotations.SBH_DESCRIPTION));
+        assertEquals("Tomek",comp.getAnnotation(CommonAnnotations.SBH_DESCRIPTION).getStringValue());
+        
+        instance.addAnnotation(comp, CommonAnnotations.SBH_DESCRIPTION, "Tomek2");
+        assertEquals(2, comp.getAnnotations().size());
+        assertEquals("Tomek2",comp.getAnnotations().get(1).getStringValue());
+    }
+    
+    @Test
+    public void setsAnnotation() throws Exception {
+        
+        ComponentDefinition comp = doc.createComponentDefinition("comp","1", ComponentDefinition.DNA_REGION);
+        
+        instance.setAnnotation(comp, CommonAnnotations.SBH_DESCRIPTION, "Tomek");
+        
+        assertNotNull(comp.getAnnotation(CommonAnnotations.SBH_DESCRIPTION));
+        assertEquals("Tomek",comp.getAnnotation(CommonAnnotations.SBH_DESCRIPTION).getStringValue());
+        
+        instance.setAnnotation(comp, CommonAnnotations.SBH_DESCRIPTION, "Tomek2");
+        assertEquals(1, comp.getAnnotations().size());
+        assertEquals("Tomek2",comp.getAnnotation(CommonAnnotations.SBH_DESCRIPTION).getStringValue());
+    }    
+    
+    @Test
+    public void appendsAnnotation() throws Exception {
+        
+        ComponentDefinition comp = doc.createComponentDefinition("comp","1", ComponentDefinition.DNA_REGION);
+        
+        instance.appendAnnotation(comp, CommonAnnotations.SBH_DESCRIPTION, "Tomek");
+        
+        assertNotNull(comp.getAnnotation(CommonAnnotations.SBH_DESCRIPTION));
+        assertEquals("Tomek",comp.getAnnotation(CommonAnnotations.SBH_DESCRIPTION).getStringValue());
+        
+        instance.appendAnnotation(comp, CommonAnnotations.SBH_DESCRIPTION, "Tomek2");
+        assertEquals(1, comp.getAnnotations().size());
+        assertEquals("TomekTomek2",comp.getAnnotation(CommonAnnotations.SBH_DESCRIPTION).getStringValue());
+    }     
     
     
     public SBOLDocument testDoc(String fileName) throws SBOLValidationException {

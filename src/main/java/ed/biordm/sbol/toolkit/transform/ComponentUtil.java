@@ -7,10 +7,18 @@ package ed.biordm.sbol.toolkit.transform;
 
 import static ed.biordm.cyanosource.plasmid.CyanoTemplate.CYANO_PREF;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.BIORDM_PREF;
+import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.CREATOR;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import javax.xml.namespace.QName;
 import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
@@ -164,6 +172,25 @@ public class ComponentUtil {
                 .orElseThrow(() -> new IllegalArgumentException("Missing coponent: "+displayId));
     }
     
+    public Map<String,List<String>> extractComponentsVersionedDisplayIds(SBOLDocument doc) {
+        
+        
+        Map<String,List<String>> idsWithVersions = new HashMap<>();
+        
+        doc.getComponentDefinitions().forEach( def -> {
+            if (!idsWithVersions.containsKey(def.getDisplayId())) {
+                idsWithVersions.put(def.getDisplayId(), new ArrayList<>());
+            }
+            List<String> versions = idsWithVersions.get(def.getDisplayId());
+            versions.add(def.getVersion());
+        });
+        
+        idsWithVersions.values().forEach( list -> list.sort(Comparator.reverseOrder()));
+
+        return idsWithVersions;
+    }
+    
+    
     public String nameOrId(Identified def) {
         if (def.getName() != null && !def.getName().isBlank()) {
             return def.getName();
@@ -210,4 +237,49 @@ public class ComponentUtil {
 
         SBOLWriter.write(doc, file.toFile());
     }    
+    
+    public String getAnnotationValue(Identified elm, QName annotation) {
+            Annotation previous = elm.getAnnotation(annotation);
+            if (previous != null) {
+                return previous.getStringValue();
+            }        
+            return null;
+    }
+    
+    public void addAnnotation(Identified elm, QName annotation, String value) {
+        try {
+            elm.createAnnotation(annotation, value);
+        } catch (SBOLValidationException e) {
+            throw new IllegalStateException(e);
+        }        
+    }    
+    
+    public void setAnnotation(Identified elm, QName annotation, String value) {
+        try {
+            Annotation previous = elm.getAnnotation(annotation);
+            if (previous != null) {
+                elm.removeAnnotation(previous);
+            }
+            elm.createAnnotation(annotation, value);
+        } catch (SBOLValidationException e) {
+            throw new IllegalStateException(e);
+        }        
+    }    
+    
+    public void appendAnnotation(Identified elm, QName annotation, String value) {
+        try {
+            String old = null;
+            Annotation previous = elm.getAnnotation(annotation);
+            if (previous != null) {
+                old = previous.getStringValue();
+                elm.removeAnnotation(previous);
+            }
+            if (old == null) old = "";
+            elm.createAnnotation(annotation, old + value);
+        } catch (SBOLValidationException e) {
+            throw new IllegalStateException(e);
+        }        
+    }    
+    
+    
 }
