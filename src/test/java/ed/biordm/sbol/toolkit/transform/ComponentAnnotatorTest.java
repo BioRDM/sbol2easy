@@ -10,7 +10,7 @@ import ed.biordm.sbol.toolkit.meta.MetaRecord;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.CREATOR;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SBH_DESCRIPTION;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SBH_NOTES;
-import ed.biordm.sbol.toolkit.transform.ComponentAnnotator.Outcome;
+import ed.biordm.sbol.toolkit.transform.Outcome;
 import static ed.biordm.sbol.toolkit.transform.ComponentUtil.emptyDocument;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -44,46 +44,6 @@ public class ComponentAnnotatorTest {
         doc = emptyDocument();
     }
 
-    @Test
-    public void emptyMetaComparesWithFormat() {
-        
-        MetaRecord meta = new MetaRecord();
-        meta.displayId = Optional.of("id");
-        meta.version = Optional.of("ver");
-        meta.name = Optional.of("name");
-        meta.authors = List.of("A");
-        meta.extras = Map.of("left", "1", "right", "2");
-        
-        MetaFormat format = new MetaFormat();
-        format.displayId = Optional.of(1);
-        format.version = Optional.of(2);
-        format.name = Optional.of(3);
-        format.authors = List.of(4);
-        format.extras = Map.of("left", 6, "right", 7);
-        
-        assertFalse(instance.emptyMeta(meta, format));
-        
-        meta.version = Optional.of("");
-        assertTrue(instance.emptyMeta(meta, format));
-        
-        meta.version = Optional.of("ver");
-        assertFalse(instance.emptyMeta(meta, format));
-        
-        format.authors = List.of(4,5);
-        assertTrue(instance.emptyMeta(meta, format));
-
-        meta.authors = List.of("A","B");
-        assertFalse(instance.emptyMeta(meta, format));
-        
-        format.extras = Map.of("left", 6, "right", 7, "barcode",8);
-        assertTrue(instance.emptyMeta(meta, format));
-        
-        meta.extras = Map.of("left", "1", "right", "2","barcode","");
-        assertTrue(instance.emptyMeta(meta, format));
-        
-        meta.extras = Map.of("left", "1", "right", "2","barcode","3");
-        assertFalse(instance.emptyMeta(meta, format));
-    }
     
     @Test
     public void chechMissingDataGathersIds() throws Exception {
@@ -187,13 +147,16 @@ public class ComponentAnnotatorTest {
         
         Optional<String> desc = Optional.of("desc");
         
-        instance.setSummary(comp, desc, displayId, variable, name);        
+        instance.addSummary(comp, desc, false, displayId, variable, name);        
         assertEquals("desc", comp.getDescription());
         
-        desc = Optional.of("{displayId} {name} {variable}");        
-        instance.setSummary(comp, desc, displayId, variable, name);        
-        assertEquals("comp my name a", comp.getDescription());
+        desc = Optional.of(" {displayId} {name} {variable}");        
+        instance.addSummary(comp, desc, false, displayId, variable, name);        
+        assertEquals("desc comp my name a", comp.getDescription());
         
+        desc = Optional.of("{displayId} {name} {variable}");        
+        instance.addSummary(comp, desc, true, displayId, variable, name);        
+        assertEquals("comp my name a", comp.getDescription());
     }     
     
     @Test

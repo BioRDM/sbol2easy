@@ -7,6 +7,7 @@ package ed.biordm.sbol.toolkit.transform;
 
 import ed.biordm.sbol.toolkit.meta.ExcelMetaReader;
 import ed.biordm.sbol.toolkit.meta.MetaFormat;
+import ed.biordm.sbol.toolkit.meta.MetaHelper;
 import ed.biordm.sbol.toolkit.meta.MetaRecord;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.CREATOR;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SBH_DESCRIPTION;
@@ -27,11 +28,13 @@ import org.sbolstandard.core2.SBOLDocument;
  */
 public class ComponentAnnotator {
     
-    final ExcelMetaReader metaReader = new ExcelMetaReader();
     final ComponentUtil util = new ComponentUtil();
+    final MetaHelper metaHelper = new MetaHelper();
     
     public Outcome annotate(SBOLDocument source, Path metaFile, boolean overwriteDesc, 
             boolean stopOnMissingId, boolean stopOnMissingMeta) throws IOException {
+        
+        ExcelMetaReader metaReader = new ExcelMetaReader();
         
         MetaFormat metaFormat = metaReader.readMetaFormat(metaFile);
         validateMetaFormat(metaFormat);
@@ -67,10 +70,7 @@ public class ComponentAnnotator {
                 .map( meta -> meta.displayId.get())
                 .collect(Collectors.toList());
         
-        List<String> missingMeta = metaData.stream()
-                .filter( meta -> emptyMeta(meta, metaFormat))
-                .map( meta -> meta.displayId.get())
-                .collect(Collectors.toList());
+        List<String> missingMeta = metaHelper.missingMetaIds(metaData, metaFormat);
                 
         Outcome status = new Outcome();
         status.missingId = missingIds;
@@ -86,46 +86,19 @@ public class ComponentAnnotator {
         return !versions.contains(meta.version.get());
     }
     
-    boolean emptyMeta(MetaRecord meta, MetaFormat format) {
-        
-        if (format.displayId.isPresent() && emptyVal(meta.displayId)) return true;
-        if (format.version.isPresent() && emptyVal(meta.version)) return true;
-        if (format.name.isPresent() && emptyVal(meta.name)) return true;
-        if (format.summary.isPresent() && emptyVal(meta.summary)) return true;
-        if (format.variable.isPresent() && emptyVal(meta.variable)) return true;
-        if (format.description.isPresent() && emptyVal(meta.description)) return true;
-        if (format.notes.isPresent() && emptyVal(meta.notes)) return true;
-        if (format.attachment.isPresent() && emptyVal(meta.attachment)) return true;
-        
-        if (format.authors.size() != meta.authors.size()) return true;
-        if (format.extras.size() != meta.extras.size()) return true;
-        //blank values
-        if (    meta.extras.values().stream().anyMatch(s -> s.isBlank()) ) return true;
-        return false;
-        
-    }
-    
-    boolean emptyVal(Optional<String> val) {
-        return (val.isEmpty() || val.get().isBlank());
-    }
+
 
     void validateCompletness(Outcome status, boolean stopOnMissingId, boolean stopOnMissingMeta) {
         
         if (stopOnMissingId && !status.missingId.isEmpty()) {
-            throw new IllegalArgumentException("Missing designs ids in the input document: "+shortList(status.missingId));
+            throw new IllegalArgumentException("Missing designs ids in the input document: "+metaHelper.shortList(status.missingId));
         }
         
         if (stopOnMissingMeta && !status.missingMeta.isEmpty()) {
-            throw new IllegalArgumentException("Missing metadata fileds for records: "+shortList(status.missingMeta));
+            throw new IllegalArgumentException("Missing metadata fileds for records: "+metaHelper.shortList(status.missingMeta));
         }
     }
     
-    String shortList(List<String> vals) {
-        String s = vals.stream().limit(5)
-                .collect(Collectors.joining(","));
-        if (vals.size() > 5) s +="...";
-        return s;
-    }
 
     Outcome annotate(SBOLDocument source, Map<String, List<String>> idsWithVersions, List<MetaRecord> metaData, MetaFormat metaFormat, boolean overWrite, Outcome status) {
 
@@ -141,7 +114,7 @@ public class ComponentAnnotator {
             ComponentDefinition component = source.getComponentDefinition(displayId, version);
             if (component == null) continue;
             
-            annotateComponent(component, record, metaFormat, overWrite);
+            annotateComponent(component, record, overWrite);
             
             status.successful.add(displayId);
         }
@@ -149,7 +122,7 @@ public class ComponentAnnotator {
         return status;
     }
 
-    void annotateComponent(ComponentDefinition component, MetaRecord meta, MetaFormat metaFormat, boolean overWriteDesc) {
+    public void annotateComponent(ComponentDefinition component, MetaRecord meta, boolean overWriteDesc) {
         
         String displayId = component.getDisplayId();
         String variable = meta.variable.orElse("");
@@ -159,7 +132,7 @@ public class ComponentAnnotator {
         
         addAuthors(component, meta.authors);
         
-        setSummary(component, meta.summary, displayId, variable, name);
+        addSummary(component, meta.summary, overWriteDesc, displayId, variable, name);
         
         addDescription(component, meta.description, overWriteDesc, displayId, variable, name);
         
@@ -196,7 +169,7 @@ public class ComponentAnnotator {
         util.addAnnotation(component, CREATOR, author);
     }
     
-    void setSummary(ComponentDefinition component, Optional<String> summary, String displayId, String variable, String name) {
+    void addSummary(ComponentDefinition component, Optional<String> summary, boolean overwrite, String displayId, String variable, String name) {
         
         if (summary.isEmpty()) return;
         
@@ -205,7 +178,13 @@ public class ComponentAnnotator {
         template = setTemplateVariable("variable", variable, template);
         template = setTemplateVariable("name", name, template);
 
-        component.setDescription(template);
+        if (overwrite) {
+            component.setDescription(template);
+        } else {
+            String old = component.getDescription();
+            if (old == null) old = "";
+            component.setDescription(old+template);
+        }
     }
 
     void addDescription(ComponentDefinition component, Optional<String> description, boolean overwrite, String displayId, String variable, String name) {
@@ -242,10 +221,4 @@ public class ComponentAnnotator {
     
     
     
-    public static class Outcome {
-        public List<String> successful = new ArrayList<>();
-        public List<String> missingId = new ArrayList<>();
-        public List<String> missingMeta = new ArrayList<>();
-        
-    }
 }
