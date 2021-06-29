@@ -29,7 +29,7 @@ public class MetaHelper {
         if (format.version.isPresent() && emptyVal(meta.version)) return true;
         if (format.name.isPresent() && emptyVal(meta.name)) return true;
         if (format.summary.isPresent() && emptyVal(meta.summary)) return true;
-        if (format.variable.isPresent() && emptyVal(meta.variable)) return true;
+        if (format.key.isPresent() && emptyVal(meta.key)) return true;
         if (format.description.isPresent() && emptyVal(meta.description)) return true;
         if (format.notes.isPresent() && emptyVal(meta.notes)) return true;
         if (format.attachment.isPresent() && emptyVal(meta.attachment)) return true;

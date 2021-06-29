@@ -10,7 +10,6 @@ import ed.biordm.sbol.toolkit.meta.MetaRecord;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.CREATOR;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SBH_DESCRIPTION;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SBH_NOTES;
-import ed.biordm.sbol.toolkit.transform.Outcome;
 import static ed.biordm.sbol.toolkit.transform.ComponentUtil.emptyDocument;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -99,19 +98,19 @@ public class ComponentAnnotatorTest {
         
         String displayId = "comp";
         String name = "my name";
-        String variable = "";
+        String key = "";
         
         Optional<String> note = Optional.of("A note");
         
-        instance.addNotes(comp, note, false, displayId, variable, name);
+        instance.addNotes(comp, note, false, displayId, key, name);
         
         assertEquals("A note", instance.util.getAnnotationValue(comp, SBH_NOTES));
         
         note = Optional.of(" {name}");        
-        instance.addNotes(comp, note, false, displayId, variable, name);        
+        instance.addNotes(comp, note, false, displayId, key, name);        
         assertEquals("A note my name", instance.util.getAnnotationValue(comp, SBH_NOTES));
         
-        instance.addNotes(comp, note, true, displayId, variable, name);        
+        instance.addNotes(comp, note, true, displayId, key, name);        
         assertEquals(" my name", instance.util.getAnnotationValue(comp, SBH_NOTES));
     }
     
@@ -121,19 +120,19 @@ public class ComponentAnnotatorTest {
         
         String displayId = "comp";
         String name = "my name";
-        String variable = "";
+        String key = "";
         
         Optional<String> desc = Optional.of("desc");
         
-        instance.addDescription(comp, desc, false, displayId, variable, name);
+        instance.addDescription(comp, desc, false, displayId, key, name);
         
         assertEquals("desc", instance.util.getAnnotationValue(comp, SBH_DESCRIPTION));
         
-        desc = Optional.of(" {variable}");        
-        instance.addDescription(comp, desc, false, displayId, variable, name);        
+        desc = Optional.of(" {key}");        
+        instance.addDescription(comp, desc, false, displayId, key, name);        
         assertEquals("desc ", instance.util.getAnnotationValue(comp, SBH_DESCRIPTION));
         
-        instance.addDescription(comp, desc, true, displayId, variable, name);        
+        instance.addDescription(comp, desc, true, displayId, key, name);        
         assertEquals(" ", instance.util.getAnnotationValue(comp, SBH_DESCRIPTION));
     }    
     
@@ -143,19 +142,19 @@ public class ComponentAnnotatorTest {
         
         String displayId = "comp";
         String name = "my name";
-        String variable = "a";
+        String key = "a";
         
         Optional<String> desc = Optional.of("desc");
         
-        instance.addSummary(comp, desc, false, displayId, variable, name);        
+        instance.addSummary(comp, desc, false, displayId, key, name);        
         assertEquals("desc", comp.getDescription());
         
-        desc = Optional.of(" {displayId} {name} {variable}");        
-        instance.addSummary(comp, desc, false, displayId, variable, name);        
+        desc = Optional.of(" {displayId} {name} {key}");        
+        instance.addSummary(comp, desc, false, displayId, key, name);        
         assertEquals("desc comp my name a", comp.getDescription());
         
-        desc = Optional.of("{displayId} {name} {variable}");        
-        instance.addSummary(comp, desc, true, displayId, variable, name);        
+        desc = Optional.of("{displayId} {name} {key}");        
+        instance.addSummary(comp, desc, true, displayId, key, name);        
         assertEquals("comp my name a", comp.getDescription());
     }     
     

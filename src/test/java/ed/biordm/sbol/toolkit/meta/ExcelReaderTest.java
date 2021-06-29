@@ -44,7 +44,7 @@ public class ExcelReaderTest {
         
         List<String> row = instance.readStringRow(testFile("meta_test.xlsx"), 0, 0);
         
-        List<String> exp = List.of("display_id","name","variable","description","notes","left");
+        List<String> exp = List.of("display_id","name","key","description","notes","left");
 
         assertEquals(exp, row);
         
@@ -59,7 +59,7 @@ public class ExcelReaderTest {
         List<List<String>> rows = instance.readStringRows(testFile("meta_test.xlsx"), 0, 0, 6);
         
         List<List<String>> exp = List.of(
-                List.of("display_id","name","variable","description","notes","left"),
+                List.of("display_id","name","key","description","notes","left"),
                 List.of("cs0001_slr0611",	"N cs0001_slr0611",	"123.0","target gene {name}","","AACC"),
                 List.of("cs0002_slr0612",	"N cs0002_slr0612",	"","","",""),
                 List.of("","missing","","","",""),

@@ -24,7 +24,7 @@ public class MetaRecord {
     public Optional<String> summary = Optional.empty();
     public Optional<String> description = Optional.empty();
     public Optional<String> notes = Optional.empty();
-    public Optional<String> variable = Optional.empty();
+    public Optional<String> key = Optional.empty();
     public Optional<String> attachment = Optional.empty();
     public List<String> authors = new ArrayList<>();
     
@@ -39,7 +39,7 @@ public class MetaRecord {
         hash = 47 * hash + Objects.hashCode(this.summary);
         hash = 47 * hash + Objects.hashCode(this.description);
         hash = 47 * hash + Objects.hashCode(this.notes);
-        hash = 47 * hash + Objects.hashCode(this.variable);
+        hash = 47 * hash + Objects.hashCode(this.key);
         hash = 47 * hash + Objects.hashCode(this.attachment);
         hash = 47 * hash + Objects.hashCode(this.authors);
         hash = 47 * hash + Objects.hashCode(this.extras);
@@ -76,7 +76,7 @@ public class MetaRecord {
         if (!Objects.equals(this.notes, other.notes)) {
             return false;
         }
-        if (!Objects.equals(this.variable, other.variable)) {
+        if (!Objects.equals(this.key, other.key)) {
             return false;
         }
         if (!Objects.equals(this.attachment, other.attachment)) {

@@ -22,7 +22,7 @@ public class ExcelMetaReader {
     public static final String VERSION_HEADER = "version";
     public static final String NAME_HEADER = "name";
     public static final String SUMMARY_HEADER = "summary";
-    public static final String VARIABLE_HEADER = "variable";    
+    public static final String KEY_HEADER = "key";    
     public static final String AUTHOR_HEADER = "author";    
     public static final String DESC_HEADER = "description";
     public static final String NOTES_HEADER = "notes";    
@@ -72,7 +72,7 @@ public class ExcelMetaReader {
         meta.version = locationToValue(locations.version, row);
         meta.name = locationToValue(locations.name, row);
         meta.summary = locationToValue(locations.summary, row);
-        meta.variable = locationToValue(locations.variable, row);
+        meta.key = locationToValue(locations.key, row);
         meta.description = locationToValue(locations.description, row);
         meta.notes = locationToValue(locations.notes, row);
         meta.attachment = locationToValue(locations.attachment, row);
@@ -105,7 +105,7 @@ public class ExcelMetaReader {
                 case VERSION_HEADER: meta.version = Optional.of(i); break;
                 case NAME_HEADER: meta.name = Optional.of(i); break;
                 case SUMMARY_HEADER: meta.summary = Optional.of(i); break;
-                case VARIABLE_HEADER: meta.variable = Optional.of(i); break;
+                case KEY_HEADER: meta.key = Optional.of(i); break;
                 case DESC_HEADER: meta.description = Optional.of(i); break;
                 case NOTES_HEADER: meta.notes = Optional.of(i); break;
                 case ATTACH_FILE_HEADER: meta.attachment = Optional.of(i); break;

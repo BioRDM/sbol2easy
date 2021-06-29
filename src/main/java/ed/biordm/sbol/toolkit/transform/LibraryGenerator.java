@@ -221,18 +221,18 @@ public class LibraryGenerator {
     void instantiesExistingDescriptions(ComponentDefinition component, MetaRecord meta) {
 
         String displayId = component.getDisplayId();
-        String variable = meta.variable.orElse("");
+        String key = meta.key.orElse("");
         
-        annotator.setName(component, meta.name, displayId, variable);
+        annotator.setName(component, meta.name, displayId, key);
         String name = component.getName() != null ? component.getName() : "";
         
-        annotator.addSummary(component, Optional.ofNullable(component.getDescription()), true, displayId, variable, name);
+        annotator.addSummary(component, Optional.ofNullable(component.getDescription()), true, displayId, key, name);
         
         Optional<String> tmp = Optional.ofNullable(util.getAnnotationValue(component, SBH_DESCRIPTION));
-        annotator.addDescription(component, tmp, true, displayId, variable, name);
+        annotator.addDescription(component, tmp, true, displayId, key, name);
         
         tmp = Optional.ofNullable(util.getAnnotationValue(component, SBH_NOTES));
-        annotator.addNotes(component, tmp, true, displayId, variable, name);
+        annotator.addNotes(component, tmp, true, displayId, key, name);
     }    
 
 }

@@ -24,7 +24,7 @@ public class MetaFormat {
     public Optional<Integer> summary = Optional.empty();    
     public Optional<Integer> description = Optional.empty();
     public Optional<Integer> notes = Optional.empty();
-    public Optional<Integer> variable = Optional.empty();
+    public Optional<Integer> key = Optional.empty();
     public Optional<Integer> attachment = Optional.empty();
     public List<Integer> authors = new ArrayList<>();
     
@@ -41,7 +41,7 @@ public class MetaFormat {
         hash = 47 * hash + Objects.hashCode(this.summary);
         hash = 47 * hash + Objects.hashCode(this.description);
         hash = 47 * hash + Objects.hashCode(this.notes);
-        hash = 47 * hash + Objects.hashCode(this.variable);
+        hash = 47 * hash + Objects.hashCode(this.key);
         hash = 47 * hash + Objects.hashCode(this.attachment);
         hash = 47 * hash + Objects.hashCode(this.authors);
         hash = 47 * hash + Objects.hashCode(this.extras);
@@ -81,7 +81,7 @@ public class MetaFormat {
         if (!Objects.equals(this.notes, other.notes)) {
             return false;
         }
-        if (!Objects.equals(this.variable, other.variable)) {
+        if (!Objects.equals(this.key, other.key)) {
             return false;
         }
         if (!Objects.equals(this.attachment, other.attachment)) {

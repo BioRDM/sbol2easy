@@ -10,14 +10,12 @@ import ed.biordm.sbol.toolkit.meta.MetaRecord;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SBH_DESCRIPTION;
 import static ed.biordm.sbol.toolkit.transform.ComponentUtil.emptyDocument;
 import static ed.biordm.sbol.toolkit.transform.ComponentUtil.saveValidSbol;
-import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -200,14 +198,14 @@ public class LibraryGeneratorTest {
         SBOLDocument doc = emptyDocument();
         
         ComponentDefinition template = testingTemplate(doc);        
-        template.setDescription("Old {variable}");
+        template.setDescription("Old {key}");
         util.setAnnotation(template, SBH_DESCRIPTION, "Name {name}");
         
         
         MetaRecord meta = new MetaRecord();
         //meta.displayId = Optional.of("D1");
-        meta.variable = Optional.of("gene");
-        meta.name = Optional.of("{variable} {displayId}");
+        meta.key = Optional.of("gene");
+        meta.name = Optional.of("{key} {displayId}");
         
         instance.describeComponent(template, meta);
         
@@ -229,8 +227,8 @@ public class LibraryGeneratorTest {
         
         MetaRecord meta = new MetaRecord();
         //meta.displayId = Optional.of("D1");
-        meta.variable = Optional.of("gene");
-        meta.name = Optional.of("{variable} {displayId}");
+        meta.key = Optional.of("gene");
+        meta.name = Optional.of("{key} {displayId}");
         meta.summary = Optional.of("New");
         
         instance.describeComponent(template, meta);

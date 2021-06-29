@@ -14,7 +14,6 @@ import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SBH_DESCRIPTION
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SBH_NOTES;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -125,33 +124,33 @@ public class ComponentAnnotator {
     public void annotateComponent(ComponentDefinition component, MetaRecord meta, boolean overWriteDesc) {
         
         String displayId = component.getDisplayId();
-        String variable = meta.variable.orElse("");
+        String key = meta.key.orElse("");
         
-        setName(component, meta.name, displayId, variable);
+        setName(component, meta.name, displayId, key);
         String name = component.getName() != null ? component.getName() : "";
         
         addAuthors(component, meta.authors);
         
-        addSummary(component, meta.summary, overWriteDesc, displayId, variable, name);
+        addSummary(component, meta.summary, overWriteDesc, displayId, key, name);
         
-        addDescription(component, meta.description, overWriteDesc, displayId, variable, name);
+        addDescription(component, meta.description, overWriteDesc, displayId, key, name);
         
-        addNotes(component, meta.notes, overWriteDesc, displayId, variable, name);
+        addNotes(component, meta.notes, overWriteDesc, displayId, key, name);
         
     }
 
-    protected String setTemplateVariable(String variable, String value, String template) {
+    protected String setTemplateVariable(String key, String value, String template) {
         
-        String pattern = "\\{"+variable+"}";
+        String pattern = "\\{"+key+"}";
         return template.replaceAll(pattern, value);
     }
     
-    void setName(ComponentDefinition component, Optional<String> name, String displayId, String variable) {
+    void setName(ComponentDefinition component, Optional<String> name, String displayId, String key) {
         if (name.isEmpty()) return;
         
         String template = name.get();
         template = setTemplateVariable("displayId", displayId, template);
-        template = setTemplateVariable("variable", variable, template);
+        template = setTemplateVariable("key", key, template);
         
         component.setName(template);
     }
@@ -169,13 +168,13 @@ public class ComponentAnnotator {
         util.addAnnotation(component, CREATOR, author);
     }
     
-    void addSummary(ComponentDefinition component, Optional<String> summary, boolean overwrite, String displayId, String variable, String name) {
+    void addSummary(ComponentDefinition component, Optional<String> summary, boolean overwrite, String displayId, String key, String name) {
         
         if (summary.isEmpty()) return;
         
         String template = summary.get();
         template = setTemplateVariable("displayId", displayId, template);
-        template = setTemplateVariable("variable", variable, template);
+        template = setTemplateVariable("key", key, template);
         template = setTemplateVariable("name", name, template);
 
         if (overwrite) {
@@ -187,13 +186,13 @@ public class ComponentAnnotator {
         }
     }
 
-    void addDescription(ComponentDefinition component, Optional<String> description, boolean overwrite, String displayId, String variable, String name) {
+    void addDescription(ComponentDefinition component, Optional<String> description, boolean overwrite, String displayId, String key, String name) {
         
         if (description.isEmpty()) return;
         
         String template = description.get();
         template = setTemplateVariable("displayId", displayId, template);
-        template = setTemplateVariable("variable", variable, template);
+        template = setTemplateVariable("key", key, template);
         template = setTemplateVariable("name", name, template);
 
         if (overwrite) {
@@ -203,12 +202,12 @@ public class ComponentAnnotator {
         }
     }
 
-    void addNotes(ComponentDefinition component, Optional<String> notes, boolean overwrite, String displayId, String variable, String name) {
+    void addNotes(ComponentDefinition component, Optional<String> notes, boolean overwrite, String displayId, String key, String name) {
         if (notes.isEmpty()) return;
         
         String template = notes.get();
         template = setTemplateVariable("displayId", displayId, template);
-        template = setTemplateVariable("variable", variable, template);
+        template = setTemplateVariable("key", key, template);
         template = setTemplateVariable("name", name, template);
 
         if (overwrite) {
