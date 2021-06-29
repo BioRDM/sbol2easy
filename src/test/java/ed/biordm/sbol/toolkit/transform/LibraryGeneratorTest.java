@@ -324,6 +324,8 @@ public class LibraryGeneratorTest {
         
         assertEquals(3, Files.list(outDir).count());
         
+        assertTrue(out.successful.contains("c2_toc"));
+        
     }
     
     

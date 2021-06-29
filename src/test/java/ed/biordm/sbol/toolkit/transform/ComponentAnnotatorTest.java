@@ -74,23 +74,6 @@ public class ComponentAnnotatorTest {
         
     }    
     
-    @Test
-    public void setTemplateVariableReplaces() {
-        
-        String template = "I am {gene} {gene} {name}";
-        String var = "missing";
-        String val = "X";
-        
-        assertEquals(template, instance.setTemplateVariable(var, val, template));
-        
-        var = "gene";
-        String exp = "I am X X {name}";
-        assertEquals(exp, instance.setTemplateVariable(var, val, template));
-        
-        var = "name";
-        exp = "I am {gene} {gene} X";
-        assertEquals(exp, instance.setTemplateVariable(var, val, template));
-    }
 
     @Test
     public void addsNotes() throws Exception {
@@ -254,7 +237,7 @@ public class ComponentAnnotatorTest {
         assertEquals("cs0002_slr0612 flat", c2.getName());
 
         assertEquals("1.0", c1.getDescription());
-        assertEquals("", c2.getDescription());
+        assertEquals("slr0612", c2.getDescription());
     }
     
     public Path testFile(String name) {

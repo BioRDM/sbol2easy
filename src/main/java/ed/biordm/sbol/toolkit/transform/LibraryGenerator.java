@@ -55,6 +55,7 @@ public class LibraryGenerator {
         validateMetaFormat(metaFormat);
         
         List<MetaRecord> metaData = metaReader.readMeta(metaFile, metaFormat);
+        metaData = metaHelper.calculateIdFromKey(metaData);
         
         Outcome status = checkMissingMeta(metaData, metaFormat);
         validateCompletness(status, stopOnMissingMeta);

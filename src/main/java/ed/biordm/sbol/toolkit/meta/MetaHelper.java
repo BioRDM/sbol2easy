@@ -5,6 +5,7 @@
  */
 package ed.biordm.sbol.toolkit.meta;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,6 +16,22 @@ import java.util.stream.Collectors;
  */
 public class MetaHelper {
     
+   
+    public static String setTemplateVariable(String key, String value, String template) {
+        
+        String pattern = "\\{"+key+"}";
+        return template.replaceAll(pattern, value);
+    }
+    
+    public List<MetaRecord> calculateIdFromKey(List<MetaRecord> records) {
+        for (MetaRecord record: records) {
+            String key = record.key.orElse("");
+            String displayId = record.displayId.orElse("");
+            displayId = setTemplateVariable("key", key, displayId);
+            record.displayId = Optional.of(displayId);
+        }
+        return records;
+    }
     
     public List<String> missingMetaIds(List<MetaRecord> metaData, MetaFormat metaFormat) {
         return metaData.stream()

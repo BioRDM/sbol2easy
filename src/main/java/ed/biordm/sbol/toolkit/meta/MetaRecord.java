@@ -16,7 +16,7 @@ import java.util.Optional;
  *
  * @author tzielins
  */
-public class MetaRecord {
+public class MetaRecord implements Cloneable {
     
     public Optional<String> displayId = Optional.empty();
     public Optional<String> version = Optional.empty();
@@ -90,6 +90,16 @@ public class MetaRecord {
         }
         return true;
     }
+
+    protected MetaRecord clone() {
+        try {
+            return (MetaRecord) super.clone(); 
+        } catch (CloneNotSupportedException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+    
+    
     
     
 }

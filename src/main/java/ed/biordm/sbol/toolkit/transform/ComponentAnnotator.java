@@ -8,6 +8,7 @@ package ed.biordm.sbol.toolkit.transform;
 import ed.biordm.sbol.toolkit.meta.ExcelMetaReader;
 import ed.biordm.sbol.toolkit.meta.MetaFormat;
 import ed.biordm.sbol.toolkit.meta.MetaHelper;
+import static ed.biordm.sbol.toolkit.meta.MetaHelper.setTemplateVariable;
 import ed.biordm.sbol.toolkit.meta.MetaRecord;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.CREATOR;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SBH_DESCRIPTION;
@@ -39,6 +40,7 @@ public class ComponentAnnotator {
         validateMetaFormat(metaFormat);
         
         List<MetaRecord> metaData = metaReader.readMeta(metaFile, metaFormat);
+        metaData = metaHelper.calculateIdFromKey(metaData);
         
         Map<String,List<String>> idsWithVersions = util.extractComponentsVersionedDisplayIds(source);
         
@@ -139,11 +141,6 @@ public class ComponentAnnotator {
         
     }
 
-    protected String setTemplateVariable(String key, String value, String template) {
-        
-        String pattern = "\\{"+key+"}";
-        return template.replaceAll(pattern, value);
-    }
     
     void setName(ComponentDefinition component, Optional<String> name, String displayId, String key) {
         if (name.isEmpty()) return;
