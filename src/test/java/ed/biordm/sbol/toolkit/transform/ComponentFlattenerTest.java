@@ -60,7 +60,7 @@ public class ComponentFlattenerTest {
                 
         Component cp1i = cont.createComponent("cp1i", AccessType.PUBLIC, cp1.getPersistentIdentity());
 
-        ComponentDefinition flat = instance.flattenDesign(cont, "flat", doc);
+        ComponentDefinition flat = instance.flattenDesign(cont, "flat", "flat", doc);
         
         String seq = instance.getSequenceElements(flat, Sequence.IUPAC_DNA)
                 .get();
@@ -104,7 +104,7 @@ public class ComponentFlattenerTest {
         cont.createSequenceConstraint("cs1", RestrictionType.PRECEDES, cp1i.getIdentity(), cp2i.getIdentity());
         cont.createSequenceConstraint("cs2", RestrictionType.PRECEDES, cp2i.getIdentity(), cp3i.getIdentity());
 
-        ComponentDefinition flat = instance.flattenDesign(cont, "flat", doc);
+        ComponentDefinition flat = instance.flattenDesign(cont, "flat", "flat", doc);
         
         String seq = instance.getSequenceElements(flat, Sequence.IUPAC_DNA)
                 .get();
@@ -159,7 +159,7 @@ public class ComponentFlattenerTest {
         cont.createSequenceConstraint("cs1", RestrictionType.PRECEDES, cp1i.getIdentity(), cp2i.getIdentity());
         cont.createSequenceConstraint("cs2", RestrictionType.PRECEDES, cp2i.getIdentity(), cp3i.getIdentity());
 
-        ComponentDefinition flat = instance.flattenDesign(cont, "flat", doc);
+        ComponentDefinition flat = instance.flattenDesign(cont, "flat", "flat", doc);
         
         String seq = instance.getSequenceElements(flat, Sequence.IUPAC_DNA)
                 .get();
@@ -210,7 +210,7 @@ public class ComponentFlattenerTest {
   
         cont.createSequenceConstraint("cs1", RestrictionType.PRECEDES, cp1i.getIdentity(), cp2i.getIdentity());
 
-        ComponentDefinition flat = instance.flattenDesign(cont, "flat", doc);
+        ComponentDefinition flat = instance.flattenDesign(cont, "flat","flat", doc);
         
         String seq = instance.getSequenceElements(flat, Sequence.IUPAC_DNA)
                 .get();
@@ -287,7 +287,7 @@ public class ComponentFlattenerTest {
         cont.createSequenceConstraint("cs1", RestrictionType.PRECEDES, sub1i.getIdentity(), sub2i.getIdentity());
         
 
-        ComponentDefinition flat = instance.flattenDesign(cont, "flat", doc);
+        ComponentDefinition flat = instance.flattenDesign(cont, "flat", "flat", doc);
         
         String seq = instance.getSequenceElements(flat, Sequence.IUPAC_DNA)
                 .get();
@@ -377,7 +377,7 @@ public class ComponentFlattenerTest {
 
         SBOLDocument dest = emptyDocument();
         
-        ComponentDefinition flat = instance.flattenDesign(cont, "flat", dest);
+        ComponentDefinition flat = instance.flattenDesign(cont, "flat", "flat", dest);
         
         String seq = instance.getSequenceElements(flat, Sequence.IUPAC_DNA)
                 .get();

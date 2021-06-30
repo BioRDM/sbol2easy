@@ -83,7 +83,7 @@ public class CyanoRecipeTest {
         //to make it top level
         sll0199.clearWasDerivedFroms();
         
-        ComponentDefinition sll0199Flat = flattener.flattenDesign(sll0199, "sl0199_flatten", templateDoc);
+        ComponentDefinition sll0199Flat = flattener.flattenDesign(sll0199, "sl0199_flatten","sl0199_flatten", templateDoc);
         
         //to make it top level
         sll0199Flat.clearWasDerivedFroms();

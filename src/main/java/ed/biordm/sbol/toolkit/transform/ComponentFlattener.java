@@ -35,33 +35,36 @@ public class ComponentFlattener {
      * 
      *
      * @param template component for which a sequence should be generated
-     * @param newName name (converted to diplayid) for the new component
-     * defintion
+     * @param newId display id (will be sanitized)
+     * @param newName name of the new component definition
      * @param destDoc sbol document in which to create the new definition
      * @return new component definition with the full joined sequence
      * @throws SBOLValidationException from sbol library
      * @throws IllegalArgumentException if definition is abstract i.e. does not have sequences in the comp tree
      */
-    public ComponentDefinition flattenDesign(ComponentDefinition template, String newName, SBOLDocument destDoc) throws SBOLValidationException {
+    public ComponentDefinition flattenDesign(ComponentDefinition template, String newId, String newName, SBOLDocument destDoc) throws SBOLValidationException {
 
-        String cleanName = util.sanitizeName(newName);
-        ComponentDefinition newCmpDef = destDoc.createComponentDefinition(cleanName, template.getVersion(), template.getTypes());
+        newId = util.sanitizeName(newId);
+        
+        //needs to be first in case it cannot be created and will continue with next design
+        Sequence joinedSequence = joinDNASequences(template, newId+"_seq", template.getVersion(),destDoc);
+                
+        ComponentDefinition newCmpDef = destDoc.createComponentDefinition(newId, template.getVersion(), template.getTypes());
         newCmpDef.setName(newName);
-        newCmpDef.addWasDerivedFrom(template.getIdentity());
+        //newCmpDef.addWasDerivedFrom(template.getIdentity());
         util.copyMeta(template, newCmpDef);
+        newCmpDef.addSequence(joinedSequence);
 
         List<Component> children = template.getSortedComponents();
-        
-        Sequence joinedSequence = joinDNASequences(template, cleanName+"_seq", template.getVersion(),destDoc);
-        newCmpDef.addSequence(joinedSequence);
-        
         convertComponentsToFeatures(children, newCmpDef);
-        
         copySequenceFeatures(children, newCmpDef);
-        
 
         return newCmpDef;
     }
+    
+    ComponentDefinition flattenDesign(ComponentDefinition template, String newName, SBOLDocument destDoc) throws SBOLValidationException {
+        return flattenDesign(template, newName, newName, destDoc);
+    }    
     
     /**
      * Flattens the top level root designs and stores them in the destDoc. 
@@ -80,7 +83,7 @@ public class ComponentFlattener {
         
         for (ComponentDefinition comp : source.getRootComponentDefinitions()) {
             try {
-                ComponentDefinition flat = flattenDesign(comp, util.nameOrId(comp)+nameSuffix, destDoc);
+                ComponentDefinition flat = flattenDesign(comp, comp.getDisplayId()+nameSuffix, util.nameOrId(comp)+nameSuffix, destDoc);
                 flattened.add(flat);
             } catch (IllegalArgumentException e) {
                 if (stopOnError) {
