@@ -42,7 +42,7 @@ public class CyanoTemplate {
     
     public static final String CYANO_PREF = "http://bio.ed.ac.uk/a_mccormick/cyano_source/";
     
-    public static void main(String[] args) throws SBOLValidationException, SBOLConversionException, IOException, URISyntaxException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
+    public static void main(String[] args) throws SBOLValidationException, SBOLConversionException, IOException, URISyntaxException {
         Path tempDir = Paths.get("E:/Temp");
         
         Path outDir = tempDir.resolve("cyanosource_"+LocalDate.now());

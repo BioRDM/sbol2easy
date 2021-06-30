@@ -15,4 +15,19 @@ public class SBOLHack {
     public static SBOLDocument getSBOLDocument(Identified elm) {
         return elm.getSBOLDocument();
     }
+    
+
+    public static SBOLConversionException conversionException(String msg) {
+        return new SBOLConversionException(msg);
+    }
+    
+    public static SBOLConversionException conversionException(Throwable cause) {
+        return new SBOLConversionException(cause);
+    }
+    
+    public static SBOLConversionException conversionException(String message, Throwable cause) {
+        RuntimeException inter = new RuntimeException(message, cause);
+        return new SBOLConversionException(inter);
+    }
+    
 }

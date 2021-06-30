@@ -30,7 +30,9 @@ import org.sbolstandard.core2.Identified;
 import org.sbolstandard.core2.Location;
 import org.sbolstandard.core2.OrientationType;
 import org.sbolstandard.core2.Range;
+import org.sbolstandard.core2.SBOLConversionException;
 import org.sbolstandard.core2.SBOLDocument;
+import static org.sbolstandard.core2.SBOLHack.conversionException;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.Sequence;
 import org.sbolstandard.core2.SequenceAnnotation;
@@ -135,7 +137,7 @@ public class GenBankConverter {
             }
         }
         if (seq == null) {
-            throw new SBOLConversionException("ComponentDefinition " + componentDefinition.getIdentity()
+            throw conversionException("ComponentDefinition " + componentDefinition.getIdentity()
                     + " does not have an IUPAC sequence.");
         }
         int size = seq.getElements().length();
@@ -731,7 +733,7 @@ public class GenBankConverter {
             }
         }
         if (type == null) {
-            throw new SBOLConversionException("ComponentDefinition " + componentDefinition.getIdentity()
+            throw conversionException("ComponentDefinition " + componentDefinition.getIdentity()
                     + " is not DNA or RNA type.");
         }
         annotation = componentDefinition.getAnnotation(new QName(GBNAMESPACE, MOLECULE, GBPREFIX));
@@ -893,7 +895,7 @@ public class GenBankConverter {
             end = offset + cut.getAt() + 1;
             isCut = true;
         } else {
-            throw new SBOLConversionException("Location " + location.getIdentity() + " is not range or cut.");
+            throw conversionException("Location " + location.getIdentity() + " is not range or cut.");
         }
         if (location2 != null) {
             if (location2 instanceof Range) {
@@ -939,7 +941,7 @@ public class GenBankConverter {
     private static void writeFeature(Writer w, SequenceAnnotation sa, String role, int offset, boolean inline)
             throws IOException, SBOLConversionException {
         if (sa.getPreciseLocations().size() == 0) {
-            throw new SBOLConversionException("SequenceAnnotation " + sa.getIdentity() + " has no range/cut locations.");
+            throw conversionException("SequenceAnnotation " + sa.getIdentity() + " has no range/cut locations.");
         } else if (sa.getPreciseLocations().size() == 1) {
             Location loc = sa.getPreciseLocations().iterator().next();
             boolean locReverse = false;

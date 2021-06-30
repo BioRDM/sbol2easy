@@ -54,7 +54,7 @@ public class PlasmidsGenerator {
     final protected ComponentUtil coponentUtil = new ComponentUtil();
     final protected ComponentFlattener flattener = new ComponentFlattener();
     
-    public static void main(String[] args) throws SBOLValidationException, SBOLConversionException, IOException, URISyntaxException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
+    public static void main(String[] args) throws SBOLValidationException, SBOLConversionException, IOException, URISyntaxException {
         Path tempDir = Paths.get("E:/Temp");
         
         Path outDir = tempDir.resolve("cyanosource_"+LocalDate.now());
@@ -80,19 +80,19 @@ public class PlasmidsGenerator {
     }    
         
 
-    public void generateFromFiles(String version,Path templateFile, Path flankFile, Path outDir) throws IOException, SBOLValidationException, SBOLConversionException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
+    public void generateFromFiles(String version,Path templateFile, Path flankFile, Path outDir) throws IOException, SBOLValidationException, SBOLConversionException {
         
         generateFromFiles("designs", version, templateFile, flankFile, outDir);
     }
     
-    public void generateFromFiles(String name, String version,Path templateFile, Path flankFile, Path outDir) throws IOException, SBOLValidationException, SBOLConversionException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
+    public void generateFromFiles(String name, String version,Path templateFile, Path flankFile, Path outDir) throws IOException, SBOLValidationException, SBOLConversionException {
         Path sbolDir = outDir.resolve("sbol");
         Path genDir = outDir.resolve("genbank");
         
         generateFromFiles(name, version, templateFile, flankFile, sbolDir, genDir);
     } 
     
-    protected void generateFromFiles(String name, String version,Path templateFile, Path flankFile, Path sbolDir, Path genDir) throws IOException, SBOLValidationException, SBOLConversionException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
+    protected void generateFromFiles(String name, String version,Path templateFile, Path flankFile, Path sbolDir, Path genDir) throws IOException, SBOLValidationException, SBOLConversionException {
     
         System.out.println("Generating ....");
         List<SBOLDocument> docs =  generateFromFileTemplate(templateFile, flankFile, version);
@@ -209,7 +209,7 @@ public class PlasmidsGenerator {
     }    
     
     
-    protected void saveFlattened(SBOLDocument doc, Path dir) throws IOException, ed.biordm.sbol.toolkit.transform.SBOLConversionException {
+    protected void saveFlattened(SBOLDocument doc, Path dir) throws IOException, SBOLConversionException {
         
         for (ComponentDefinition comp : doc.getComponentDefinitions()) {
             if (comp.getDisplayId().endsWith("flat")) {
