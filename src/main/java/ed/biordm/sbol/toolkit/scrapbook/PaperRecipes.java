@@ -100,7 +100,6 @@ public class PaperRecipes {
     
     Path annotate(Path sourceFile, Path metaFile) throws SBOLValidationException, IOException, SBOLConversionException {
         SBOLDocument in = SBOLReader.read(sourceFile.toFile());
-        in.setDefaultURIprefix(CommonAnnotations.BIORDM_PREF);
 
         ComponentAnnotator annotator = new ComponentAnnotator();
         annotator.annotate(in, metaFile, false, true, true);

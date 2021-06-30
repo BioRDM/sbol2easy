@@ -103,6 +103,10 @@ public class ComponentAnnotator {
 
     Outcome annotate(SBOLDocument source, Map<String, List<String>> idsWithVersions, List<MetaRecord> metaData, MetaFormat metaFormat, boolean overWrite, Outcome status) {
 
+        if (source.getDefaultURIprefix() == null || source.getDefaultURIprefix().isBlank()) {
+            source.setDefaultURIprefix(CommonAnnotations.BIORDM_PREF);
+        }
+        
         for (MetaRecord record : metaData) {
             String displayId = record.displayId.get();
             if (!idsWithVersions.containsKey(displayId)) continue;
