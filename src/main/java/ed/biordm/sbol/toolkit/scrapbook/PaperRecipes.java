@@ -5,15 +5,17 @@
  */
 package ed.biordm.sbol.toolkit.scrapbook;
 
-import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.CREATOR;
+import ed.biordm.sbol.toolkit.transform.CommonAnnotations;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.GB_GENE;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.GB_PRODUCT;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SBH_DESCRIPTION;
 import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SO;
+import ed.biordm.sbol.toolkit.transform.ComponentAnnotator;
+import ed.biordm.sbol.toolkit.transform.ComponentFlattener;
 import static ed.biordm.sbol.toolkit.transform.ComponentUtil.emptyDocument;
 import static ed.biordm.sbol.toolkit.transform.ComponentUtil.saveValidSbol;
+import ed.biordm.sbol.toolkit.transform.LibraryGenerator;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,6 +27,7 @@ import org.sbolstandard.core2.OrientationType;
 import org.sbolstandard.core2.RestrictionType;
 import org.sbolstandard.core2.SBOLConversionException;
 import org.sbolstandard.core2.SBOLDocument;
+import org.sbolstandard.core2.SBOLReader;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.Sequence;
 import org.sbolstandard.core2.SequenceAnnotation;
@@ -36,8 +39,95 @@ import org.sbolstandard.core2.SequenceOntology;
  */
 public class PaperRecipes {
     
+    static String version = "1.0";
     
-    public ComponentDefinition assemblePlasmidTemplate(SBOLDocument doc, String version) throws SBOLValidationException {
+    static Path outDir;
+    static Path inputs;
+    
+    public static void main(String[] args) {
+
+        Path tempDir = Paths.get("E:/Temp");        
+        outDir = tempDir.resolve("sbol2easy_"+LocalDate.now());
+        
+        inputs = Paths.get("examples");
+        assert(Files.isDirectory(inputs));
+
+        
+        try {
+            Files.createDirectories(outDir);
+            PaperRecipes recipes = new PaperRecipes();
+            
+            
+            // creating template
+            Path templateFile = recipes.createTemplateDesignFile(outDir,"template.xml");
+            
+            //generating library
+            Path libraryDef = inputToOut("library_def.xlsx");                        
+            LibraryGenerator generator = new LibraryGenerator();
+            generator.generateFromFiles("library", version, templateFile, libraryDef, outDir, true);
+            
+            Path libraryFile = outDir.resolve("library.1.xml");
+            assert(Files.isRegularFile(libraryFile));
+            
+            //flatten
+            Path flatFile = recipes.flatten(libraryFile);
+            assert(Files.isRegularFile(flatFile));
+            
+            //annotate flatten
+            Path annotDef = inputToOut("flat_annotation.xlsx");            
+            Path annotatedFile = recipes.annotate(flatFile, annotDef);
+            assert(Files.isRegularFile(annotatedFile));
+            
+            
+        } catch (IOException | SBOLConversionException | SBOLValidationException e) {
+            System.out.println("Failed: "+e.getMessage());
+            e.printStackTrace(System.out);
+            throw new RuntimeException(e);
+        }
+        
+        
+    }
+    
+
+    
+    static Path inputToOut(String name) throws IOException {
+        Path inputFile = inputs.resolve(name);
+        assert(Files.isRegularFile(inputFile));            
+        Path outFile = outDir.resolve(inputFile.getFileName());
+        Files.copy(inputFile, outFile); 
+        return outFile;
+    }
+    
+    Path annotate(Path sourceFile, Path metaFile) throws SBOLValidationException, IOException, SBOLConversionException {
+        SBOLDocument in = SBOLReader.read(sourceFile.toFile());
+        in.setDefaultURIprefix(CommonAnnotations.BIORDM_PREF);
+
+        ComponentAnnotator annotator = new ComponentAnnotator();
+        annotator.annotate(in, metaFile, false, true, true);
+        Path annotatedFile = outDir.resolve("annotated.xml");
+        saveValidSbol(in, annotatedFile);
+        return annotatedFile;
+    }
+    
+    Path flatten(Path sourceFile) throws SBOLValidationException, IOException, SBOLConversionException {
+        SBOLDocument in = SBOLReader.read(sourceFile.toFile());
+        SBOLDocument out = emptyDocument();
+        ComponentFlattener flattener = new ComponentFlattener();
+        flattener.flattenDesigns(in, " flat", out, false);
+        Path flatFile = outDir.resolve("flattened.xml");
+        saveValidSbol(out, flatFile);        
+        return flatFile;
+    }
+
+    Path createTemplateDesignFile(Path outDir, String name) throws SBOLValidationException, IOException, SBOLConversionException {
+        Path templateFile = outDir.resolve(name);
+        SBOLDocument doc = emptyDocument();
+        ComponentDefinition template = assemblePlasmidTemplate(doc, version);
+        saveValidSbol(doc, templateFile);;
+        return templateFile;        
+    }
+    
+    ComponentDefinition assemblePlasmidTemplate(SBOLDocument doc, String version) throws SBOLValidationException {
 
         String name = "plasmid_template";
         ComponentDefinition plasmid = doc.createComponentDefinition(name, version, ComponentDefinition.DNA_REGION);

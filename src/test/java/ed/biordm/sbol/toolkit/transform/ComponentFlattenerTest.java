@@ -469,7 +469,7 @@ public class ComponentFlattenerTest {
 
         SBOLDocument dest = emptyDocument();
 
-        List<ComponentDefinition> flattened = instance.flattenDesigns(doc, "_flat", dest);
+        List<ComponentDefinition> flattened = instance.flattenDesigns(doc, "_flat", dest, true);
         
         assertEquals(2, flattened.size());
         
