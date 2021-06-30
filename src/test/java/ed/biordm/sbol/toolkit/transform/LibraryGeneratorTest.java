@@ -114,6 +114,7 @@ public class LibraryGeneratorTest {
         SBOLDocument doc = emptyDocument();
         
         ComponentDefinition template = testingTemplate(doc);
+        template.setDescription("Should stay");
         
         MetaRecord meta = new MetaRecord();
         meta.displayId = Optional.of("D1");
@@ -122,6 +123,7 @@ public class LibraryGeneratorTest {
         assertNotNull(res);
         assertEquals("D1", res.getDisplayId());
         assertEquals("2.0", res.getVersion());
+        assertEquals("Should stay", template.getDescription());
         
         meta.displayId = Optional.of("D2");
         meta.version = Optional.of("1");
@@ -146,6 +148,20 @@ public class LibraryGeneratorTest {
             instance.instantiateComponent(template, meta, "2.0", doc);
             fail();
         } catch (IllegalArgumentException e) {};
+    }    
+    
+    @Test 
+    public void instantiateComponentIgnoresColumnsWithHash() throws Exception {
+        SBOLDocument doc = emptyDocument();
+        
+        ComponentDefinition template = testingTemplate(doc);
+        
+        MetaRecord meta = new MetaRecord();
+        meta.displayId = Optional.of("D1");
+        meta.extras.put("#missing", "AAA");
+        
+        ComponentDefinition res = instance.instantiateComponent(template, meta, "2.0", doc);
+        assertNotNull(res);
     }    
     
     @Test 

@@ -7,20 +7,12 @@ package ed.biordm.sbol.toolkit.transform;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import org.sbolstandard.core2.AccessType;
-import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.Component;
 import org.sbolstandard.core2.ComponentDefinition;
-import org.sbolstandard.core2.Identified;
 import org.sbolstandard.core2.Location;
 import org.sbolstandard.core2.Range;
 import org.sbolstandard.core2.SBOLDocument;
@@ -37,6 +29,29 @@ public class TemplateTransformer {
     
     final ComponentUtil util = new ComponentUtil();
     
+    /**
+     * Creates new instance of component definition using the provided template.
+     *
+     * @param template component to be copied
+     * @param newName name of the component (will be transformed into displayId)
+     * @param version
+     * @param doc including sbol document
+     * @return new component definition which is a deep copy of the template
+     * with the given properties set
+     * @throws SBOLValidationException
+     * @throws URISyntaxException
+     */
+    public ComponentDefinition instantiateFromTemplate(ComponentDefinition template,
+            String newName, String version, SBOLDocument doc) throws SBOLValidationException {
+
+        String cleanName = util.sanitizeName(newName);
+
+        ComponentDefinition copy = (ComponentDefinition) doc.createCopy(template, cleanName, version);
+        copy.setName(newName);
+        copy.addWasDerivedFrom(template.getIdentity());
+
+        return copy;
+    }    
 
     /**
      * Creates new instance of component definition using the provided template.
@@ -54,15 +69,8 @@ public class TemplateTransformer {
     public ComponentDefinition instantiateFromTemplate(ComponentDefinition template,
             String newName, String version, String description, SBOLDocument doc) throws SBOLValidationException {
 
-        // name should be sanitized for conversion into display id as alphanumeric with _ (replace all non alphanumeric characters with _)
-        // it should be deep copy, i.e. the owned object must be copied like component, sequenceanotations, sequenceConstraints
-        // that should be already handled by doc.crateCopy method.
-        String cleanName = util.sanitizeName(newName);
-
-        ComponentDefinition copy = (ComponentDefinition) doc.createCopy(template, cleanName, version);
-        copy.setName(newName);
+        ComponentDefinition copy = instantiateFromTemplate(template, newName, version, doc);
         copy.setDescription(description);
-        copy.addWasDerivedFrom(template.getIdentity());
 
         return copy;
     }

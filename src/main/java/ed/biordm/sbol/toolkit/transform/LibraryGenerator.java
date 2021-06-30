@@ -188,20 +188,21 @@ public class LibraryGenerator {
         String version = meta.version.orElse(defVersion);
         
         try {
-            ComponentDefinition instance = transformer.instantiateFromTemplate(template, displayId, version, "", doc);    
-            //otherwise they are not root
+            ComponentDefinition instance = transformer.instantiateFromTemplate(template, displayId, version, doc);    
+            //otherwise they are not root and visible in synbiohub
             instance.clearWasDerivedFroms();
         
-            for (String genCompId : meta.extras.keySet()) {
-                String newSeq = meta.extras.getOrDefault(genCompId, "");
+            for (String genericCompId : meta.extras.keySet()) {
+                if (genericCompId.startsWith("#")) continue;
+                String newSeq = meta.extras.getOrDefault(genericCompId, "");
                 if (newSeq.isBlank()) continue; //ignoring creation of components with empty sequences
                 
-                if (instance.getComponent(genCompId) == null) 
-                    throw new IllegalArgumentException("No component instance: "+genCompId+" in the template design");
+                if (instance.getComponent(genericCompId) == null) 
+                    throw new IllegalArgumentException("No component instance: "+genericCompId+" in the template design");
                 
-                String newName = displayId+"_"+genCompId; //that should be unique
+                String newName = displayId+"_"+genericCompId; //that should be unique
                 
-                transformer.concretizePart(instance, genCompId, newName, newSeq, doc);
+                transformer.concretizePart(instance, genericCompId, newName, newSeq, doc);
             }
             
         
