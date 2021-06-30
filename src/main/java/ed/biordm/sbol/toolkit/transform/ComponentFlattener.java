@@ -70,16 +70,23 @@ public class ComponentFlattener {
      * @param source
      * @param nameSuffix
      * @param destDoc
+     * @param stopOnError if true it stops on conversion after first error, otherwise ignores failed conversions
      * @return list of the created, new, flat designs
      * @throws SBOLValidationException 
      */
-    public List<ComponentDefinition> flattenDesigns(SBOLDocument source, String nameSuffix, SBOLDocument destDoc) throws SBOLValidationException {
+    public List<ComponentDefinition> flattenDesigns(SBOLDocument source, String nameSuffix, SBOLDocument destDoc, boolean stopOnError) throws SBOLValidationException {
         
         List<ComponentDefinition> flattened = new ArrayList<>();
         
         for (ComponentDefinition comp : source.getRootComponentDefinitions()) {
-            ComponentDefinition flat = flattenDesign(comp, util.nameOrId(comp)+nameSuffix, destDoc);
-            flattened.add(flat);
+            try {
+                ComponentDefinition flat = flattenDesign(comp, util.nameOrId(comp)+nameSuffix, destDoc);
+                flattened.add(flat);
+            } catch (IllegalArgumentException e) {
+                if (stopOnError) {
+                    throw new IllegalArgumentException("Could not flatten '"+comp.getDisplayId()+"' cause of: "+e.getMessage(),e);
+                }
+            }
         }
         
         return flattened;
@@ -156,7 +163,7 @@ public class ComponentFlattener {
     Sequence joinDNASequences(ComponentDefinition def, String displayId, String version, SBOLDocument doc) throws SBOLValidationException {
         
         String seq = getJoinedSequenceElements(def, Sequence.IUPAC_DNA)
-                .orElseThrow( () -> new IllegalArgumentException("Cannot join component without sequence "+def.getDisplayId()));
+                .orElseThrow( () -> new IllegalArgumentException("Cannot join component without sequence: "+def.getDisplayId()));
         
         return doc.createSequence(displayId, version, seq, Sequence.IUPAC_DNA);
     }    
@@ -179,8 +186,8 @@ public class ComponentFlattener {
         for (Component comp : def.getSortedComponents()) {
             
             String part = getJoinedSequenceElements(comp.getDefinition(), seqType)
-                    .orElseThrow( () -> new IllegalArgumentException("Cannot join elements from component without sequence "+
-                             comp.getDisplayId()+" in "+def.getDisplayId()));
+                    .orElseThrow( () -> new IllegalArgumentException("Cannot join elements from component without sequence '"+
+                             comp.getDisplayId()+"' in: "+def.getDisplayId()));
             sb.append(part);            
         }
         
@@ -192,7 +199,7 @@ public class ComponentFlattener {
         Optional<String> concrete = getSequenceElements(def, seqType);
         if (concrete.isPresent()) return concrete.get().length();
         if (def.getComponents().isEmpty()) 
-            throw new IllegalArgumentException("Cannot calculate length from missing sequence in comp "+def.getDisplayId());
+            throw new IllegalArgumentException("Cannot calculate length from missing sequence in comp: "+def.getDisplayId());
         
         int length = 0;
         for (Component comp : def.getComponents()) {
