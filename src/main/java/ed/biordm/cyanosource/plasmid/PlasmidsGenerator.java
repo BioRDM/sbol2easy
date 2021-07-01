@@ -8,13 +8,13 @@ package ed.biordm.cyanosource.plasmid;
 import static ed.biordm.cyanosource.plasmid.CyanoTemplate.CYANO_PREF;
 import static ed.biordm.cyanosource.plasmid.CyanoTemplate.createTemplatePlasmid;
 import static ed.biordm.cyanosource.plasmid.CyanoTemplate.cyanoDocument;
-import ed.biordm.sbol.toolkit.transform.CommonAnnotations;
-import static ed.biordm.sbol.toolkit.transform.CommonAnnotations.SBH_DESCRIPTION;
-import ed.biordm.sbol.toolkit.transform.ComponentFlattener;
-import ed.biordm.sbol.toolkit.transform.ComponentUtil;
-import ed.biordm.sbol.toolkit.transform.FeaturesReader;
-import ed.biordm.sbol.toolkit.transform.GenBankConverter;
-import ed.biordm.sbol.toolkit.transform.TemplateTransformer;
+import ed.biordm.sbol.sbol2easy.transform.CommonAnnotations;
+import static ed.biordm.sbol.sbol2easy.transform.CommonAnnotations.SBH_DESCRIPTION;
+import ed.biordm.sbol.sbol2easy.transform.ComponentFlattener;
+import ed.biordm.sbol.sbol2easy.transform.ComponentUtil;
+import ed.biordm.sbol.sbol2easy.transform.FeaturesReader;
+import ed.biordm.sbol.sbol2easy.transform.GenBankConverter;
+import ed.biordm.sbol.sbol2easy.transform.TemplateTransformer;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
@@ -39,7 +39,7 @@ import org.sbolstandard.core2.SBOLReader;
 import org.sbolstandard.core2.SBOLValidate;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.SBOLWriter;
-import static ed.biordm.sbol.toolkit.transform.ComponentUtil.saveValidSbol;
+import static ed.biordm.sbol.sbol2easy.transform.ComponentUtil.saveValidSbol;
 
 /**
  *
