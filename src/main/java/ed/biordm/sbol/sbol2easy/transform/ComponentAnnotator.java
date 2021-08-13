@@ -187,7 +187,18 @@ public class ComponentAnnotator {
         }
     }
 
-    void addDescription(ComponentDefinition component, Optional<String> description, boolean overwrite, String displayId, String key, String name) {
+    public final String getDescription(ComponentDefinition component) {
+        return util.getDescription(component);
+    }
+    
+    public String parseTemplate(String template, String displayId, String key, String name) {
+        template = setTemplateVariable("displayId", displayId, template);
+        template = setTemplateVariable("key", key, template);
+        template = setTemplateVariable("name", name, template);
+        return template;
+    }
+    
+    public void addDescription(ComponentDefinition component, Optional<String> description, boolean overwrite, String displayId, String key, String name) {
         
         if (description.isEmpty()) return;
         
@@ -203,7 +214,11 @@ public class ComponentAnnotator {
         }
     }
 
-    void addNotes(ComponentDefinition component, Optional<String> notes, boolean overwrite, String displayId, String key, String name) {
+    public final String getNotes(ComponentDefinition component) {
+        return util.getNotes(component);
+    }
+    
+    public void addNotes(ComponentDefinition component, Optional<String> notes, boolean overwrite, String displayId, String key, String name) {
         if (notes.isEmpty()) return;
         
         String template = notes.get();

@@ -8,6 +8,8 @@ package ed.biordm.sbol.sbol2easy.transform;
 import static ed.biordm.cyanosource.plasmid.CyanoTemplate.CYANO_PREF;
 import static ed.biordm.sbol.sbol2easy.transform.CommonAnnotations.BIORDM_PREF;
 import static ed.biordm.sbol.sbol2easy.transform.CommonAnnotations.CREATOR;
+import static ed.biordm.sbol.sbol2easy.transform.CommonAnnotations.SBH_DESCRIPTION;
+import static ed.biordm.sbol.sbol2easy.transform.CommonAnnotations.SBH_NOTES;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -236,6 +238,14 @@ public class ComponentUtil {
         }
 
         SBOLWriter.write(doc, file.toFile());
+    }
+
+    public String getDescription(ComponentDefinition component) {
+        return getAnnotationValue(component, SBH_DESCRIPTION);
+    }
+    
+    public String getNotes(ComponentDefinition component) {
+        return getAnnotationValue(component, SBH_NOTES);
     }    
     
     public String getAnnotationValue(Identified elm, QName annotation) {

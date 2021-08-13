@@ -17,5 +17,7 @@ public class Outcome {
     public List<String> successful = new ArrayList<>();
     public List<String> missingId = new ArrayList<>();
     public List<String> missingMeta = new ArrayList<>();
+    public List<String> failed = new ArrayList<>();
+    public List<String> ignored = new ArrayList<>();
     
 }
