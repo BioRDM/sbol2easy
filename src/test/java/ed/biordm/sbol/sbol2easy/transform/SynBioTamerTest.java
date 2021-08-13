@@ -103,6 +103,34 @@ public class SynBioTamerTest {
     }
     
     @Test
+    public void canTameCollectionsWithAttachments() throws Exception {
+        File file = new File(getClass().getResource("test_collection_with_attachments.xml").getFile());
+        
+        SBOLDocument org = SBOLReader.read(file);
+        
+        SBOLDocument cpy = instance.tameForSynBio(org);
+        
+        
+        assertTrue(cpy.getCollections().isEmpty());
+        
+        assertEquals(org.getComponentDefinitions().size(), cpy.getComponentDefinitions().size());
+        
+
+        
+        SBOLValidate.clearErrors();
+        SBOLValidate.validateSBOL(cpy, true, true, true);
+        if (SBOLValidate.getNumErrors() > 0) {
+            for (String error : SBOLValidate.getErrors()) {
+                System.out.println(error);
+            }
+            throw new IllegalStateException("Stoping cause of validation errors");
+        }
+
+       
+        
+    }
+    
+    @Test
     public void renameNamseSpacesRenames() throws Exception {
 
         SBOLDocument org = testDoc();

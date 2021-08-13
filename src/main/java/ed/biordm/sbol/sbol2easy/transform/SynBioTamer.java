@@ -40,7 +40,8 @@ public class SynBioTamer {
     }
     
     public SBOLDocument tameForSynBio(SBOLDocument org, String newNameSpace, boolean removeCollections) throws SBOLValidationException {
-        
+    
+        boolean removeAttachments = true;
         SBOLDocument cpy = new SBOLDocument();
         cpy.setDefaultURIprefix(newNameSpace);
         cpy.setComplete(false);
@@ -50,6 +51,10 @@ public class SynBioTamer {
         
         if (removeCollections) {
             cpy.clearCollections();
+        }
+        
+        if (removeAttachments) { // they are remote, not sure how to deal with them as strong validation fails.
+            removeAttachments(cpy);
         }
         
         renameNameSpace(cpy, newNameSpace);
@@ -183,6 +188,13 @@ public class SynBioTamer {
 
     void removeGenericRole(SequenceAnnotation def) {
         def.removeRole(SequenceOntology.SEQUENCE_FEATURE);
+    }
+
+    void removeAttachments(SBOLDocument doc) {
+        
+        for (ComponentDefinition comp : doc.getComponentDefinitions()) {
+            comp.clearAttachments();
+        }
     }
 
 
