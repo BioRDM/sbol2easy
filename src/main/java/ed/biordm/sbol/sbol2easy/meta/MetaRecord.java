@@ -13,7 +13,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- *
+ * Represents metadata / records attributes.
+ * Attributes are stored as Optionals, if present they store String value from the corresponding
+ * column in the table.
+ * Unrecognized attribures(headers) are stored in extras field.
  * @author tzielins
  */
 public class MetaRecord implements Cloneable {

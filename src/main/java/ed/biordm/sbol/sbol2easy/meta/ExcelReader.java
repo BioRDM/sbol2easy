@@ -11,10 +11,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.poifs.filesystem.NotOLE2FileException;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -25,12 +22,20 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 /**
- *
+ * Utility class for reading Excel files.
+ * It reads Excel row as list of string (list of cell values) 
  * @author tzielins
  */
 public class ExcelReader {
 
-    
+    /**
+     * Reads given row from excel file
+     * @param file 
+     * @param sheetNr 0-based sheet to be read from
+     * @param rowNr 0-based row number which should be read
+     * @return value of that row as List of strings ("" for missing collumns)
+     * @throws IOException 
+     */
     public List<String> readStringRow(Path file, int sheetNr, int rowNr) throws IOException {
 
         try (Workbook workbook = WorkbookFactory.create(file.toFile(), null, true)) {
@@ -47,6 +52,15 @@ public class ExcelReader {
         
     }
     
+    /**
+     * Reads all rows from an Excel file as List of List of String.
+     * @param file
+     * @param sheetNr 0-based sheet to be read
+     * @param skip how many initial rows should be skipped
+     * @param cols how many collumns should be read for each row (missing columns are returned as "")
+     * @return list of rows values, each rows is a list of string, no nulls
+     * @throws IOException 
+     */
     public List<List<String>> readStringRows(Path file, int sheetNr, int skip, int cols) throws IOException {
 
         try (Workbook workbook = WorkbookFactory.create(file.toFile(), null, true)) {

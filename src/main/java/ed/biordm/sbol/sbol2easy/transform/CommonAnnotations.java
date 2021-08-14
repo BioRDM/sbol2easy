@@ -11,7 +11,7 @@ import javax.xml.namespace.QName;
 import org.sbolstandard.core2.SequenceOntology;
 
 /**
- *
+ * Collections of sbol and SynBioHub related constants.
  * @author tzielins
  */
 public class CommonAnnotations {

@@ -5,11 +5,7 @@
  */
 package ed.biordm.sbol.sbol2easy.transform;
 
-import static ed.biordm.cyanosource.plasmid.CyanoTemplate.CYANO_PREF;
-import static ed.biordm.sbol.sbol2easy.transform.CommonAnnotations.BIORDM_PREF;
-import static ed.biordm.sbol.sbol2easy.transform.CommonAnnotations.CREATOR;
-import static ed.biordm.sbol.sbol2easy.transform.CommonAnnotations.SBH_DESCRIPTION;
-import static ed.biordm.sbol.sbol2easy.transform.CommonAnnotations.SBH_NOTES;
+import static ed.biordm.sbol.sbol2easy.transform.CommonAnnotations.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -19,7 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.xml.namespace.QName;
 import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.Component;
@@ -37,7 +32,7 @@ import org.sbolstandard.core2.Sequence;
 import org.sbolstandard.core2.SequenceAnnotation;
 
 /**
- *
+ * Collection of handy operations on sbol documents and components.
  * @author tzielins
  */
 public class ComponentUtil {

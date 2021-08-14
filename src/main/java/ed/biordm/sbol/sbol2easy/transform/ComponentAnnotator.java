@@ -23,7 +23,9 @@ import org.sbolstandard.core2.ComponentDefinition;
 import org.sbolstandard.core2.SBOLDocument;
 
 /**
- *
+ * Utility class that can set descriptive properties of component definitions.
+ * It can handle, name, summary (sbol description), sbh notes , 
+ * sbh mutable description and creators/authors
  * @author tzielins
  */
 public class ComponentAnnotator {
@@ -50,6 +52,32 @@ public class ComponentAnnotator {
         return annotate(source, idsWithVersions, metaData, metaFormat, overwriteDesc, status);
         
     }
+    
+    /**
+     * Adds metadescripton to the component. 
+     * It can handle simple templating in the description/notes values.
+     * It sets name, summary, description, notes, creators
+     * @param component definition to be annotated
+     * @param meta attributes to be set (missing fields are ignored)
+     * @param overWriteDesc if false the new values are appended to existing notes and description
+     */
+    public void annotateComponent(ComponentDefinition component, MetaRecord meta, boolean overWriteDesc) {
+        
+        String displayId = component.getDisplayId();
+        String key = meta.key.orElse("");
+        
+        setName(component, meta.name, displayId, key);
+        String name = component.getName() != null ? component.getName() : "";
+        
+        addAuthors(component, meta.authors);
+        
+        addSummary(component, meta.summary, overWriteDesc, displayId, key, name);
+        
+        addDescription(component, meta.description, overWriteDesc, displayId, key, name);
+        
+        addNotes(component, meta.notes, overWriteDesc, displayId, key, name);
+        
+    }    
 
     void validateMetaFormat(MetaFormat metaFormat) {
         if (metaFormat.displayId.isEmpty())
@@ -127,23 +155,7 @@ public class ComponentAnnotator {
         return status;
     }
 
-    public void annotateComponent(ComponentDefinition component, MetaRecord meta, boolean overWriteDesc) {
-        
-        String displayId = component.getDisplayId();
-        String key = meta.key.orElse("");
-        
-        setName(component, meta.name, displayId, key);
-        String name = component.getName() != null ? component.getName() : "";
-        
-        addAuthors(component, meta.authors);
-        
-        addSummary(component, meta.summary, overWriteDesc, displayId, key, name);
-        
-        addDescription(component, meta.description, overWriteDesc, displayId, key, name);
-        
-        addNotes(component, meta.notes, overWriteDesc, displayId, key, name);
-        
-    }
+
 
     
     void setName(ComponentDefinition component, Optional<String> name, String displayId, String key) {

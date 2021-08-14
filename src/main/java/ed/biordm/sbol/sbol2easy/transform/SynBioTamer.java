@@ -24,7 +24,8 @@ import org.sbolstandard.core2.SequenceOntology;
 import org.sbolstandard.core2.TopLevel;
 
 /**
- *
+ * Removes synbiohub namespace and attributes which prevents an sbol document
+ * form re-upload to SynBioHub.
  * @author tzielins
  */
 public class SynBioTamer {

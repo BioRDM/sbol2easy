@@ -12,7 +12,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- *
+ * Utility class for extracting metadata for describing designs from an Excel tables.
+ * It can provide information on the available attributes depending
+ * on the column headers in the file (as MetaFormat object)
+ * 
  * @author tzielins
  */
 public class ExcelMetaReader {
@@ -28,6 +31,12 @@ public class ExcelMetaReader {
     public static final String NOTES_HEADER = "notes";    
     public static final String ATTACH_FILE_HEADER = "attachment_filename";
     
+    /**
+     * Returns descritpion of the available metadata in a file (the format)
+     * @param file
+     * @return MetaFormat object that maps recognized meta attributes to column numbers in Excel
+     * @throws IOException 
+     */
     public MetaFormat readMetaFormat(Path file) throws IOException {
         
         return readMetaFormat(file, 0);
@@ -41,12 +50,17 @@ public class ExcelMetaReader {
         return def;
     }
 
+    /**
+     * Parses Excel rows as metadata attributes
+     * @param file
+     * @return Metadata record
+     * @throws IOException 
+     */
     public List<MetaRecord> readMeta(Path file) throws IOException {
         
         MetaFormat locations = ExcelMetaReader.this.readMetaFormat(file);
         return readMeta(file, locations, 0, 1);
     }
-    
     
     public List<MetaRecord> readMeta(Path file, MetaFormat locations) throws IOException {
         

@@ -34,7 +34,8 @@ import org.sbolstandard.core2.SequenceAnnotation;
 import org.sbolstandard.core2.SequenceOntology;
 
 /**
- *
+ * Demonstration of library functionality. It uses the input files from the examples folder.
+ * And calls them in a sequence that mimicks potential workflow for sbol documents.
  * @author tzielins
  */
 public class PaperRecipes {

@@ -7,13 +7,9 @@ package ed.biordm.sbol.sbol2easy.transform;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -21,7 +17,9 @@ import java.util.stream.Stream;
 import org.sbolstandard.core2.SequenceOntology;
 
 /**
- *
+ * Class that converts GenBank features into SequenceOntology terms and back.
+ * The mapping is encoced in a file, so adding new mappings is straightforward
+ * 
  * @author Tomasz Zielinski
  */
 public class GenBank2SO {

@@ -25,7 +25,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 /**
- *
+ * Utility class for reading values form excel tables.
+ * Superseeded by ExcelMetaReader
  * @author tzielins
  */
 public class FeaturesReader {

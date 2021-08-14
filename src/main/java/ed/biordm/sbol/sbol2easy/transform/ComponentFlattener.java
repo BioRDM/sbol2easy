@@ -19,7 +19,7 @@ import org.sbolstandard.core2.Sequence;
 import org.sbolstandard.core2.SequenceAnnotation;
 
 /**
- *
+ * Flattens designs to one annotated sequence.
  * @author tzielins
  */
 public class ComponentFlattener {
@@ -62,10 +62,6 @@ public class ComponentFlattener {
         return newCmpDef;
     }
     
-    ComponentDefinition flattenDesign(ComponentDefinition template, String newName, SBOLDocument destDoc) throws SBOLValidationException {
-        return flattenDesign(template, newName, newName, destDoc);
-    }    
-    
     /**
      * Flattens the top level root designs and stores them in the destDoc. 
      * For each of the root component definition creates a flattenedDesgin (see flattenDesign)
@@ -93,7 +89,13 @@ public class ComponentFlattener {
         }
         
         return flattened;
-    }
+    }    
+    
+    ComponentDefinition flattenDesign(ComponentDefinition template, String newName, SBOLDocument destDoc) throws SBOLValidationException {
+        return flattenDesign(template, newName, newName, destDoc);
+    }    
+    
+
     
     
     void convertComponentsToFeatures(List<Component> children, ComponentDefinition dest) throws SBOLValidationException {

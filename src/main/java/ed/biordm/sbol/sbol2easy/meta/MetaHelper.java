@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- *
+ * Utility class for operations on MetaRecords.
  * @author tzielins
  */
 public class MetaHelper {

@@ -6,7 +6,7 @@
 package org.sbolstandard.core2;
 
 /**
- *
+ * Utility class for accessing protected methods from sbol library
  * @author tzielins
  */
 public class SBOLHack {

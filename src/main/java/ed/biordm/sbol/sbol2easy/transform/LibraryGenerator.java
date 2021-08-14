@@ -27,8 +27,9 @@ import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLReader;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.SBOLConversionException;
+
 /**
- *
+ * Populates template with values from excel table to generate series of related components definitions.
  * @author tzielins
  */
 public class LibraryGenerator {

@@ -13,7 +13,9 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- *
+ * Represents layout of known/supported attributes in a table.
+ * Each attribute (if present) is mapped to the corresponding column number.
+ * 
  * @author tzielins
  */
 public class MetaFormat {

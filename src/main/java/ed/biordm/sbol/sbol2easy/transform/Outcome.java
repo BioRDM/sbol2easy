@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Stores information about the processing outcome as series of identifiers for 
+ * which on operation succeeded or failed.
  * @author tzielins
  */
 public class Outcome {
