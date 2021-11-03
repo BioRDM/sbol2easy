@@ -293,9 +293,9 @@ public class PlasmidsGenerator {
             plasmid.createAnnotation(SBH_DESCRIPTION, fullDescription);
         }
 
-        transformer.concretizePart(plasmid, "left", gene+"_left", lFlankSeq, doc);
+        transformer.concretizePart(plasmid, "left", gene+"_left",gene+"_left", lFlankSeq, doc);
 
-        transformer.concretizePart(plasmid, "right", gene+"_right", rFlankSeq, doc);
+        transformer.concretizePart(plasmid, "right", gene+"_right",gene+"_right", rFlankSeq, doc);
 
         //to make it top level
         plasmid.clearWasDerivedFroms();

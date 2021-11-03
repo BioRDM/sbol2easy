@@ -301,7 +301,7 @@ public class TemplateTransformerTest {
         String newName = "right!/new";
         String newSequence = "GATTACA";
 
-        ComponentDefinition newDef = templateTransformer.concretizePart(parent, genericComponentId, newName, newSequence, doc);
+        ComponentDefinition newDef = templateTransformer.concretizePart(parent, genericComponentId, newName, newName, newSequence, doc);
         assertNotNull(newDef);
 
         //it is being replaced
@@ -312,14 +312,16 @@ public class TemplateTransformerTest {
         Component newComp = parent.getComponent(newDisplayId);
         assertNotNull(newComp);
 
-        assertEquals(newDisplayId, newComp.getName());
+        //check if newComp has proper properties       
+        assertEquals(newDisplayId, newComp.getDisplayId());
+        assertEquals(newName, newComp.getName());
         assertEquals(parent.getVersion(), newComp.getVersion());
         assertEquals(newDef.getIdentity(), newComp.getDefinitionIdentity());
         assertEquals(replaced.getRoles(), newComp.getRoles());
 
-        //check if newDefinition is correct        
-        assertEquals(newDisplayId, newDef.getName());
+        //check if newDefinition has correct id/name       
         assertEquals(newDisplayId, newDef.getDisplayId());
+        assertEquals(newName, newDef.getName());
 
         assertTrue(newDef.getSequences().stream().findFirst().isPresent());
         Sequence seq = newDef.getSequences().stream().findFirst().get();
@@ -378,7 +380,7 @@ public class TemplateTransformerTest {
                 List<Component> origCmps = cmpDef.getSortedComponents();
 
                 ComponentDefinition newSubCmpDef = templateTransformer.concretizePart(cmpDef, genericComponentId,
-                        newName, newSequence, doc);
+                        newName, newName, newSequence, doc);
 
                 // Get child components and verify they match in new component
                 List<Component> newCmps = cmpDef.getSortedComponents();
@@ -582,7 +584,7 @@ public class TemplateTransformerTest {
         String ltSeq = "caaggcaaaaccaccgttatcagcagaacgacggcgggaaaaaatgattaaacgaaaaaatttgcaaggattcatagcggttgcccaatctaactcagggagcgacttcagcccacaaaaaacaccactgggcctactgggctattcccattatcatctacattgaagggatagcaagctaatttttatgacggcgatcgccaaaaacaaagaaaattcagcaattaccgtgggtagcaaaaaatccccatctaaagttcagtaaatatagctagaacaaccaagcattttcggcaaagtactattcagatagaacgagaaatgagcttgttctatccgcccggggctgaggctgtataatctacgacgggctgtcaaacattgtgataccatgggcagaagaaaggaaaaacgtccctgatcgcctttttgggcacggagtagggcgttaccccggcccgttcaaccacaagtccctatAGATACAATCGCCAAGAAGT";
         String genericCmpId = "left";
 
-        templateTransformer.concretizePart(newPlasmid, genericCmpId, "test_left",
+        templateTransformer.concretizePart(newPlasmid, genericCmpId, "test_left", "test_left",
                 ltSeq, doc);
 
         // Right sequence elements
@@ -590,7 +592,7 @@ public class TemplateTransformerTest {
         String rtSeq = "tcagccagctcaatctgtgtgtcgttgatttaagcttaatgctacggggtctgtctccaactccctcagcttctcgcaatggcaaggcaaataatgtttctcttgctgagtagatgttcaggaggacggatcgaaagtctacaaaacagattcttgaccaagccatctacttagaaaaacttctgcgttttggcgatcgcatcttttaagcgagatgcgatttttttgtccattagtttgtattttaatactcttttgttgtttgatttcgtccaagcttttcttggtatgtgggatcttccgtgcccaaaattttatcccagaaagtgaaatatagtcatttcaattaacgatgagagaatttaatgtaaaattatggagtgtacaaaatgaacaggtttaaacaatggcttacagtttagatttaaggcaaagggtagtagcttatatagaagctggaggaaaaataactgaggcttccaagatatataaaataggaaaagcctcgatatacagatggttaaatagagtagatttaagcccaacaaaagtagagcgtcgccatagg";
         genericCmpId = "right";
 
-        templateTransformer.concretizePart(newPlasmid, genericCmpId, "test_right",
+        templateTransformer.concretizePart(newPlasmid, genericCmpId, "test_right","test_right",
                 rtSeq, doc);
 
         // Check component instances match

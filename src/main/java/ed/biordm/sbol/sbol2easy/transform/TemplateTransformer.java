@@ -83,6 +83,7 @@ public class TemplateTransformer {
      * to new subcomponent
      * @param genericComponentId displayId of the component which is going to be
      * replaced by a new link
+     * @param newId id for the new componanent instance (needs to be globaly unique)
      * @param newName name of the new component instance / component definiton
      * @param newSequence DNA sequence to be added to the new component
      * definition if provided
@@ -93,7 +94,7 @@ public class TemplateTransformer {
      * @throws URISyntaxException
      */
     public ComponentDefinition concretizePart(ComponentDefinition parent, String genericComponentId,
-            String newName, String newSequence, SBOLDocument doc) throws SBOLValidationException {
+            String newId, String newName, String newSequence, SBOLDocument doc) throws SBOLValidationException {
 
         // name shoudl be sanitize for conversion into display id as alphanumeric with _ (replace all not alphanumeri caracters with _)
         // parent has a sub component of the genericComponentId which has to be replaced by the new definiton
@@ -105,15 +106,15 @@ public class TemplateTransformer {
         // in the parent component defition the sequenceAnotations and sequeceConstraints have to be updated to point
         // to new component instead of genericComponentId
         // it returns the new sub component definion not the parent so it can be further customized if needed
-        String cleanName = util.sanitizeName(newName);
+        newId = util.sanitizeName(newId);
 
         Component cmp = parent.getComponent(genericComponentId);
         ComponentDefinition prevCmpDef = cmp.getDefinition();
 
         // make copy of existing component definition - does version have to be supplied?
         // should use instantiateFromTemplate method here
-        ComponentDefinition newCmpDef = (ComponentDefinition) doc.createCopy(prevCmpDef, cleanName, parent.getVersion());
-        newCmpDef.setName(cleanName);
+        ComponentDefinition newCmpDef = (ComponentDefinition) doc.createCopy(prevCmpDef, newId, parent.getVersion());
+        newCmpDef.setName(newName);
         newCmpDef.addWasDerivedFrom(prevCmpDef.getIdentity());
 
         // Find the sequence annotation for the previous component definition
@@ -135,14 +136,14 @@ public class TemplateTransformer {
         }
         // Create a new sequence for the component
         String version = "1.0.0"; // should this be the version of the component definition?
-        Sequence seq = doc.createSequence(cleanName + "_seq", version,
+        Sequence seq = doc.createSequence(newId + "_seq", version,
                 newSequence, Sequence.IUPAC_DNA);
         newCmpDef.addSequence(seq);
 
         // Create instance of new component definition
-        Component link = parent.createComponent(cleanName, AccessType.PUBLIC, newCmpDef.getIdentity());
+        Component link = parent.createComponent(newId, AccessType.PUBLIC, newCmpDef.getIdentity());
         link.addWasDerivedFrom(cmp.getIdentity());
-        link.setName(cleanName);
+        link.setName(newName);
 
         // Replace component and update sequence constraints
         replaceComponent(parent, cmp, link);

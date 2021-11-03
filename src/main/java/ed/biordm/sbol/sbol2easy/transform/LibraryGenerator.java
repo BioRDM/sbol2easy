@@ -186,6 +186,8 @@ public class LibraryGenerator {
         
         
         String displayId = meta.displayId.get();
+        String key = meta.key.orElse("");
+        
         String version = meta.version.orElse(defVersion);
         
         try {
@@ -195,6 +197,10 @@ public class LibraryGenerator {
         
             for (String genericCompId : meta.extras.keySet()) {
                 if (genericCompId.startsWith("#")) continue;
+                
+                if (genericCompId.endsWith("_name")) continue; //that will be name
+                if (genericCompId.endsWith("_id")) continue; //that will be name
+                
                 String newSeq = meta.extras.getOrDefault(genericCompId, "");
                 if (newSeq.isBlank()) continue; //ignoring creation of components with empty sequences
                 
@@ -202,8 +208,19 @@ public class LibraryGenerator {
                     throw new IllegalArgumentException("No component instance: "+genericCompId+" in the template design");
                 
                 String newName = displayId+"_"+genericCompId; //that should be unique
+                String newId = displayId+"_"+genericCompId; //that should be unique
                 
-                transformer.concretizePart(instance, genericCompId, newName, newSeq, doc);
+                if (meta.extras.containsKey(genericCompId+"_name")) {
+                    newName = meta.extras.get(genericCompId+"_name");
+                    newName = annotator.parseTemplate(newName, displayId, key);
+                }
+                
+                if (meta.extras.containsKey(genericCompId+"_id")) {
+                    newId = meta.extras.get(genericCompId+"_id");
+                    newId = annotator.parseTemplate(newId, displayId, key);
+                }
+                
+                transformer.concretizePart(instance, genericCompId, newId, newName, newSeq, doc);
             }
             
         

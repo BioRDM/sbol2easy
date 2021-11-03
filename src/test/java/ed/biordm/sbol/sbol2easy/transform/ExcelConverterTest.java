@@ -143,8 +143,8 @@ public class ExcelConverterTest {
                 //engineered plasmid
                 newCyanoCD.addRole(new URI(SEQUENCE_ONTO_PREF + "SO:0000637"));
 
-                newLeftFlank = templateTransformer.concretizePart(newCyanoCD, lfGenericId, leftFlankName, leftFlankSequence, newDoc);
-                newRightFlank = templateTransformer.concretizePart(newCyanoCD, rfGenericId, rightFlankName, rightFlankSequence, newDoc);
+                newLeftFlank = templateTransformer.concretizePart(newCyanoCD, lfGenericId, leftFlankName, leftFlankName, leftFlankSequence, newDoc);
+                newRightFlank = templateTransformer.concretizePart(newCyanoCD, rfGenericId, rightFlankName, rightFlankName, rightFlankSequence, newDoc);
 
                 // Should concretizePart do this bit?
                 /*for (Sequence seq : newLeftFlank.getSequences()) {

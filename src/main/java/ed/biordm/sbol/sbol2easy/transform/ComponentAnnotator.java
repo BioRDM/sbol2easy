@@ -158,13 +158,11 @@ public class ComponentAnnotator {
 
 
     
+    
     void setName(ComponentDefinition component, Optional<String> name, String displayId, String key) {
         if (name.isEmpty()) return;
         
-        String template = name.get();
-        template = setTemplateVariable("displayId", displayId, template);
-        template = setTemplateVariable("key", key, template);
-        
+        String template = parseTemplate(name.get(), displayId, key);        
         component.setName(template);
     }
 
@@ -209,6 +207,12 @@ public class ComponentAnnotator {
         template = setTemplateVariable("name", name, template);
         return template;
     }
+    
+    public String parseTemplate(String template, String displayId, String key) {
+        template = setTemplateVariable("displayId", displayId, template);
+        template = setTemplateVariable("key", key, template);
+        return template;
+    }    
     
     public void addDescription(ComponentDefinition component, Optional<String> description, boolean overwrite, String displayId, String key, String name) {
         
